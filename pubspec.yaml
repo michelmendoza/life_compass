@@ -1,0 +1,44 @@
+name: life_compass
+description: App de bússola da vida com timer
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  audioplayers: ^5.2.1 
+  cupertino_icons: ^1.0.2
+  intl: ^0.18.1
+  google_fonts: ^6.1.0
+  flutter_neumorphic: ^3.2.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.1
+
+
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^2.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.6
+  
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/sounds/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#6B8E23"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
