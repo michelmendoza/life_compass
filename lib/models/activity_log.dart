@@ -9,8 +9,8 @@ class ActivityLog extends HiveObject {
   final String organ;
   final int durationInSeconds;
   final DateTime timestamp;
-  final int consciousnessLevel;
-  final String difficultyFeedback;
+  final int? consciousnessLevel;
+  final String? difficultyFeedback;
 
   ActivityLog({
     required this.id,

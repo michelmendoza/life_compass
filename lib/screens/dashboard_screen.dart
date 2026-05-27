@@ -23,6 +23,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _selectedPeriod = 'Hoje';
   int _periodOffset = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _debugPrintLogs();
+    });
+  }
+
+  void _debugPrintLogs() {
+    print('=== DASHBOARD - TODOS OS LOGS ===');
+    for (final log in widget.logs) {
+      print('Log: ${log.group} - ${log.formattedDuration}');
+      print('  Consciousness: ${log.consciousnessLevel ?? "null"}');
+      print('  Difficulty: ${log.difficultyFeedback ?? "null"}');
+      print('  Timestamp: ${log.timestamp}');
+    }
+    print('Total: ${widget.logs.length} logs');
+
+    final withFeedback = widget.logs
+        .where((l) => l.consciousnessLevel != null && l.consciousnessLevel! > 0)
+        .length;
+    print('Logs com feedback de consciência: $withFeedback');
+  }
+
   DateTime get _referenceDate {
     final now = DateTime.now();
     switch (_selectedPeriod) {
@@ -206,7 +230,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return '🪵';
   }
 
-  // ========== CÁLCULOS ==========
+  // ========== CÁLCULOS BÁSICOS ==========
   int get _totalMinutes =>
       _filteredLogs.fold(0, (sum, log) => sum + log.duration.inMinutes);
   int get _previousTotalMinutes =>
@@ -311,11 +335,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool get _isTrendingUp => _totalMinutes > _previousTotalMinutes;
   int get _trendPercent {
     if (_previousTotalMinutes == 0) return 100;
-    return ((_totalMinutes - _previousTotalMinutes) /
+    return ((_totalMinutes - _previousTotalMinutes).abs() /
             _previousTotalMinutes *
             100)
-        .round()
-        .abs();
+        .round();
   }
 
   String _formatMinutes(int minutes) {
@@ -328,7 +351,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final energy = _calculateEnergyBalance();
     final active = energy['Ativa'] ?? 0;
     final passive = energy['Passiva'] ?? 0;
-    if (_filteredLogs.isEmpty) return '📭 Sem dados';
+    if (_filteredLogs.isEmpty) return 'Sem dados';
     if (active > 0.7) return '🔥 Muito Ativo';
     if (passive > 0.7) return '🧘 Contemplativo';
     if (active >= 0.4 && passive >= 0.4) return '⚖️ Equilibrado';
@@ -344,14 +367,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return _currentStreak >= 1 ? '🌱' : '';
   }
 
-  // ========== BUILD ==========
+  // ========== BUILD PRINCIPAL ==========
   @override
   Widget build(BuildContext context) {
-    final energyBalance = _calculateEnergyBalance();
-    final flowDistribution = _calculateFlowDistribution();
-    final organBalance = _calculateOrganBalance();
-    final categoryDistribution = _calculateCategoryDistribution();
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -369,62 +387,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildGlassAppBar(),
+              _buildHeader(),
               Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      _buildPeriodSelector(),
-                      const SizedBox(height: 10),
-                      if (_filteredLogs.isNotEmpty) ...[
-                        _buildSummaryCard(),
-                        const SizedBox(height: 10),
-                        _buildSmartSuggestion(),
-                        const SizedBox(height: 10),
-                        _buildGlassCard(child: _buildEquilibrioCard()),
-                        const SizedBox(height: 10),
-                        _buildGlassCard(child: _buildConsciousnessCard()),
-                        const SizedBox(height: 10),
-                        _buildGlassCard(child: _buildFlowVsChallengeCard()),
-                        const SizedBox(height: 10),
-                        _buildGlassCard(
-                            child: _buildEnergyBalance(energyBalance)),
-                        const SizedBox(height: 10),
-                        Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                  child: _buildGlassCard(
-                                      child: _buildFlowDistribution(
-                                          flowDistribution))),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                  child: _buildGlassCard(
-                                      child: _buildChallengeIndex())),
-                            ]),
-                        const SizedBox(height: 10),
-                        Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                  child: _buildGlassCard(
-                                      child: _buildOrganBalance(organBalance))),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                  child: _buildGlassCard(
-                                      child: _buildCategoriesSummary(
-                                          categoryDistribution))),
-                            ]),
-                        const SizedBox(height: 10),
-                        _buildGlassCard(child: _buildRecentActivities()),
-                      ] else
-                        _buildEmptyState(),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
+                child: _filteredLogs.isEmpty
+                    ? _buildEmptyState()
+                    : SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            _buildPeriodSelector(),
+                            const SizedBox(height: 20),
+                            _buildHeroStatsCard(),
+                            const SizedBox(height: 16),
+                            _buildSmartSuggestion(),
+                            const SizedBox(height: 16),
+                            _buildEquilibrioCard(),
+                            const SizedBox(height: 16),
+                            _buildConsciousnessCard(),
+                            const SizedBox(height: 16),
+                            _buildFlowVsChallengeCard(),
+                            const SizedBox(height: 16),
+                            _buildEnergyBalanceCard(),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: _buildFlowDistributionCard(),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildChallengeIndexCard(),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: _buildOrganBalanceCard(),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildCategoriesCard(),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _buildRecentActivitiesCard(),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
               ),
             ],
           ),
@@ -433,375 +449,507 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ========== WIDGETS ==========
-
-  Widget _buildGlassAppBar() {
+  // ========== HEADER ==========
+  Widget _buildHeader() {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFFE8F0D5), Color(0xFFF5F9E9), Color(0xFFD4E8C2)],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF6B8E23).withOpacity(0.1),
-              blurRadius: 15,
-              offset: const Offset(0, 4))
-        ],
-      ),
-      child: Row(children: [
-        Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-                colors: [Color(0xFF6B8E23), Color(0xFF8B6914)]),
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                  color: const Color(0xFF6B8E23).withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3))
-            ],
+            color: const Color(0xFF6B8E23).withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
-          child: const Text('🌳', style: TextStyle(fontSize: 18)),
-        ),
-        const SizedBox(width: 10),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Dashboard Vital',
-              style: GoogleFonts.playfairDisplay(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF4A5D23))),
-          Text('🌿 Métricas da sua jornada',
-              style: GoogleFonts.lato(
-                  fontSize: 10,
-                  color: const Color(0xFF6B8E23).withOpacity(0.7),
-                  fontStyle: FontStyle.italic)),
-        ]),
-        const Spacer(),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-              color: const Color(0xFF6B8E23).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10)),
-          child: Text('${widget.logs.length} registros',
-              style: GoogleFonts.lato(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF6B8E23))),
-        ),
-      ]),
-    );
-  }
-
-  Widget _buildPeriodSelector() {
-    final periods = ['Hoje', 'Semana', 'Mês', 'Geral'];
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.35),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
+        ],
       ),
       child: Row(
-        children: periods.map((period) {
-          final isSelected = _selectedPeriod == period;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() {
-                _selectedPeriod = period;
-                _periodOffset = 0;
-              }),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF6B8E23).withOpacity(0.8)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(18),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF6B8E23), Color(0xFF8B6914)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6B8E23).withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
-                child: Text(period,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.lato(
-                        color:
-                            isSelected ? Colors.white : const Color(0xFF4A5D23),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11)),
+              ],
+            ),
+            child: const Text('🌳', style: TextStyle(fontSize: 24)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dashboard Vital',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF4A5D23),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Sua jornada de evolução consciente',
+                  style: GoogleFonts.lato(
+                    fontSize: 13,
+                    color: const Color(0xFF6B8E23).withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6B8E23).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '${widget.logs.length} registros',
+              style: GoogleFonts.lato(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF6B8E23),
               ),
             ),
-          );
-        }).toList(),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-            colors: [Color(0xFF6B8E23), Color(0xFF8B6914)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-              color: const Color(0xFF6B8E23).withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8))
-        ],
-      ),
-      child: Column(children: [
-        Row(children: [
-          GestureDetector(
-            onTap: _canGoBack ? _goBack : null,
-            child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(_canGoBack ? 0.2 : 0.05),
-                    borderRadius: BorderRadius.circular(6)),
-                child: Icon(Icons.chevron_left_rounded,
-                    size: 20,
-                    color: Colors.white.withOpacity(_canGoBack ? 0.9 : 0.3))),
+  // ========== SELETOR DE PERÍODO ==========
+  Widget _buildPeriodSelector() {
+    final periods = ['Hoje', 'Semana', 'Mês', 'Geral'];
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.3)),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-              child: Column(children: [
-            Text(_periodTitle,
-                style: GoogleFonts.lato(
-                    color: Colors.white70,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2)),
-            const SizedBox(height: 2),
-            Text(_periodSubtitle,
-                style: GoogleFonts.lato(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold)),
-          ])),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: _canGoForward ? _goForward : null,
-            child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(_canGoForward ? 0.2 : 0.05),
-                    borderRadius: BorderRadius.circular(6)),
-                child: Icon(Icons.chevron_right_rounded,
-                    size: 20,
-                    color:
-                        Colors.white.withOpacity(_canGoForward ? 0.9 : 0.3))),
+          child: Row(
+            children: periods.map((period) {
+              final isSelected = _selectedPeriod == period;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() {
+                    _selectedPeriod = period;
+                    _periodOffset = 0;
+                  }),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF6B8E23)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: Text(
+                      period,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.lato(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isSelected ? Colors.white : const Color(0xFF4A5D23),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
-        ]),
-        if (_periodOffset != 0) ...[
-          const SizedBox(height: 6),
-          GestureDetector(
+        ),
+        const SizedBox(height: 12),
+        if (_selectedPeriod != 'Geral')
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _navArrow(Icons.chevron_left_rounded, _canGoBack, _goBack),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        _periodTitle,
+                        style: GoogleFonts.lato(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.grey[500],
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _periodSubtitle,
+                        style: GoogleFonts.lato(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF4A5D23),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _navArrow(
+                    Icons.chevron_right_rounded, _canGoForward, _goForward),
+              ],
+            ),
+          ),
+        if (_periodOffset != 0 && _selectedPeriod != 'Geral')
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: GestureDetector(
               onTap: _resetPeriod,
               child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Text('Voltar ao atual',
-                      style: GoogleFonts.lato(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600)))),
-        ],
-        const SizedBox(height: 12),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-          _buildSummaryItem(
-              Icons.timer_rounded, _formatMinutes(_totalMinutes), 'Tempo'),
-          _buildSummaryItem(
-              Icons.fitness_center_rounded, '$_totalActivities', 'Ativ.'),
-          _buildSummaryItem(Icons.auto_awesome_rounded,
-              _getLifeBalance().split(' ')[0], 'Estado'),
-          _buildSummaryItem(Icons.local_fire_department_rounded,
-              '${_currentStreak}d', 'Streak ${_getStreakEmoji()}'),
-        ]),
-      ]),
-    );
-  }
-
-  Widget _buildSummaryItem(IconData icon, String value, String label) {
-    return Column(children: [
-      Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: Colors.white, size: 18)),
-      const SizedBox(height: 6),
-      Text(value,
-          style: GoogleFonts.lato(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-      Text(label, style: GoogleFonts.lato(color: Colors.white70, fontSize: 10)),
-    ]);
-  }
-
-  Widget _buildSmartSuggestion() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-            colors: [const Color(0xFFF5F9E9), const Color(0xFFE8F0D5)]),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.5)),
-      ),
-      child: Row(children: [
-        const Text('💡', style: TextStyle(fontSize: 20)),
-        const SizedBox(width: 10),
-        Expanded(
-            child: Text(_getSmartSuggestion(),
-                style: GoogleFonts.lato(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6B8E23).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'Voltar ao atual',
+                  style: GoogleFonts.lato(
                     fontSize: 11,
-                    color: const Color(0xFF4A5D23),
-                    height: 1.4))),
-      ]),
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF6B8E23),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
-  Widget _buildGlassCard({required Widget child}) {
+  Widget _navArrow(IconData icon, bool enabled, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: enabled
+              ? const Color(0xFF6B8E23).withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          icon,
+          size: 24,
+          color: enabled ? const Color(0xFF6B8E23) : Colors.grey[300],
+        ),
+      ),
+    );
+  }
+
+  // ========== CARD PRINCIPAL ==========
+  Widget _buildHeroStatsCard() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.35),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6B8E23), Color(0xFF8B6914)],
+        ),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF6B8E23).withOpacity(0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 4))
+            color: const Color(0xFF6B8E23).withOpacity(0.4),
+            blurRadius: 25,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
-      child: child,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _heroStatItem(
+                icon: Icons.timer_rounded,
+                value: _formatMinutes(_totalMinutes),
+                label: 'Tempo total',
+              ),
+              _heroStatItem(
+                icon: Icons.fitness_center_rounded,
+                value: '$_totalActivities',
+                label: 'Atividades',
+              ),
+              _heroStatItem(
+                icon: Icons.local_fire_department_rounded,
+                value: '${_currentStreak}d',
+                label: 'Sequência',
+                suffix: _getStreakEmoji(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.trending_up_rounded,
+                      color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _getLifeBalance(),
+                        style: GoogleFonts.lato(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _getTrendText(),
+                        style: GoogleFonts.lato(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_totalMinutes > 0 && _previousTotalMinutes > 0)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isTrendingUp
+                              ? Icons.trending_up
+                              : Icons.trending_down,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$_trendPercent%',
+                          style: GoogleFonts.lato(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  Widget _heroStatItem({
+    required IconData icon,
+    required String value,
+    required String label,
+    String suffix = '',
+  }) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon, color: Colors.white, size: 24),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          '$value$suffix',
+          style: GoogleFonts.lato(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.lato(
+            fontSize: 11,
+            color: Colors.white70,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getTrendText() {
+    if (_previousTotalMinutes == 0) return 'Primeiros registros! 🎉';
+    if (_isTrendingUp) return '${_trendPercent}% mais que período anterior';
+    return '${_trendPercent}% menos que período anterior';
+  }
+
+  // ========== CARD DE EQUILÍBRIO ==========
   Widget _buildEquilibrioCard() {
     final upsCategorias = _upsPorCategoria;
     final naoPraticadas = _categoriasNaoPraticadas;
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Text(_getEquilibrioEmoji(), style: const TextStyle(fontSize: 16)),
-        const SizedBox(width: 5),
-        Text('EQUILÍBRIO',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-                color: _getEquilibrioColor().withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8)),
-            child: Text('${_indiceEquilibrio.round()}%',
-                style: GoogleFonts.lato(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: _getEquilibrioColor()))),
-        const SizedBox(width: 4),
-        GestureDetector(
-          onTap: () => _showInfoModal(
-              'Índice de Equilíbrio',
-              'Mede quão bem distribuído está seu tempo entre as categorias usando UPs.',
-              'UP = Minutos / Tempo ideal\nEquilíbrio = 100% - Variância'),
-          child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4)),
-              child: const Icon(Icons.info_outline_rounded,
-                  size: 12, color: Colors.grey)),
+    final maxUP = upsCategorias.values.isEmpty
+        ? 1
+        : upsCategorias.values.reduce((a, b) => a > b ? a : b);
+
+    return _glassCard(
+      title: 'Equilíbrio entre Categorias',
+      icon: Icons.balance_rounded,
+      rightWidget: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: _getEquilibrioColor().withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
         ),
-      ]),
-      const SizedBox(height: 10),
-      if (upsCategorias.isNotEmpty) ...[
-        ...upsCategorias.entries.take(6).map((entry) {
-          final maxUP = upsCategorias.values.reduce((a, b) => a > b ? a : b);
-          final proporcao = maxUP > 0 ? entry.value / maxUP : 0.0;
-          final cor = _getCorCategoria(entry.key);
-          return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(children: [
-                SizedBox(
-                    width: 80,
-                    child: Text(entry.key,
+        child: Text(
+          '${_indiceEquilibrio.round()}% ${_getEquilibrioEmoji()}',
+          style: GoogleFonts.lato(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: _getEquilibrioColor(),
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          ...upsCategorias.entries.take(5).map((entry) {
+            final proporcao = maxUP > 0 ? entry.value / maxUP : 0.0;
+            final cor = _getCorCategoria(entry.key);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        entry.key,
                         style: GoogleFonts.lato(
-                            fontSize: 10, color: Colors.grey[600]),
-                        overflow: TextOverflow.ellipsis)),
-                const SizedBox(width: 6),
-                Expanded(
-                    child: Container(
-                        height: 12,
-                        decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(6)),
-                        child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: proporcao.clamp(0.05, 1.0),
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                        colors: [cor, cor.withOpacity(0.7)]),
-                                    borderRadius: BorderRadius.circular(6)))))),
-                const SizedBox(width: 6),
-                SizedBox(
-                    width: 35,
-                    child: Text('${_formatUPs(entry.value)} UP',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      Text(
+                        '${_formatUPs(entry.value)} UP',
                         style: GoogleFonts.lato(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: cor),
-                        textAlign: TextAlign.right)),
-              ]));
-        }),
-      ],
-      if (naoPraticadas.isNotEmpty) ...[
-        const SizedBox(height: 8),
-        Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.withOpacity(0.2))),
-            child: Row(children: [
-              const Text('💡', style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 6),
-              Expanded(
-                  child: Text(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: cor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  LinearProgressIndicator(
+                    value: proporcao.clamp(0.0, 1.0),
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(cor),
+                    borderRadius: BorderRadius.circular(6),
+                    minHeight: 8,
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (naoPraticadas.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  const Text('💡', style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
                       'Não praticado: ${naoPraticadas.take(3).join(", ")}',
                       style: GoogleFonts.lato(
-                          fontSize: 10, color: Colors.grey[600])))
-            ])),
-      ],
-      if (_sugestaoEquilibrio.isNotEmpty && _indiceEquilibrio < 70) ...[
-        const SizedBox(height: 6),
-        Text('Experimente: $_sugestaoEquilibrio',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: _getEquilibrioColor())),
-      ],
-      if (_totalUPs > 0) ...[
-        const SizedBox(height: 4),
-        Text(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (_sugestaoEquilibrio.isNotEmpty && _indiceEquilibrio < 70)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                '✨ Experimente: $_sugestaoEquilibrio',
+                style: GoogleFonts.lato(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _getEquilibrioColor(),
+                ),
+              ),
+            ),
+          const SizedBox(height: 4),
+          Text(
             'Total: ${_formatUPs(_totalUPs)} UPs em $_totalActivities atividades',
-            style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[400])),
-      ],
-    ]);
+            style: GoogleFonts.lato(
+              fontSize: 11,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Color _getCorCategoria(String categoria) {
@@ -811,479 +959,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const Color(0xFF6B8E23);
   }
 
-  Widget _buildEnergyBalance(Map<String, double> energyBalance) {
-    final activePercent = ((energyBalance['Ativa'] ?? 0) * 100).round();
-    final passivePercent = ((energyBalance['Passiva'] ?? 0) * 100).round();
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.bolt_rounded, size: 13, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 5),
-        Text('BALANÇO ENERGÉTICO',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        GestureDetector(
-            onTap: () => _showInfoModal(
-                'Balanço Energético',
-                'Proporção de TEMPO Ativo vs Passivo.',
-                'Minutos do tipo / Total × 100'),
-            child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4)),
-                child: const Icon(Icons.info_outline_rounded,
-                    size: 12, color: Colors.grey))),
-        const SizedBox(width: 4),
-        Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-                color: const Color(0xFF6B8E23).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6)),
-            child: Text(
-                '${_isTrendingUp ? "↑" : "↓"}${_trendPercent}% ${_getLifeBalance()}',
-                style: GoogleFonts.lato(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF6B8E23)))),
-      ]),
-      const SizedBox(height: 10),
-      Row(children: [
-        Expanded(
-            child: _buildBar('⚡ Ativa', energyBalance['Ativa'] ?? 0,
-                const Color(0xFFFF6B35), '$activePercent%')),
-        const SizedBox(width: 8),
-        Expanded(
-            child: _buildBar('🍃 Passiva', energyBalance['Passiva'] ?? 0,
-                const Color(0xFF4ECDC4), '$passivePercent%')),
-      ]),
-    ]);
-  }
-
-  Widget _buildFlowDistribution(Map<String, double> flowDistribution) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.swap_vert_rounded, size: 13, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 5),
-        Text('FLOW',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        GestureDetector(
-            onTap: () => _showInfoModal('Flow', 'Nível de desafio por tempo.',
-                'Minutos do nível / Total × 100'),
-            child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4)),
-                child: const Icon(Icons.info_outline_rounded,
-                    size: 12, color: Colors.grey))),
-      ]),
-      const SizedBox(height: 8),
-      ...flowDistribution.entries.map((e) => Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: _buildBar(
-              e.key,
-              e.value,
-              HawkinsColors.flowGradient[e.key] ?? Colors.grey,
-              '${(e.value * 100).round()}%'))),
-    ]);
-  }
-
-  Widget _buildChallengeIndex() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.trending_up_rounded,
-            size: 13, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 5),
-        Text('DESAFIO',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        GestureDetector(
-            onTap: () => _showInfoModal(
-                'Índice de Desafio',
-                'Score 0-100 do nível de dificuldade.',
-                'Pesos: Fácil=1 a Difícil=5'),
-            child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4)),
-                child: const Icon(Icons.info_outline_rounded,
-                    size: 12, color: Colors.grey))),
-      ]),
-      const SizedBox(height: 12),
-      Center(
-          child: Column(children: [
-        Stack(alignment: Alignment.center, children: [
-          SizedBox(
-              width: 70,
-              height: 70,
-              child: CircularProgressIndicator(
-                  value: _challengeIndex / 100,
-                  strokeWidth: 6,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: AlwaysStoppedAnimation<Color>(_challengeIndex > 70
-                      ? Colors.red
-                      : _challengeIndex > 40
-                          ? Colors.orange
-                          : const Color(0xFF6B8E23)))),
-          Text('$_challengeIndex',
-              style: GoogleFonts.lato(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2D3436))),
-        ]),
-        const SizedBox(height: 4),
-        Text('/100',
-            style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[400])),
-        const SizedBox(height: 4),
-        Text(
-            _challengeIndex > 70
-                ? '🔥 Alta'
-                : _challengeIndex > 40
-                    ? '⚡ Moderado'
-                    : '🌊 Tranquilo',
-            style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[500])),
-      ])),
-    ]);
-  }
-
-  Widget _buildOrganBalance(Map<String, double> organBalance) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.psychology_rounded,
-            size: 13, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 5),
-        Text('FOCO',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        GestureDetector(
-            onTap: () => _showInfoModal(
-                'Foco', 'Tempo por dimensão.', 'Minutos do tipo / Total × 100'),
-            child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4)),
-                child: const Icon(Icons.info_outline_rounded,
-                    size: 12, color: Colors.grey))),
-      ]),
-      const SizedBox(height: 8),
-      ...organBalance.entries.map((e) {
-        final icon = e.key == 'Mente'
-            ? '🧠'
-            : e.key == 'Corpo'
-                ? '💪'
-                : '🧘';
-        return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: _buildBar(
-                '$icon ${e.key}',
-                e.value,
-                HawkinsColors.organGradients[e.key]?[0] ?? Colors.grey,
-                '${(e.value * 100).round()}%'));
-      }),
-    ]);
-  }
-
-  Widget _buildCategoriesSummary(Map<String, double> categoryDistribution) {
-    final sorted = categoryDistribution.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final top = sorted.take(5).toList();
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.pie_chart_rounded, size: 13, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 5),
-        Text('CATEGORIAS',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        GestureDetector(
-            onTap: () => _showInfoModal('Categorias', 'Top 5 por tempo.',
-                'Minutos da categoria / Total × 100'),
-            child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4)),
-                child: const Icon(Icons.info_outline_rounded,
-                    size: 12, color: Colors.grey))),
-      ]),
-      const SizedBox(height: 8),
-      if (top.isEmpty)
-        Text('Sem dados',
-            style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[400]))
-      else
-        ...top.map((e) => Padding(
-            padding: const EdgeInsets.only(bottom: 3),
-            child: _buildBar(e.key, e.value, const Color(0xFF6B8E23),
-                '${(e.value * 100).round()}%'))),
-    ]);
-  }
-
-  Widget _buildBar(String label, double value, Color color, String percent) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label,
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500)),
-        Text(percent,
-            style: GoogleFonts.lato(
-                fontSize: 10, color: color, fontWeight: FontWeight.bold)),
-      ]),
-      const SizedBox(height: 3),
-      Stack(children: [
-        Container(
-            height: 5,
-            decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(3))),
-        FractionallySizedBox(
-            widthFactor: value,
-            child: Container(
-                height: 5,
-                decoration: BoxDecoration(
-                    gradient:
-                        LinearGradient(colors: [color, color.withOpacity(0.7)]),
-                    borderRadius: BorderRadius.circular(3),
-                    boxShadow: [
-                      BoxShadow(color: color.withOpacity(0.3), blurRadius: 4)
-                    ]))),
-      ]),
-    ]);
-  }
-
-  Widget _buildRecentActivities() {
-    final recent = _filteredLogs.take(3).toList();
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.history_rounded, size: 13, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 5),
-        Text('RECENTES',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-      ]),
-      const SizedBox(height: 8),
-      ...recent.map((log) {
-        final c = HawkinsColors.energyColors[log.energy] ?? Colors.grey;
-        return Container(
-          margin: const EdgeInsets.only(bottom: 4),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(10)),
-          child: Row(children: [
-            Container(
-                width: 3,
-                height: 22,
-                decoration: BoxDecoration(
-                    color: c, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(width: 8),
-            Expanded(
-                child: Text(log.group,
-                    style: GoogleFonts.lato(
-                        fontWeight: FontWeight.bold, fontSize: 11))),
-            Text(log.formattedDuration,
-                style: GoogleFonts.lato(
-                    fontWeight: FontWeight.bold, fontSize: 11, color: c)),
-          ]),
-        );
-      }),
-    ]);
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      const SizedBox(height: 40),
-      Container(
-          padding: const EdgeInsets.all(30),
-          decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.35),
-              border:
-                  Border.all(color: const Color(0xFFA8C686).withOpacity(0.4))),
-          child:
-              Icon(Icons.dashboard_rounded, size: 50, color: Colors.grey[400])),
-      const SizedBox(height: 16),
-      Text('Nenhum dado ainda',
-          style: GoogleFonts.lato(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[500])),
-      const SizedBox(height: 6),
-      Text('Inicie uma atividade na Bússola\npara ver suas métricas aqui',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.lato(
-              fontSize: 12, color: Colors.grey[400], height: 1.4)),
-      const SizedBox(height: 40),
-    ]));
-  }
-
-  void _showInfoModal(String title, String description, String formula) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FA),
-              borderRadius: BorderRadius.circular(20),
-              border:
-                  Border.all(color: const Color(0xFFA8C686).withOpacity(0.3)),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10))
-              ]),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Row(children: [
-              Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [Color(0xFF6B8E23), Color(0xFF8B6914)]),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.info_outline_rounded,
-                      color: Colors.white, size: 18)),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Text(title,
-                      style: GoogleFonts.playfairDisplay(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2D3436)))),
-              GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: const Icon(Icons.close_rounded,
-                          size: 16, color: Colors.grey))),
-            ]),
-            const SizedBox(height: 16),
-            Text(description,
-                style: GoogleFonts.lato(
-                    fontSize: 13, color: Colors.grey[700], height: 1.5)),
-            const SizedBox(height: 12),
-            Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    color: const Color(0xFFF5F9E9),
-                    borderRadius: BorderRadius.circular(10)),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('📐 Como é calculado:',
-                          style: GoogleFonts.lato(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF6B8E23))),
-                      const SizedBox(height: 4),
-                      Text(formula,
-                          style: GoogleFonts.lato(
-                              fontSize: 10,
-                              color: const Color(0xFF4A5D23),
-                              height: 1.4)),
-                    ])),
-          ]),
-        ),
-      ),
-    );
-  }
-
-  // ========== CONSCIÊNCIA MÉDIA ==========
-
+  // ========== CARD DE CONSCIÊNCIA ==========
   Widget _buildConsciousnessCard() {
-    // Verifica se há dados de feedback
-    final logsWithConsciousness =
-        _filteredLogs.where((l) => l.consciousnessLevel > 0).toList();
+    // CORRIGIDO: verifica null
+    final logsWithConsciousness = _filteredLogs
+        .where((l) => l.consciousnessLevel != null && l.consciousnessLevel! > 0)
+        .toList();
 
     if (logsWithConsciousness.isEmpty) {
-      // Estado vazio: mensagem informativa
-      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Icon(Icons.self_improvement_rounded,
-              size: 16, color: Color(0xFF6B8E23)),
-          const SizedBox(width: 6),
-          Text('CONSCIÊNCIA MÉDIA',
-              style: GoogleFonts.lato(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.grey[500],
-                  letterSpacing: 1.5)),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => _showInfoModal(
-                'Consciência Média',
-                'Nível de presença durante as atividades.',
-                'Disponível após feedback pós-atividade.'),
-            child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(5)),
-                child: const Icon(Icons.info_outline_rounded,
-                    size: 12, color: Colors.grey)),
-          ),
-        ]),
-        const SizedBox(height: 10),
-        Container(
+      return _glassCard(
+        title: 'Consciência Média',
+        icon: Icons.self_improvement_rounded,
+        child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-              color: const Color(0xFF6B8E23).withOpacity(0.03),
-              borderRadius: BorderRadius.circular(12)),
-          child: Row(children: [
-            const Text('📝', style: TextStyle(fontSize: 20)),
-            const SizedBox(width: 10),
-            Expanded(
+            color: const Color(0xFF6B8E23).withOpacity(0.04),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              const Text('📝', style: TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              Expanded(
                 child: Text(
-                    'Responda o feedback rápido após cada atividade para desbloquear suas métricas de consciência.',
-                    style: GoogleFonts.lato(
-                        fontSize: 11, color: Colors.grey[500], height: 1.3))),
-          ]),
+                  'Responda o feedback rápido após cada atividade para desbloquear suas métricas de consciência.',
+                  style: GoogleFonts.lato(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ]);
+      );
     }
 
-    // TEM DADOS! Mostra o gráfico
+    // CORRIGIDO: usa ! porque já verificou que não é null
     double avgConsciousness = logsWithConsciousness.fold(
-            0.0, (sum, l) => sum + l.consciousnessLevel) /
+            0.0, (sum, l) => sum + (l.consciousnessLevel ?? 0)) /
         logsWithConsciousness.length;
 
     final counts = <int, int>{0: 0, 1: 0, 2: 0, 3: 0};
     for (final log in logsWithConsciousness) {
-      counts[log.consciousnessLevel] =
-          (counts[log.consciousnessLevel] ?? 0) + 1;
+      final level = log.consciousnessLevel ?? 0;
+      counts[level] = (counts[level] ?? 0) + 1;
     }
 
     final total = logsWithConsciousness.length;
@@ -1302,174 +1023,146 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ? 'Presente'
                 : 'Automático';
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.self_improvement_rounded,
-            size: 16, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 6),
-        Text('CONSCIÊNCIA MÉDIA',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-                color: const Color(0xFF6B8E23).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8)),
-            child: Text('$emoji $label',
-                style: GoogleFonts.lato(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF6B8E23)))),
-        const SizedBox(width: 4),
-        GestureDetector(
-          onTap: () => _showInfoModal(
-              'Consciência Média',
-              'Nível de presença durante as atividades.\n\n😴 Automático\n😐 Presente\n🔥 Focado\n✨ Fluindo',
-              'Média: Soma dos níveis / Total de feedbacks'),
-          child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(5)),
-              child: const Icon(Icons.info_outline_rounded,
-                  size: 12, color: Colors.grey)),
+    return _glassCard(
+      title: 'Consciência Média',
+      icon: Icons.self_improvement_rounded,
+      rightWidget: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFF6B8E23).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
         ),
-      ]),
-      const SizedBox(height: 10),
-      Row(children: [
-        _consciousnessBar(
-            '😴', 0, counts[0] ?? 0, total, const Color(0xFFBDBDBD)),
-        const SizedBox(width: 4),
-        _consciousnessBar(
-            '😐', 1, counts[1] ?? 0, total, const Color(0xFFFFEB3B)),
-        const SizedBox(width: 4),
-        _consciousnessBar(
-            '🔥', 2, counts[2] ?? 0, total, const Color(0xFFFF9800)),
-        const SizedBox(width: 4),
-        _consciousnessBar(
-            '✨', 3, counts[3] ?? 0, total, const Color(0xFF6B8E23)),
-      ]),
-      const SizedBox(height: 6),
-      Text('${logsWithConsciousness.length} atividades com feedback',
-          style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[400])),
-    ]);
+        child: Text(
+          '$emoji $label',
+          style: GoogleFonts.lato(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF6B8E23),
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _consciousnessBar('😴', 0, counts[0] ?? 0, total, Colors.grey),
+              const SizedBox(width: 8),
+              _consciousnessBar(
+                  '😐', 1, counts[1] ?? 0, total, const Color(0xFFFFEB3B)),
+              const SizedBox(width: 8),
+              _consciousnessBar(
+                  '🔥', 2, counts[2] ?? 0, total, const Color(0xFFFF9800)),
+              const SizedBox(width: 8),
+              _consciousnessBar(
+                  '✨', 3, counts[3] ?? 0, total, const Color(0xFF6B8E23)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${logsWithConsciousness.length} atividades com feedback',
+            style: GoogleFonts.lato(
+              fontSize: 11,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _consciousnessBar(
       String emoji, int level, int count, int total, Color color) {
     final percent = total > 0 ? count / total : 0.0;
     return Expanded(
-      child: Column(children: [
-        Text(emoji,
-            style: TextStyle(
-                fontSize: 18, color: percent > 0 ? color : Colors.grey[300])),
-        const SizedBox(height: 2),
-        Container(
-          height: 4,
-          decoration: BoxDecoration(
-              color: Colors.grey[200], borderRadius: BorderRadius.circular(2)),
-          child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: percent,
-              child: Container(
-                  decoration: BoxDecoration(
-                      color: color, borderRadius: BorderRadius.circular(2)))),
-        ),
-        const SizedBox(height: 2),
-        Text('$count',
+      child: Column(
+        children: [
+          Text(emoji, style: TextStyle(fontSize: 24)),
+          const SizedBox(height: 6),
+          LinearProgressIndicator(
+            value: percent,
+            backgroundColor: Colors.grey[200],
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            borderRadius: BorderRadius.circular(4),
+            minHeight: 6,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$count',
             style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: percent > 0 ? color : Colors.grey[300])),
-      ]),
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: percent > 0 ? color : Colors.grey[400],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-// ========== FLOW vs DESAFIO (OURO!) ==========
+  // ========== CARD FLOW vs DESAFIO ==========
   Widget _buildFlowVsChallengeCard() {
-    // Verifica se há dados de feedback
+    // CORRIGIDO: verifica null
     final logsWithFeedback = _filteredLogs
-        .where(
-            (l) => l.difficultyFeedback.isNotEmpty && l.consciousnessLevel > 0)
+        .where((l) =>
+            l.difficultyFeedback != null &&
+            l.difficultyFeedback!.isNotEmpty &&
+            l.consciousnessLevel != null &&
+            l.consciousnessLevel! > 0)
         .toList();
 
     if (logsWithFeedback.isEmpty) {
-      // Estado vazio: mensagem informativa
-      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Icon(Icons.show_chart_rounded,
-              size: 16, color: Color(0xFF6B8E23)),
-          const SizedBox(width: 6),
-          Text('FLOW vs DESAFIO',
-              style: GoogleFonts.lato(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.grey[500],
-                  letterSpacing: 1.5)),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => _showInfoModal(
-                'Flow vs Desafio',
-                'Cruza dificuldade com flow.\n\nDescubra sua zona ideal!',
-                'Disponível após feedback pós-atividade.'),
-            child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(5)),
-                child: const Icon(Icons.info_outline_rounded,
-                    size: 12, color: Colors.grey)),
-          ),
-        ]),
-        const SizedBox(height: 10),
-        Container(
+      return _glassCard(
+        title: 'Flow vs Desafio',
+        icon: Icons.show_chart_rounded,
+        child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-              color: const Color(0xFF6B8E23).withOpacity(0.03),
-              borderRadius: BorderRadius.circular(12)),
-          child: Row(children: [
-            const Text('🧪', style: TextStyle(fontSize: 20)),
-            const SizedBox(width: 10),
-            Expanded(
+            color: const Color(0xFF6B8E23).withOpacity(0.04),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              const Text('🧪', style: TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              Expanded(
                 child: Text(
-                    'Ao finalizar cada atividade, avalie a dificuldade e seu nível de flow para desbloquear este gráfico.',
-                    style: GoogleFonts.lato(
-                        fontSize: 11, color: Colors.grey[500], height: 1.3))),
-          ]),
+                  'Ao finalizar cada atividade, avalie a dificuldade e seu nível de flow para desbloquear este gráfico.',
+                  style: GoogleFonts.lato(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ]);
+      );
     }
 
-    // TEM DADOS! Mostra o gráfico
     int facilFlow = 0, facilNoFlow = 0;
     int medioFlow = 0, medioNoFlow = 0;
     int dificilFlow = 0, dificilNoFlow = 0;
 
     for (final log in logsWithFeedback) {
-      final hasFlow = log.consciousnessLevel >= 3;
-      switch (log.difficultyFeedback) {
-        case 'Fácil':
-          if (hasFlow)
-            facilFlow++;
-          else
-            facilNoFlow++;
-          break;
-        case 'Médio':
-          if (hasFlow)
-            medioFlow++;
-          else
-            medioNoFlow++;
-          break;
-        case 'Difícil':
-          if (hasFlow)
-            dificilFlow++;
-          else
-            dificilNoFlow++;
-          break;
+      final hasFlow = (log.consciousnessLevel ?? 0) >= 3;
+      final difficulty = log.difficultyFeedback ?? '';
+
+      if (difficulty == 'Fácil') {
+        if (hasFlow)
+          facilFlow++;
+        else
+          facilNoFlow++;
+      } else if (difficulty == 'Difícil') {
+        if (hasFlow)
+          dificilFlow++;
+        else
+          dificilNoFlow++;
+      } else {
+        if (hasFlow)
+          medioFlow++;
+        else
+          medioNoFlow++;
       }
     }
 
@@ -1493,154 +1186,672 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bestRate = facilRate;
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const Icon(Icons.show_chart_rounded,
-            size: 16, color: Color(0xFF6B8E23)),
-        const SizedBox(width: 6),
-        Text('FLOW vs DESAFIO',
-            style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.grey[500],
-                letterSpacing: 1.5)),
-        const Spacer(),
-        Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-                color: const Color(0xFF6B8E23).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8)),
-            child: Text('Pico: $bestZone ${(bestRate * 100).round()}%',
-                style: GoogleFonts.lato(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF6B8E23)))),
-        const SizedBox(width: 4),
-        GestureDetector(
-          onTap: () => _showInfoModal(
-              'Flow vs Desafio',
-              'Cruza dificuldade com flow.\n\nMostra qual zona te leva mais ao flow.',
-              'Taxa de Flow = Atividades com ✨ / Total por nível'),
-          child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(5)),
-              child: const Icon(Icons.info_outline_rounded,
-                  size: 12, color: Colors.grey)),
-        ),
-      ]),
-      const SizedBox(height: 10),
-      Row(children: [
-        _flowZoneBar('🌊 Fácil', facilFlow, facilTotal, facilRate,
-            const Color(0xFF4CAF50)),
-        const SizedBox(width: 6),
-        _flowZoneBar('⚡ Médio', medioFlow, medioTotal, medioRate,
-            const Color(0xFFFFEB3B)),
-        const SizedBox(width: 6),
-        _flowZoneBar('🔥 Difícil', dificilFlow, dificilTotal, dificilRate,
-            const Color(0xFFF44336)),
-      ]),
-      const SizedBox(height: 8),
-      Container(
-        padding: const EdgeInsets.all(10),
+    return _glassCard(
+      title: 'Flow vs Desafio',
+      icon: Icons.show_chart_rounded,
+      rightWidget: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-            color: const Color(0xFF6B8E23).withOpacity(0.05),
-            borderRadius: BorderRadius.circular(10)),
-        child: Row(children: [
-          const Text('💡', style: TextStyle(fontSize: 16)),
-          const SizedBox(width: 8),
-          Expanded(
-              child: Text(
-            bestRate > 0.6
-                ? 'Você entra em flow principalmente em atividades $bestZone. Este é seu ponto ideal!'
-                : bestRate > 0.3
-                    ? 'Flow distribuído. Varie a dificuldade para encontrar seu ponto ideal.'
-                    : 'Poucos momentos de flow. Tente ajustar: nem tão fácil que entedie, nem tão difícil que frustre.',
-            style: GoogleFonts.lato(
-                fontSize: 11, color: Colors.grey[700], height: 1.3),
-          )),
-        ]),
+          color: const Color(0xFF6B8E23).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          'Pico: $bestZone ${(bestRate * 100).round()}%',
+          style: GoogleFonts.lato(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF6B8E23),
+          ),
+        ),
       ),
-    ]);
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _flowZoneBar('🌊 Fácil', facilFlow, facilTotal, facilRate,
+                  const Color(0xFF4CAF50)),
+              const SizedBox(width: 8),
+              _flowZoneBar('⚡ Médio', medioFlow, medioTotal, medioRate,
+                  const Color(0xFFFFC107)),
+              const SizedBox(width: 8),
+              _flowZoneBar('🔥 Difícil', dificilFlow, dificilTotal, dificilRate,
+                  const Color(0xFFF44336)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6B8E23).withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Text('💡', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    bestRate > 0.6
+                        ? 'Você entra em flow principalmente em atividades $bestZone. Este é seu ponto ideal!'
+                        : bestRate > 0.3
+                            ? 'Flow distribuído. Varie a dificuldade para encontrar seu ponto ideal.'
+                            : 'Poucos momentos de flow. Tente ajustar: nem tão fácil que entedie, nem tão difícil que frustre.',
+                    style: GoogleFonts.lato(
+                      fontSize: 12,
+                      color: Colors.grey[700],
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _flowZoneBar(
       String label, int flowCount, int total, double rate, Color color) {
     return Expanded(
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(label,
-              style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[600])),
-          Text('${(rate * 100).round()}%',
-              style: GoogleFonts.lato(
-                  fontSize: 10, fontWeight: FontWeight.bold, color: color)),
-        ]),
-        const SizedBox(height: 4),
-        Container(
-          height: 20,
-          decoration: BoxDecoration(
-              color: Colors.grey[200], borderRadius: BorderRadius.circular(4)),
-          child: Row(children: [
-            if (flowCount > 0)
-              Expanded(
-                flex: flowCount,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.8),
-                    borderRadius: BorderRadius.horizontal(
-                      left: const Radius.circular(4),
-                      right: flowCount == total
-                          ? const Radius.circular(4)
-                          : Radius.zero,
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.lato(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                if (flowCount > 0)
+                  Expanded(
+                    flex: flowCount,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.8),
+                        borderRadius: BorderRadius.horizontal(
+                          left: const Radius.circular(8),
+                          right: flowCount == total
+                              ? const Radius.circular(8)
+                              : Radius.zero,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '✨$flowCount',
+                          style: GoogleFonts.lato(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  child: Center(
-                      child: Text('✨$flowCount',
-                          style: GoogleFonts.lato(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white))),
-                ),
-              ),
-            if (total - flowCount > 0)
-              Expanded(
-                flex: total - flowCount,
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.horizontal(
-                          right: const Radius.circular(4))),
-                  child: Center(
-                      child: Text('${total - flowCount}',
-                          style: GoogleFonts.lato(
-                              fontSize: 9, color: Colors.grey[400]))),
-                ),
-              ),
-          ]),
-        ),
-        const SizedBox(height: 2),
-        Text('$total atividades',
-            style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
-      ]),
+                if (total - flowCount > 0)
+                  Expanded(
+                    flex: total - flowCount,
+                    child: Center(
+                      child: Text(
+                        '${total - flowCount}',
+                        style: GoogleFonts.lato(
+                          fontSize: 11,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$total ativ.',
+            style: GoogleFonts.lato(
+              fontSize: 10,
+              color: Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${(rate * 100).round()}% flow',
+            style: GoogleFonts.lato(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  String _getSmartSuggestion() {
-    if (_filteredLogs.isEmpty)
-      return 'Inicie sua primeira atividade na Bússola para ver insights personalizados! 🚀';
-    final naoPraticadas = _categoriasNaoPraticadas;
-    final sugestao = _sugestaoEquilibrio;
-    if (naoPraticadas.length >= 3)
-      return 'Você ainda não praticou ${naoPraticadas.length} categorias. Que tal começar com "$sugestao"? 🌱';
-    if (naoPraticadas.length == 1)
-      return 'Falta apenas "$sugestao" para diversificar suas práticas! 🎯';
-    if (_indiceEquilibrio < 40)
-      return 'Seu tempo está concentrado em poucas categorias. Experimente "$sugestao" para equilibrar! ⚖️';
-    if (_indiceEquilibrio >= 70)
-      return 'Excelente equilíbrio! ${_indiceEquilibrio.round()}% de distribuição entre categorias! ⭐';
-    if (_currentStreak >= 7)
-      return '${_currentStreak} dias seguidos! ${_formatMinutes(_totalMinutes)} de prática! 🔥';
-    return 'Continue variando suas atividades para um desenvolvimento mais completo! 📊';
+  // ========== CARD ENERGIA ==========
+  Widget _buildEnergyBalanceCard() {
+    final energyBalance = _calculateEnergyBalance();
+    final activePercent = ((energyBalance['Ativa'] ?? 0) * 100).round();
+    final passivePercent = ((energyBalance['Passiva'] ?? 0) * 100).round();
+
+    return _glassCard(
+      title: 'Balanço Energético',
+      icon: Icons.bolt_rounded,
+      child: Row(
+        children: [
+          Expanded(
+            child:
+                _energyPill('⚡ Ativa', activePercent, const Color(0xFFFF6B35)),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _energyPill(
+                '🍃 Passiva', passivePercent, const Color(0xFF4ECDC4)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _energyPill(String label, int percent, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.lato(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$percent%',
+            style: GoogleFonts.lato(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: percent / 100,
+            backgroundColor: Colors.grey[200],
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            borderRadius: BorderRadius.circular(6),
+            minHeight: 8,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ========== CARD FLOW DISTRIBUTION ==========
+  Widget _buildFlowDistributionCard() {
+    final flowDistribution = _calculateFlowDistribution();
+
+    return _glassCard(
+      title: 'Distribuição do Flow',
+      icon: Icons.swap_vert_rounded,
+      child: Column(
+        children: flowDistribution.entries.map((entry) {
+          final color = HawkinsColors.flowGradient[entry.key] ?? Colors.grey;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      entry.key,
+                      style: GoogleFonts.lato(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    Text(
+                      '${(entry.value * 100).round()}%',
+                      style: GoogleFonts.lato(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: entry.value,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  borderRadius: BorderRadius.circular(6),
+                  minHeight: 6,
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ========== CARD CHALLENGE INDEX ==========
+  Widget _buildChallengeIndexCard() {
+    return _glassCard(
+      title: 'Índice de Desafio',
+      icon: Icons.trending_up_rounded,
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: CircularProgressIndicator(
+                  value: _challengeIndex / 100,
+                  strokeWidth: 10,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _challengeIndex > 70
+                        ? const Color(0xFFF44336)
+                        : _challengeIndex > 40
+                            ? const Color(0xFFFFC107)
+                            : const Color(0xFF6B8E23),
+                  ),
+                ),
+              ),
+              Text(
+                '$_challengeIndex',
+                style: GoogleFonts.lato(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF2D3436),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _challengeIndex > 70
+                ? '🔥 Alta intensidade'
+                : _challengeIndex > 40
+                    ? '⚡ Moderado'
+                    : '🌊 Fluxo tranquilo',
+            style: GoogleFonts.lato(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ========== CARD ÓRGÃOS ==========
+  Widget _buildOrganBalanceCard() {
+    final organBalance = _calculateOrganBalance();
+    final organs = ['Mente', 'Corpo', 'Espírito'];
+    final icons = {'Mente': '🧠', 'Corpo': '💪', 'Espírito': '🧘'};
+
+    return _glassCard(
+      title: 'Foco por Dimensão',
+      icon: Icons.psychology_rounded,
+      child: Column(
+        children: organs.map((organ) {
+          final percent = ((organBalance[organ] ?? 0) * 100).round();
+          final color = HawkinsColors.organGradients[organ]?[0] ?? Colors.grey;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$organ ${icons[organ]}',
+                      style: GoogleFonts.lato(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    Text(
+                      '$percent%',
+                      style: GoogleFonts.lato(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: percent / 100,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  borderRadius: BorderRadius.circular(6),
+                  minHeight: 8,
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ========== CARD CATEGORIAS ==========
+  Widget _buildCategoriesCard() {
+    final categoryDistribution = _calculateCategoryDistribution();
+    final sorted = categoryDistribution.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final top = sorted.take(4).toList();
+
+    return _glassCard(
+      title: 'Top Categorias',
+      icon: Icons.pie_chart_rounded,
+      child: Column(
+        children: top.map((entry) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      entry.key,
+                      style: GoogleFonts.lato(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${(entry.value * 100).round()}%',
+                      style: GoogleFonts.lato(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF6B8E23),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: entry.value,
+                  backgroundColor: Colors.grey[200],
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(Color(0xFF6B8E23)),
+                  borderRadius: BorderRadius.circular(6),
+                  minHeight: 6,
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ========== CARD ATIVIDADES RECENTES ==========
+  Widget _buildRecentActivitiesCard() {
+    final recent = _filteredLogs.take(5).toList();
+
+    return _glassCard(
+      title: 'Atividades Recentes',
+      icon: Icons.history_rounded,
+      child: Column(
+        children: recent.map((log) {
+          final color = HawkinsColors.energyColors[log.energy] ?? Colors.grey;
+          final dateFormat = DateFormat('dd/MM - HH:mm');
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        log.group,
+                        style: GoogleFonts.lato(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF2D3436),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        log.example,
+                        style: GoogleFonts.lato(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      log.formattedDuration,
+                      style: GoogleFonts.lato(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      dateFormat.format(log.timestamp),
+                      style: GoogleFonts.lato(
+                        fontSize: 11,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ========== CARD SUGESTÃO INTELIGENTE ==========
+  Widget _buildSmartSuggestion() {
+    String suggestion;
+    if (_filteredLogs.isEmpty) {
+      suggestion =
+          'Inicie sua primeira atividade na Bússola para ver insights personalizados! 🚀';
+    } else {
+      final naoPraticadas = _categoriasNaoPraticadas;
+      final sugestao = _sugestaoEquilibrio;
+      if (naoPraticadas.length >= 3) {
+        suggestion =
+            'Você ainda não praticou ${naoPraticadas.length} categorias. Que tal começar com "$sugestao"? 🌱';
+      } else if (naoPraticadas.length == 1) {
+        suggestion =
+            'Falta apenas "$sugestao" para diversificar suas práticas! 🎯';
+      } else if (_indiceEquilibrio < 40) {
+        suggestion =
+            'Seu tempo está concentrado em poucas categorias. Experimente "$sugestao" para equilibrar! ⚖️';
+      } else if (_indiceEquilibrio >= 70) {
+        suggestion =
+            'Excelente equilíbrio! ${_indiceEquilibrio.round()}% de distribuição entre categorias! ⭐';
+      } else if (_currentStreak >= 7) {
+        suggestion =
+            '${_currentStreak} dias seguidos! ${_formatMinutes(_totalMinutes)} de prática! 🔥';
+      } else {
+        suggestion =
+            'Continue variando suas atividades para um desenvolvimento mais completo! 📊';
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [const Color(0xFFF5F9E9), const Color(0xFFE8F0D5)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          const Text('💡', style: TextStyle(fontSize: 24)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              suggestion,
+              style: GoogleFonts.lato(
+                fontSize: 13,
+                color: const Color(0xFF4A5D23),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ========== CARD GENÉRICO ==========
+  Widget _glassCard({
+    required String title,
+    required IconData icon,
+    Widget? rightWidget,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6B8E23).withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: const Color(0xFF6B8E23)),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.lato(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.grey[500],
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Spacer(),
+              if (rightWidget != null) rightWidget,
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+
+  // ========== ESTADO VAZIO ==========
+  Widget _buildEmptyState() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.5),
+                border:
+                    Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
+              ),
+              child: Icon(
+                Icons.dashboard_rounded,
+                size: 70,
+                color: Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 28),
+            Text(
+              'Nenhum dado ainda',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Inicie uma atividade na Bússola\npara ver suas métricas aqui',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.lato(
+                fontSize: 15,
+                color: Colors.grey[500],
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
   }
 }
