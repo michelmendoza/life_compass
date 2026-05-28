@@ -4,7 +4,6 @@ import 'package:life_compass/data/custom_activities.dart';
 import 'package:life_compass/data/practice.dart';
 import 'package:life_compass/models/activity_log.dart';
 import 'package:life_compass/screens/customize_screen.dart';
-import 'package:life_compass/screens/onboarding_premium_screen.dart';
 import '../data/activities.dart';
 import '../data/colors.dart';
 import 'timer_screen.dart';
@@ -300,29 +299,6 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                 ),
               ),
             ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => OnboardingPremiumScreen(
-                  onComplete: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF8B6914).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.replay_rounded,
-                color: Color(0xFF8B6914), size: 18),
           ),
         ),
         const SizedBox(width: 6),

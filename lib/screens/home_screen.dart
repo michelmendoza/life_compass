@@ -1,22 +1,21 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:life_compass/data/custom_activities.dart';
-import 'package:life_compass/data/practice.dart';
-import 'package:life_compass/models/activity_log.dart';
-import 'package:life_compass/screens/customize_screen.dart';
-import '../data/activities.dart';
-import '../data/colors.dart';
-import '../widgets/compass.dart';
-import 'timer_screen.dart';
+import '../models/activity_log.dart';
 
 class HomeScreen extends StatefulWidget {
-  final Function(dynamic) onStartActivity;
-  final List<ActivityLog> logs;
+  final List<ActivityLog> activityLogs;
+  final VoidCallback onAddPractice;
+  final VoidCallback onExplore;
+  final VoidCallback onActNow;
 
   const HomeScreen({
     super.key,
-    required this.onStartActivity,
-    required this.logs,
+    required this.activityLogs,
+    required this.onAddPractice,
+    required this.onExplore,
+    required this.onActNow,
   });
 
   @override
@@ -24,798 +23,537 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Activity? _selectedActivity;
-  String? _selectedExample;
-  bool _isCompassRotating = false;
+  late List<String> _motivationalMessages;
+  String _currentMessage = '';
+  final Random _random = Random();
+  Timer? _timer;
 
-  String _backgroundTheme = 'tree'; // 'hawkins', 'tree'
-
-  List<Activity> _allActivities = Activity.activities;
+  // Lista de mensagens motivacionais (você pode modificar depois)
+  final List<String> _messages = [
+    "✨ Pequenos passos todos os dias levam a grandes mudanças",
+    "🌟 Você está mais perto do que imagina",
+    "💪 Acredite no seu potencial",
+    "🎯 Foco no processo, não apenas no resultado",
+    "🌱 Cada prática é uma semente para o futuro",
+    "🔥 Seu eu do futuro vai agradecer",
+    "⚡ Um minuto de ação vale mais que horas de planejamento",
+    "🌈 A jornada é tão importante quanto o destino",
+    "🍃 Respire, concentre-se e siga em frente",
+    "⭐ Você é capaz de coisas incríveis",
+    "🎨 Crie momentos de presença hoje",
+    "💙 Cuide de você como cuidaria de um amigo",
+  ];
 
   @override
   void initState() {
     super.initState();
-    _loadCustomActivities();
+    _motivationalMessages = List.from(_messages);
+    _updateMessage();
+    // Muda a mensagem a cada 10 segundos
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) _updateMessage();
+    });
   }
 
-  Future<void> _loadCustomActivities() async {
-    final activities = await CustomActivitiesManager.loadActivities();
-    if (mounted) {
-      setState(() {
-        _allActivities = activities;
-      });
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _updateMessage() {
+    setState(() {
+      _currentMessage =
+          _motivationalMessages[_random.nextInt(_motivationalMessages.length)];
+    });
+  }
+
+  // Calcula a área de maior equilíbrio baseada nos logs
+  String _getDominantArea() {
+    int body = 0, mind = 0, spirit = 0;
+
+    for (var log in widget.activityLogs) {
+      // Verifica se é de hoje
+      if (log.timestamp.day == DateTime.now().day &&
+          log.timestamp.month == DateTime.now().month &&
+          log.timestamp.year == DateTime.now().year) {
+        // Classifica por tipo
+        if (log.organ == 'Corpo/Mente' ||
+            log.group == 'Saúde' ||
+            log.group == 'Exercício') {
+          body++;
+        } else if (log.group == 'Trabalho' ||
+            log.group == 'Aprendizado' ||
+            log.group == 'Estudo') {
+          mind++;
+        } else if (log.group == 'Espiritualidade' ||
+            log.group == 'Autocuidado' ||
+            log.group == 'Meditação') {
+          spirit++;
+        }
+      }
     }
-  }
 
-  // Lista organizada: Passiva primeiro, Ativa depois
-  List<Activity> get _organizedActivities {
-    final passivas =
-        _allActivities.where((a) => a.energy == 'Passiva').toList();
-    final ativas = _allActivities.where((a) => a.energy == 'Ativa').toList();
-    return [...passivas, ...ativas];
-  }
+    final total = body + mind + spirit;
+    if (total == 0) return 'Mental 70%'; // Valor padrão
 
-  // Cor do botão baseada na energia
-  Color _getCategoryColor(Activity activity) {
-    if (_selectedActivity == activity) {
-      return HawkinsColors.energyColors[activity.energy] ?? Colors.grey;
-    }
-    // Cor suave baseada na energia mesmo quando não selecionado
-    final baseColor =
-        HawkinsColors.energyColors[activity.energy] ?? Colors.grey;
-    return baseColor.withOpacity(0.08);
-  }
-
-  Color _getCategoryTextColor(Activity activity) {
-    if (_selectedActivity == activity) {
-      return Colors.white;
-    }
-    return HawkinsColors.energyColors[activity.energy] ?? Colors.grey[600]!;
-  }
-
-  Color _getCategoryBorderColor(Activity activity) {
-    if (_selectedActivity == activity) {
-      return HawkinsColors.energyColors[activity.energy] ?? Colors.grey;
-    }
-    final baseColor =
-        HawkinsColors.energyColors[activity.energy] ?? Colors.grey;
-    return baseColor.withOpacity(0.2);
-  }
-
-  void _startActivity() async {
-    if (_selectedActivity != null && _selectedExample != null) {
-      final result = await Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => TimerScreen(
-            group: _selectedActivity!.group,
-            example: _selectedExample!,
-            energy: _selectedActivity!.energy,
-            flow: _selectedActivity!.flow,
-            organ: _selectedActivity!.organ,
-          ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-        ),
-      );
-
-      widget.onStartActivity(result);
+    if (body >= mind && body >= spirit) {
+      final percent = ((body / total) * 100).round();
+      return 'Corpo ${percent}%';
+    } else if (mind >= body && mind >= spirit) {
+      final percent = ((mind / total) * 100).round();
+      return 'Mental ${percent}%';
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _selectedActivity == null
-                ? 'Selecione uma categoria!'
-                : 'Escolha um exemplo!',
-          ),
-          backgroundColor: Colors.orange[700],
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      final percent = ((spirit / total) * 100).round();
+      return 'Espírito ${percent}%';
     }
   }
 
-  Color _getEnergyColor() {
-    final practice = _selectedPractice;
-    if (practice == null) return Colors.grey[400]!;
-    return HawkinsColors.energyColors[practice.energy] ?? Colors.grey;
+  // Conta práticas de hoje
+  int _getTodayPracticesCount() {
+    return widget.activityLogs
+        .where((log) =>
+            log.timestamp.day == DateTime.now().day &&
+            log.timestamp.month == DateTime.now().month &&
+            log.timestamp.year == DateTime.now().year)
+        .length;
   }
 
-  Color _getFlowColor() {
-    final practice = _selectedPractice;
-    if (practice == null) return Colors.grey[400]!;
-    return HawkinsColors.flowGradient[practice.flow] ?? Colors.grey;
-  }
+  // Distribuição de dificuldade
+  Map<String, int> _getDifficultyDistribution() {
+    Map<String, int> distribution = {'Fácil': 0, 'Médio': 0, 'Difícil': 0};
 
-  Color _getOrganColor() {
-    final practice = _selectedPractice;
-    if (practice == null) return Colors.grey[400]!;
-    return HawkinsColors.organGradients[practice.organ]![0];
-  }
-
-  Practice? get _selectedPractice {
-    if (_selectedActivity == null || _selectedExample == null) return null;
-    return _selectedActivity!.practices.firstWhere(
-      (p) => p.name == _selectedExample,
-    );
+    for (var log in widget.activityLogs) {
+      if (log.difficultyFeedback != null) {
+        distribution[log.difficultyFeedback!] =
+            (distribution[log.difficultyFeedback!] ?? 0) + 1;
+      }
+    }
+    return distribution;
   }
 
   @override
   Widget build(BuildContext context) {
+    final todayCount = _getTodayPracticesCount();
+    final dominantArea = _getDominantArea();
+    final distribution = _getDifficultyDistribution();
+    final totalWithFeedback = distribution.values.reduce((a, b) => a + b);
+
     return Scaffold(
-        body: Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF5F9E9),
-            Color(0xFFE8F0D5),
-            Color(0xFFF0F7E6),
-            Color(0xFFD4E8C2),
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            _buildCompactAppBar(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+      backgroundColor: const Color(0xFFF5F9E9),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            // Header com Welcome
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 6),
-
-                    // Bússola + Categorias (com scroll na lista)
-                    Expanded(
-                      flex: 5,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Bússola
-                          Expanded(
-                            flex: 3,
-                            child: Center(
-                              child: CompassWidget(
-                                selectedActivity: _selectedActivity,
-                                isRotating: _isCompassRotating,
-                                backgroundTheme: _backgroundTheme,
-                              ),
+                    // Logo e Welcome
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF6B8E23), Color(0xFF8FBC8F)],
                             ),
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          const SizedBox(width: 6),
-                          // Categorias com scroll
-                          Expanded(
-                            flex: 2,
-                            child: _buildCompactCategories(),
+                          child: const Text(
+                            '🧭',
+                            style: TextStyle(fontSize: 28),
                           ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    // Como Praticar + Dimensões + Botão
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: _buildCompactExamples(),
-                          ),
-                          const SizedBox(height: 4),
-                          Expanded(
-                            flex: 2,
-                            child: _buildCompactDimensions(),
-                          ),
-                          const SizedBox(height: 6),
-                          _buildCompactStartButton(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ));
-  }
-
-  Widget _buildCompactAppBar() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        // Fundo com gradiente orgânico (tons de verde e marrom suave)
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFE8F0D5), // Verde-amarelado claro
-            Color(0xFFF5F9E9), // Verde muito claro
-            Color(0xFFD4E8C2), // Verde médio claro
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFA8C686).withOpacity(0.5), // Verde médio
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color:
-                const Color(0xFF6B8E23).withOpacity(0.1), // Verde oliva suave
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Ícone da árvore no lugar do explorar
-          Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF6B8E23), // Verde oliva
-                  Color(0xFF8B6914), // Marrom ocre
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF6B8E23).withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: const Text('🌳', style: TextStyle(fontSize: 18)),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Bússola Vital',
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF4A5D23), // Verde escuro
-                ),
-              ),
-              Text(
-                '🌿 Conexão com a natureza',
-                style: GoogleFonts.lato(
-                  fontSize: 9,
-                  color: const Color(0xFF6B8E23).withOpacity(0.7),
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_rounded,
-                color: Color(0xFF4A5D23), size: 20),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CustomizeScreen(
-                    onActivitiesChanged: () {
-                      // Recarrega a lista de atividades
-                      _loadCustomActivities();
-                    },
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactCategories() {
-    final activities = _organizedActivities;
-
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Cabeçalho fixo
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 4),
-            child: Row(
-              children: [
-                Icon(Icons.category_rounded,
-                    size: 11,
-                    color: _selectedActivity != null
-                        ? const Color(0xFF6B8E23)
-                        : Colors.grey[400]),
-                const SizedBox(width: 3),
-                Text('CATEGORIAS',
-                    style: GoogleFonts.lato(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.grey[500],
-                        letterSpacing: 1.5)),
-                const Spacer(),
-                Text('${activities.length}',
-                    style: GoogleFonts.lato(
-                        fontSize: 8,
-                        color: Colors.grey[400],
-                        fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-
-          // Legenda compacta
-          Row(
-            children: [
-              _buildLegendDot(const Color(0xFF4ECDC4)),
-              const SizedBox(width: 2),
-              Text('P',
-                  style:
-                      GoogleFonts.lato(fontSize: 7, color: Colors.grey[400])),
-              const SizedBox(width: 6),
-              _buildLegendDot(const Color(0xFFFF6B35)),
-              const SizedBox(width: 2),
-              Text('A',
-                  style:
-                      GoogleFonts.lato(fontSize: 7, color: Colors.grey[400])),
-            ],
-          ),
-
-          const SizedBox(height: 2),
-
-          // Divisor
-          Container(height: 0.5, color: Colors.grey[300]),
-
-          const SizedBox(height: 2),
-
-          // Lista SCROLLABLE
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: activities.length,
-              itemBuilder: (context, index) {
-                final activity = activities[index];
-                final isSelected = _selectedActivity == activity;
-                final bgColor = _getCategoryColor(activity);
-                final textColor = _getCategoryTextColor(activity);
-                final borderColor = _getCategoryBorderColor(activity);
-                final energyIcon = activity.energy == 'Ativa' ? '⚡' : '🍃';
-
-                // Mostra divisor entre passiva e ativa
-                final showDivider = index > 0 &&
-                    activities[index].energy != activities[index - 1].energy;
-
-                return Column(
-                  children: [
-                    if (showDivider)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 2, horizontal: 4),
-                        child: Container(height: 0.5, color: Colors.grey[300]),
-                      ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedActivity = activity;
-                          _selectedExample = null;
-                          _isCompassRotating = true;
-                        });
-                        Future.delayed(const Duration(seconds: 2), () {
-                          if (mounted)
-                            setState(() => _isCompassRotating = false);
-                        });
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.only(bottom: 2),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: bgColor,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: borderColor,
-                              width: isSelected ? 1.5 : 0.8),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                      color: borderColor.withOpacity(0.3),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2))
-                                ]
-                              : [],
                         ),
-                        child: Row(
-                          children: [
-                            Text(energyIcon,
-                                style: const TextStyle(fontSize: 10)),
-                            const SizedBox(width: 3),
-                            Expanded(
-                              child: Text(
-                                activity.group,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Bem-vindo(a) de volta!',
                                 style: GoogleFonts.lato(
-                                    color: textColor,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.w600,
-                                    fontSize: 9),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
                               ),
-                            ),
-                            if (isSelected)
-                              Icon(Icons.check_circle_rounded,
-                                  size: 12, color: textColor),
-                          ],
+                              Text(
+                                _getGreeting(),
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegendDot(Color color) {
-    return Container(
-      width: 5,
-      height: 5,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-    );
-  }
-
-  // COMO PRATICAR - sempre visível
-  Widget _buildCompactExamples() {
-    final hasActivity = _selectedActivity != null;
-    final color = _getFlowColor();
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      width: double.infinity,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _selectedExample != null
-              ? color.withOpacity(0.5)
-              : Colors.white.withOpacity(0.5),
-        ),
-        boxShadow: _selectedExample != null
-            ? [
-                BoxShadow(
-                    color: color.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4))
-              ]
-            : [],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            Icon(Icons.auto_awesome_rounded,
-                size: 12,
-                color: _selectedExample != null ? color : Colors.grey[400]),
-            const SizedBox(width: 4),
-            Text('COMO PRATICAR?',
-                style: GoogleFonts.lato(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.grey[500],
-                    letterSpacing: 1.5)),
-          ]),
-          const SizedBox(height: 6),
-          Expanded(
-            child: hasActivity
-                ? SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _selectedActivity!.practices.map((practice) {
-                        final isSelected = _selectedExample == practice.name;
-                        // Cada prática tem sua própria cor
-                        final practiceColor =
-                            HawkinsColors.energyColors[practice.energy] ??
-                                Colors.grey;
-
-                        return GestureDetector(
-                          onTap: () =>
-                              setState(() => _selectedExample = practice.name),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? practiceColor.withOpacity(0.15)
-                                  : Colors.white.withOpacity(0.4),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: isSelected
-                                      ? practiceColor
-                                      : Colors.white.withOpacity(0.6),
-                                  width: isSelected ? 1.5 : 0.5),
-                            ),
+                    const SizedBox(height: 16),
+                    //////////////////
+                    // GestureDetector(
+                    //   onTap: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (_) => OnboardingScreen(
+                    //           onComplete: () {
+                    //             Navigator.pop(context);
+                    //           },
+                    //         ),
+                    //       ),
+                    //     );
+                    //   },
+                    //   child: Container(
+                    //     padding: const EdgeInsets.all(8),
+                    //     decoration: BoxDecoration(
+                    //       color: const Color(0xFF8B6914).withOpacity(0.1),
+                    //       borderRadius: BorderRadius.circular(10),
+                    //     ),
+                    //     child: const Icon(Icons.replay_rounded,
+                    //         color: Color(0xFF8B6914), size: 18),
+                    //   ),
+                    // ),
+                    //////////////////
+                    // Card de equilíbrio
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6B8E23), Color(0xFF8FBC8F)],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6B8E23).withOpacity(0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Text(
+                            '⚖️',
+                            style: TextStyle(fontSize: 32),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
                             child: Column(
-                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(practice.name,
-                                    style: GoogleFonts.lato(
-                                        color: isSelected
-                                            ? practiceColor
-                                            : Colors.grey[600],
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.w500,
-                                        fontSize: 12)),
-                                const SizedBox(height: 2),
-                                Row(mainAxisSize: MainAxisSize.min, children: [
-                                  Text(practice.energy == 'Ativa' ? '⚡' : '🍃',
-                                      style: const TextStyle(fontSize: 8)),
-                                  const SizedBox(width: 2),
-                                  _flowDot(practice.flow),
-                                ]),
+                                Text(
+                                  'Equilíbrio hoje',
+                                  style: GoogleFonts.lato(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                Text(
+                                  dominantArea,
+                                  style: GoogleFonts.lato(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ],
+                      ),
                     ),
-                  )
-                : Center(
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.touch_app_rounded,
-                              size: 24, color: Colors.grey[300]),
-                          const SizedBox(height: 4),
-                          Text(
-                              'Escolha uma categoria ao lado\npara ver as opções de prática',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.lato(
-                                  fontSize: 10,
-                                  color: Colors.grey[400],
-                                  height: 1.4)),
-                        ]),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _flowDot(String flow) {
-    Color color;
-    switch (flow) {
-      case 'Fácil':
-        color = const Color(0xFF4CAF50);
-        break;
-      case 'Fácil – Médio':
-        color = const Color(0xFF8BC34A);
-        break;
-      case 'Médio':
-        color = const Color(0xFFFFEB3B);
-        break;
-      case 'Médio – Difícil':
-        color = const Color(0xFFFF9800);
-        break;
-      case 'Difícil':
-        color = const Color(0xFFF44336);
-        break;
-      default:
-        color = Colors.grey;
-    }
-    return Container(
-        width: 6,
-        height: 6,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle));
-  }
+                    const SizedBox(height: 16),
 
-  // DIMENSÕES - sempre visível
-  Widget _buildCompactDimensions() {
-    final practice = _selectedPractice;
-    final hasActivity = _selectedActivity != null;
-    final hasExample = _selectedExample != null;
-
-    final energyColor = _getEnergyColor();
-    final flowColor = _getFlowColor();
-    final organColor = _getOrganColor();
-
-    // Valores da PRÁTICA (não da categoria)
-    final energyValue = practice?.energy ?? '???';
-    final flowValue = practice?.flow ?? '???';
-    final organValue = practice?.organ ?? '???';
-
-    final energyIcon =
-        practice != null ? (practice.energy == 'Ativa' ? '⚡' : '🍃') : '⚡';
-
-    final organIcon = practice != null
-        ? (practice.organ == 'Mente'
-            ? '🧠'
-            : practice.organ == 'Corpo'
-                ? '💪'
-                : '🧘')
-        : '🧠';
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: hasExample
-              ? energyColor.withOpacity(0.5)
-              : Colors.white.withOpacity(0.5),
-        ),
-        boxShadow: hasExample
-            ? [
-                BoxShadow(
-                    color: energyColor.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4))
-              ]
-            : [],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            Icon(Icons.analytics_rounded,
-                size: 12, color: hasExample ? energyColor : Colors.grey[400]),
-            const SizedBox(width: 4),
-            Text('DIMENSÕES',
-                style: GoogleFonts.lato(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.grey[500],
-                    letterSpacing: 1.5)),
-          ]),
-          const SizedBox(height: 6),
-          Expanded(
-            child: hasActivity
-                ? Row(children: [
-                    _buildDimChip(
-                        energyIcon, energyValue, energyColor, hasExample),
-                    const SizedBox(width: 4),
-                    _buildDimChip('🔄', flowValue, flowColor, hasExample),
-                    const SizedBox(width: 4),
-                    _buildDimChip(
-                        organIcon, organValue, organColor, hasExample),
-                  ])
-                : Center(
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildDimChip(
-                              '⚡', 'Energia', Colors.grey[300]!, false),
-                          const SizedBox(width: 4),
-                          _buildDimChip('🔄', 'Flow', Colors.grey[300]!, false),
-                          const SizedBox(width: 4),
-                          _buildDimChip('🧠', 'Foco', Colors.grey[300]!, false),
-                        ]),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDimChip(String icon, String value, Color color, bool active) {
-    return Expanded(
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(
-          color: active
-              ? color.withOpacity(0.1)
-              : Colors.grey[50]!.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: active ? color.withOpacity(0.3) : Colors.grey[200]!,
-            width: active ? 1.5 : 1,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              icon,
-              style: TextStyle(
-                fontSize: active ? 20 : 16,
+                    // Cards de estatísticas
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _statCard(
+                            '📊',
+                            '$todayCount',
+                            'práticas hoje',
+                            const Color(0xFF6B8E23),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _statCard(
+                            '🏆',
+                            '${widget.activityLogs.length}',
+                            'total práticas',
+                            Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: GoogleFonts.lato(
-                fontSize: 9,
-                fontWeight: active ? FontWeight.bold : FontWeight.w500,
-                color: active ? color : Colors.grey[400],
+
+            // Mensagem motivacional
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[200]!),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Text('💭', style: TextStyle(fontSize: 28)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _currentMessage,
+                        style: GoogleFonts.lato(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
             ),
+
+            // Seção de dificuldade
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Níveis de Flow',
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Row(
+                        children: [
+                          _difficultyItem(
+                              '🌊',
+                              'Fácil',
+                              totalWithFeedback > 0
+                                  ? (distribution['Fácil']! /
+                                          totalWithFeedback *
+                                          100)
+                                      .round()
+                                  : 0,
+                              Colors.green),
+                          const SizedBox(width: 8),
+                          _difficultyItem(
+                              '⚡',
+                              'Médio',
+                              totalWithFeedback > 0
+                                  ? (distribution['Médio']! /
+                                          totalWithFeedback *
+                                          100)
+                                      .round()
+                                  : 0,
+                              Colors.orange),
+                          const SizedBox(width: 8),
+                          _difficultyItem(
+                              '🔥',
+                              'Difícil',
+                              totalWithFeedback > 0
+                                  ? (distribution['Difícil']! /
+                                          totalWithFeedback *
+                                          100)
+                                      .round()
+                                  : 0,
+                              Colors.red),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+            // Botões de ação
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _actionButton(
+                      '✨ Explorar Práticas',
+                      'Descubra novas atividades',
+                      Icons.explore,
+                      widget.onExplore,
+                      const Color(0xFF6B8E23),
+                    ),
+                    const SizedBox(height: 12),
+                    _actionButton(
+                      '⚡ Agir Agora',
+                      'Sugestões personalizadas para você',
+                      Icons.flash_on,
+                      widget.onActNow,
+                      Colors.orange,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCompactStartButton() {
-    final isEnabled = _selectedActivity != null && _selectedExample != null;
-    final energyColor = _getEnergyColor();
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Bom dia! 🌅';
+    if (hour < 18) return 'Boa tarde! 🌞';
+    return 'Boa noite! 🌙';
+  }
 
+  Widget _statCard(String emoji, String value, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: GoogleFonts.lato(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.lato(
+              fontSize: 11,
+              color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _difficultyItem(String emoji, String label, int percent, Color color) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(height: 4),
+          Text(
+            '$percent%',
+            style: GoogleFonts.lato(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.lato(
+              fontSize: 11,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionButton(String title, String subtitle, IconData icon,
+      VoidCallback onTap, Color color) {
     return GestureDetector(
-      onTap: isEnabled ? _startActivity : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: isEnabled
-              ? LinearGradient(
-                  colors: [energyColor, _getFlowColor()],
-                )
-              : LinearGradient(
-                  colors: [Colors.grey[300]!, Colors.grey[350]!],
-                ),
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: isEnabled
-              ? [
-                  BoxShadow(
-                    color: energyColor.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 6),
-                  ),
-                ]
-              : [],
+          gradient: LinearGradient(
+            colors: [color.withOpacity(0.1), Colors.white],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.play_arrow_rounded,
-              color: isEnabled ? Colors.white : Colors.grey[400],
-              size: 24,
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient:
+                    LinearGradient(colors: [color, color.withOpacity(0.7)]),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
             ),
-            const SizedBox(width: 6),
-            Text(
-              'INICIAR',
-              style: GoogleFonts.lato(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isEnabled ? Colors.white : Colors.grey[400],
-                letterSpacing: 2,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.lato(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.lato(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
             ),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
           ],
         ),
       ),
