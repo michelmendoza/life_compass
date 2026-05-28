@@ -8,6 +8,7 @@ import 'screens/history_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/smart_compass_screen.dart';
 import 'screens/conscious_action_screen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'models/activity_log.dart';
 
@@ -222,8 +223,8 @@ class _MainNavigatorState extends State<MainNavigator> {
             label: 'Início',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.compass_calibration),
-            label: 'Bússola',
+            icon: Icon(Icons.local_florist),
+            label: 'Match',
           ),
           BottomNavigationBarItem(
             icon: SizedBox.shrink(),

@@ -369,6 +369,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // ========== BUILD PRINCIPAL ==========
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -389,58 +390,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               _buildHeader(),
               Expanded(
-                child: _filteredLogs.isEmpty
-                    ? _buildEmptyState()
-                    : SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _buildPeriodSelector(),
+                      const SizedBox(height: 20),
+                      if (_filteredLogs.isEmpty)
+                        _buildEmptyState()
+                      else ...[
+                        _buildHeroStatsCard(),
+                        const SizedBox(height: 16),
+                        _buildSmartSuggestion(),
+                        const SizedBox(height: 16),
+                        _buildEquilibrioCard(),
+                        const SizedBox(height: 16),
+                        _buildConsciousnessCard(),
+                        const SizedBox(height: 16),
+                        _buildFlowVsChallengeCard(),
+                        const SizedBox(height: 16),
+                        _buildEnergyBalanceCard(),
+                        const SizedBox(height: 16),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildPeriodSelector(),
-                            const SizedBox(height: 20),
-                            _buildHeroStatsCard(),
-                            const SizedBox(height: 16),
-                            _buildSmartSuggestion(),
-                            const SizedBox(height: 16),
-                            _buildEquilibrioCard(),
-                            const SizedBox(height: 16),
-                            _buildConsciousnessCard(),
-                            const SizedBox(height: 16),
-                            _buildFlowVsChallengeCard(),
-                            const SizedBox(height: 16),
-                            _buildEnergyBalanceCard(),
-                            const SizedBox(height: 16),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: _buildFlowDistributionCard(),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildChallengeIndexCard(),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: _buildOrganBalanceCard(),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildCategoriesCard(),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _buildRecentActivitiesCard(),
-                            const SizedBox(height: 20),
+                            Expanded(child: _buildFlowDistributionCard()),
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildChallengeIndexCard()),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _buildOrganBalanceCard()),
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildCategoriesCard()),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildRecentActivitiesCard(),
+                      ],
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -1809,48 +1804,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // ========== ESTADO VAZIO ==========
   Widget _buildEmptyState() {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(40),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.5),
-                border:
-                    Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
-              ),
-              child: Icon(
-                Icons.dashboard_rounded,
-                size: 70,
-                color: Colors.grey[400],
-              ),
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.7),
+              border:
+                  Border.all(color: const Color(0xFFA8C686).withOpacity(0.4)),
             ),
-            const SizedBox(height: 28),
-            Text(
-              'Nenhum dado ainda',
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
-              ),
+            child: Icon(
+              Icons.dashboard_rounded,
+              size: 50,
+              color: Colors.grey[400],
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Inicie uma atividade na Bússola\npara ver suas métricas aqui',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.lato(
-                fontSize: 15,
-                color: Colors.grey[500],
-                height: 1.4,
-              ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Nenhuma atividade neste período',
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
             ),
-            const SizedBox(height: 40),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Altere o período ou inicie uma atividade\nna Bússola para ver suas métricas',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lato(
+              fontSize: 13,
+              color: Colors.grey[500],
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }
