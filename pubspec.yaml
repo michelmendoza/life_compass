@@ -17,8 +17,8 @@ dependencies:
   flutter_neumorphic: ^3.2.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  path_provider: ^2.1.1
-
+  path_provider: ^2.1.1 
+  share_plus: ^13.1.0
 
   
 dev_dependencies:
@@ -42,3 +42,8 @@ flutter_launcher_icons:
   image_path: "assets/icon/app_icon.png"
   adaptive_icon_background: "#6B8E23"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+
+fonts:
+  - family: NotoSans
+    fonts:
+      - asset: assets/fonts/NotoSans-Regular.ttf

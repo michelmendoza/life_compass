@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/activity_log.dart';
 import '../data/colors.dart';
 
@@ -24,6 +25,8 @@ class TimerScreen extends StatefulWidget {
   State<TimerScreen> createState() => _TimerScreenState();
 }
 
+enum TimerMode { chronometer, pomodoro, manual, hiit }
+
 class _TimerScreenState extends State<TimerScreen>
     with TickerProviderStateMixin {
   Timer? _timer;
@@ -31,19 +34,31 @@ class _TimerScreenState extends State<TimerScreen>
   DateTime? _startTime;
   bool _isRunning = false;
 
-  bool _isPomodoroMode = false;
+  // Modo atual
+  TimerMode _currentMode = TimerMode.chronometer;
+
+  // Pomodoro
   Duration _pomodoroDuration = const Duration(minutes: 25);
   Duration _pomodoroRemaining = const Duration(minutes: 25);
   bool _isPomodoroRunning = false;
   bool _isBreak = false;
 
-  final _hoursController = TextEditingController();
-  final _minutesController = TextEditingController();
-  bool _showManualInput = false;
+  // Manual
+  int _manualHours = 0;
+  int _manualMinutes = 0;
+
+  // HIIT
+  List<HiitInterval> _hiitIntervals = [];
+  int _currentIntervalIndex = 0;
+  bool _isHiitRunning = false;
+  Duration _hiitRemaining = Duration.zero;
 
   late AnimationController _pulseController;
   late AnimationController _progressAnimationController;
   double _animatedProgress = 0;
+
+  // Dados para tela de conclusão
+  Duration? _completionDuration;
 
   @override
   void initState() {
@@ -62,6 +77,59 @@ class _TimerScreenState extends State<TimerScreen>
         _animatedProgress = _progressAnimationController.value;
       });
     });
+
+    _initDefaultHiit();
+  }
+
+  void _initDefaultHiit() {
+    _hiitIntervals = [
+      HiitInterval(
+          name: 'Aquecimento',
+          duration: const Duration(seconds: 30),
+          color: Colors.green,
+          icon: '🔥'),
+      HiitInterval(
+          name: 'Exercício',
+          duration: const Duration(seconds: 20),
+          color: Colors.red,
+          icon: '💪'),
+      HiitInterval(
+          name: 'Descanso',
+          duration: const Duration(seconds: 10),
+          color: Colors.blue,
+          icon: '😮‍💨'),
+      HiitInterval(
+          name: 'Exercício',
+          duration: const Duration(seconds: 20),
+          color: Colors.red,
+          icon: '💪'),
+      HiitInterval(
+          name: 'Descanso',
+          duration: const Duration(seconds: 10),
+          color: Colors.blue,
+          icon: '😮‍💨'),
+      HiitInterval(
+          name: 'Exercício',
+          duration: const Duration(seconds: 20),
+          color: Colors.red,
+          icon: '💪'),
+      HiitInterval(
+          name: 'Descanso',
+          duration: const Duration(seconds: 10),
+          color: Colors.blue,
+          icon: '😮‍💨'),
+      HiitInterval(
+          name: 'Exercício',
+          duration: const Duration(seconds: 20),
+          color: Colors.red,
+          icon: '💪'),
+      HiitInterval(
+          name: 'Resfriamento',
+          duration: const Duration(seconds: 30),
+          color: Colors.green,
+          icon: '🧘'),
+    ];
+    _hiitRemaining = _hiitIntervals[0].duration;
   }
 
   Color get _energyColor =>
@@ -69,7 +137,6 @@ class _TimerScreenState extends State<TimerScreen>
   Color get _flowColor =>
       HawkinsColors.flowGradient[widget.flow] ?? Colors.grey;
 
-  // Progresso para o cronômetro (progressivo)
   double get _chronometerProgress {
     if (!_isRunning || _elapsed.inSeconds == 0) return 0;
     const maxDisplaySeconds = 3600;
@@ -78,15 +145,45 @@ class _TimerScreenState extends State<TimerScreen>
     return progress.clamp(0.0, 1.0);
   }
 
-  // Progresso para o Pomodoro (regressivo)
   double get _pomodoroProgress {
     if (_pomodoroDuration.inSeconds == 0) return 0;
     return (_pomodoroRemaining.inSeconds / _pomodoroDuration.inSeconds)
         .clamp(0.0, 1.0);
   }
 
-  double get _currentProgress =>
-      _isPomodoroMode ? _pomodoroProgress : _chronometerProgress;
+  double get _hiitProgress {
+    if (_hiitIntervals.isEmpty) return 0;
+    final totalDuration = _hiitIntervals.fold(
+        Duration.zero, (sum, interval) => sum + interval.duration);
+    final elapsed = totalDuration - _hiitRemaining;
+    return (elapsed.inSeconds / totalDuration.inSeconds).clamp(0.0, 1.0);
+  }
+
+  double get _currentProgress {
+    switch (_currentMode) {
+      case TimerMode.chronometer:
+        return _chronometerProgress;
+      case TimerMode.pomodoro:
+        return _pomodoroProgress;
+      case TimerMode.hiit:
+        return _hiitProgress;
+      default:
+        return 0;
+    }
+  }
+
+  Duration get _currentDuration {
+    switch (_currentMode) {
+      case TimerMode.chronometer:
+        return _elapsed;
+      case TimerMode.pomodoro:
+        return _pomodoroRemaining;
+      case TimerMode.hiit:
+        return _hiitRemaining;
+      default:
+        return Duration.zero;
+    }
+  }
 
   void _animateProgress() {
     _progressAnimationController.animateTo(
@@ -96,12 +193,11 @@ class _TimerScreenState extends State<TimerScreen>
     );
   }
 
-  // ========== TIMER ==========
+  // ========== CRONÔMETRO ==========
   void _startTimer() {
     setState(() {
       _isRunning = true;
       _startTime = DateTime.now().subtract(_elapsed);
-      _showManualInput = false;
     });
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
@@ -120,7 +216,8 @@ class _TimerScreenState extends State<TimerScreen>
 
   void _stopTimer() {
     _timer?.cancel();
-    _showFeedback(_elapsed);
+    _completionDuration = _elapsed;
+    _showCompletionScreen();
   }
 
   // ========== POMODORO ==========
@@ -131,7 +228,6 @@ class _TimerScreenState extends State<TimerScreen>
     }
     setState(() {
       _isPomodoroRunning = true;
-      _showManualInput = false;
     });
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
@@ -157,7 +253,8 @@ class _TimerScreenState extends State<TimerScreen>
     setState(() {
       _isPomodoroRunning = false;
     });
-    _showFeedback(_pomodoroDuration);
+    _completionDuration = _pomodoroDuration;
+    _showCompletionScreen();
   }
 
   void _resetPomodoro() {
@@ -181,7 +278,7 @@ class _TimerScreenState extends State<TimerScreen>
     });
   }
 
-  void _iniciarPausa(int minutes) {
+  void _startBreak(int minutes) {
     _timer?.cancel();
     setState(() {
       _isBreak = true;
@@ -195,360 +292,222 @@ class _TimerScreenState extends State<TimerScreen>
   void _stopPomodoroAndSave() {
     _timer?.cancel();
     final completed = _pomodoroDuration - _pomodoroRemaining;
-    if (completed.inSeconds > 0) _showFeedback(completed);
+    if (completed.inSeconds > 0) {
+      _completionDuration = completed;
+      _showCompletionScreen();
+    }
   }
 
-  // ========== FEEDBACK PÓS-ATIVIDADE ==========
-  int? _consciousnessLevel; // null = não selecionado
-  int? _difficultyLevel; // null = não selecionado
-
-  void _showFeedback(Duration duration) {
-    // Resetar valores para null (sem feedback)
-    _consciousnessLevel = null;
-    _difficultyLevel = null;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) {
-        // Estado local do modal - fora do builder do StatefulBuilder
-        int? localConsciousness;
-        int? localDifficulty;
-
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Como foi?',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${_isBreak ? '☕ Pausa' : widget.group} · ${_formatDurationShort(duration)}',
-                    style:
-                        GoogleFonts.lato(fontSize: 13, color: Colors.grey[500]),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Pergunta 1: Consciência
-                  Text(
-                    'Como você se sentiu? (opcional)',
-                    style: GoogleFonts.lato(
-                        fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _feedbackOptionModal(
-                        setModalState,
-                        '😴',
-                        'Automático',
-                        0,
-                        localConsciousness,
-                        (value) {
-                          setModalState(() {
-                            localConsciousness = value;
-                          });
-                        },
-                      ),
-                      _feedbackOptionModal(
-                        setModalState,
-                        '😐',
-                        'Presente',
-                        1,
-                        localConsciousness,
-                        (value) {
-                          setModalState(() {
-                            localConsciousness = value;
-                          });
-                        },
-                      ),
-                      _feedbackOptionModal(
-                        setModalState,
-                        '🔥',
-                        'Focado',
-                        2,
-                        localConsciousness,
-                        (value) {
-                          setModalState(() {
-                            localConsciousness = value;
-                          });
-                        },
-                      ),
-                      _feedbackOptionModal(
-                        setModalState,
-                        '✨',
-                        'Fluindo',
-                        3,
-                        localConsciousness,
-                        (value) {
-                          setModalState(() {
-                            localConsciousness = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Pergunta 2: Dificuldade
-                  Text(
-                    'Como foi a dificuldade? (opcional)',
-                    style: GoogleFonts.lato(
-                        fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _feedbackOptionModal(
-                        setModalState,
-                        '🌊',
-                        'Fácil',
-                        0,
-                        localDifficulty,
-                        (value) {
-                          setModalState(() {
-                            localDifficulty = value;
-                          });
-                        },
-                        isDifficulty: true,
-                      ),
-                      _feedbackOptionModal(
-                        setModalState,
-                        '⚡',
-                        'Médio',
-                        1,
-                        localDifficulty,
-                        (value) {
-                          setModalState(() {
-                            localDifficulty = value;
-                          });
-                        },
-                        isDifficulty: true,
-                      ),
-                      _feedbackOptionModal(
-                        setModalState,
-                        '🔥',
-                        'Difícil',
-                        2,
-                        localDifficulty,
-                        (value) {
-                          setModalState(() {
-                            localDifficulty = value;
-                          });
-                        },
-                        isDifficulty: true,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Botões
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            // PULAR - salvar SEM feedback
-                            _consciousnessLevel = null;
-                            _difficultyLevel = null;
-                            Navigator.pop(ctx);
-                            _saveLog(duration);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Text(
-                              'PULAR',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.lato(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            // SALVAR - só salva se selecionou algo
-                            _consciousnessLevel = localConsciousness;
-                            _difficultyLevel = localDifficulty;
-                            Navigator.pop(ctx);
-                            _saveLog(duration);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [_energyColor, _flowColor],
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Text(
-                              'SALVAR',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.lato(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Opcional: sua resposta ajuda a personalizar futuras sugestões',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.lato(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _feedbackOptionModal(
-    StateSetter setModalState,
-    String emoji,
-    String label,
-    int value,
-    int? current,
-    Function(int?) onSelected, {
-    bool isDifficulty = false,
-  }) {
-    final isSelected = current == value;
-    return GestureDetector(
-      onTap: () {
-        // Se clicar no mesmo item, desmarca
-        if (current == value) {
-          onSelected(null);
-        } else {
-          onSelected(value);
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? _energyColor.withOpacity(0.1) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? _energyColor : Colors.grey[200]!,
-            width: isSelected ? 2 : 1,
-          ),
+  // ========== MANUAL ==========
+  void _saveManualTime() {
+    final duration = Duration(hours: _manualHours, minutes: _manualMinutes);
+    if (duration.inSeconds > 0) {
+      _completionDuration = duration;
+      _showCompletionScreen();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Selecione um tempo válido!'),
+          backgroundColor: Colors.orange[700],
+          behavior: SnackBarBehavior.floating,
         ),
-        child: Column(
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: GoogleFonts.lato(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? _energyColor : Colors.grey[600],
-              ),
-            ),
-          ],
+      );
+    }
+  }
+
+  // ========== HIIT ==========
+  void _startHiit() {
+    if (_isHiitRunning) {
+      _pauseHiit();
+      return;
+    }
+
+    if (_hiitRemaining == Duration.zero) {
+      _resetHiit();
+    }
+
+    setState(() {
+      _isHiitRunning = true;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() {
+          if (_hiitRemaining.inSeconds > 0) {
+            _hiitRemaining -= const Duration(seconds: 1);
+            _animateProgress();
+          } else {
+            _nextHiitInterval();
+          }
+        });
+      }
+    });
+  }
+
+  void _nextHiitInterval() {
+    if (_currentIntervalIndex + 1 < _hiitIntervals.length) {
+      setState(() {
+        _currentIntervalIndex++;
+        _hiitRemaining = _hiitIntervals[_currentIntervalIndex].duration;
+      });
+    } else {
+      _completeHiit();
+    }
+  }
+
+  void _completeHiit() {
+    _timer?.cancel();
+    setState(() {
+      _isHiitRunning = false;
+    });
+    final totalDuration = _hiitIntervals.fold(
+        Duration.zero, (sum, interval) => sum + interval.duration);
+    _completionDuration = totalDuration;
+    _showCompletionScreen();
+  }
+
+  void _pauseHiit() {
+    _timer?.cancel();
+    setState(() => _isHiitRunning = false);
+  }
+
+  void _resetHiit() {
+    _timer?.cancel();
+    setState(() {
+      _isHiitRunning = false;
+      _currentIntervalIndex = 0;
+      _hiitRemaining = _hiitIntervals[0].duration;
+      _animateProgress();
+    });
+  }
+
+  // ========== TELA DE CONCLUSÃO SEPARADA ==========
+  void _showCompletionScreen() {
+    // Usar pushReplacement para não acumular telas
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CompletionScreen(
+          group: _isBreak ? 'Pausa Pomodoro' : widget.group,
+          example: _getExampleText(),
+          energy: _isBreak ? 'Passiva' : widget.energy,
+          flow: widget.flow,
+          organ: _isBreak ? 'Corpo/Mente' : widget.organ,
+          duration: _completionDuration!,
+          energyColor: _energyColor,
+          flowColor: _flowColor,
+          onSave: (consciousnessLevel, difficultyStr) {
+            // Salva o log e volta para a tela principal
+            _saveLogAndClose(
+                _completionDuration!, consciousnessLevel, difficultyStr);
+          },
         ),
       ),
     );
   }
 
-  void _saveLog(Duration duration) {
-    // Converte difficultyLevel para String? (pode ser null)
-    String? difficultyStr;
-    if (_difficultyLevel != null) {
-      switch (_difficultyLevel) {
-        case 0:
-          difficultyStr = 'Fácil';
-          break;
-        case 1:
-          difficultyStr = 'Médio';
-          break;
-        case 2:
-          difficultyStr = 'Difícil';
-          break;
-      }
-    }
-
+  void _saveLogAndClose(
+      Duration duration, int? consciousnessLevel, String? difficultyStr) {
     final log = ActivityLog(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       group: _isBreak ? 'Pausa Pomodoro' : widget.group,
-      example: _isBreak
-          ? '☕ ${_pomodoroDuration.inMinutes}min de pausa'
-          : widget.example,
+      example: _getExampleText(), // Agora vai pegar o exemplo correto
       energy: _isBreak ? 'Passiva' : widget.energy,
-      flow: _isBreak ? 'Fácil' : (difficultyStr ?? widget.flow),
+      flow: difficultyStr ?? widget.flow,
       organ: _isBreak ? 'Corpo/Mente' : widget.organ,
       duration: duration,
       timestamp: DateTime.now(),
-      consciousnessLevel: _consciousnessLevel, // Pode ser null
-      difficultyFeedback: difficultyStr, // Pode ser null
+      consciousnessLevel: consciousnessLevel,
+      difficultyFeedback: difficultyStr,
     );
 
     print('=== LOG SALVO ===');
-    print(
-        'Consciousness Level: ${_consciousnessLevel ?? "null (sem feedback)"}');
-    print('Difficulty Feedback: ${difficultyStr ?? "null (sem feedback)"}');
-    print('Flow usado: ${log.flow}');
+    print('Group: ${log.group}');
+    print('Example: ${log.example}');
+    print('Duration: ${log.duration.inMinutes} min');
+    print('Consciousness: ${consciousnessLevel ?? "null"}');
+    print('Difficulty: ${difficultyStr ?? "null"}');
+    print('ID: ${log.id}');
+    print('Timestamp: ${log.timestamp}');
     print('================');
 
-    if (mounted) Navigator.pop(context, log);
+    // Volta para a tela anterior (TimerScreen) com o log
+    Navigator.pop(context, log);
+
+    // Também fecha a TimerScreen e volta para o Dashboard com o log
+    Future.delayed(Duration(milliseconds: 50), () {
+      if (mounted) {
+        Navigator.pop(context, log);
+      }
+    });
+
+    // Volta diretamente para o Dashboard com o log (apenas um pop)
+    // Navigator.popUntil(context, (route) => route.isFirst);
+    // Navigator.pop(context, log);
   }
 
-  void _saveManualTime() {
-    final hours = int.tryParse(_hoursController.text) ?? 0;
-    final minutes = int.tryParse(_minutesController.text) ?? 0;
-    final duration = Duration(hours: hours, minutes: minutes);
-    if (duration.inSeconds > 0)
-      _showFeedback(duration);
-    else
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text('Insira um tempo válido!'),
-          backgroundColor: Colors.orange[700],
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))));
+  String _getExampleText() {
+    switch (_currentMode) {
+      case TimerMode.chronometer:
+        return widget.example; // Mantém o exemplo original
+      case TimerMode.pomodoro:
+        return _isBreak
+            ? '☕ Pausa de ${_pomodoroDuration.inMinutes}min'
+            : widget.example; // Mantém o exemplo original no foco
+      case TimerMode.manual:
+        // Para modo manual, mostra a prática original + " (registro manual)"
+        return '${widget.example} (registro manual)';
+      case TimerMode.hiit:
+        return '🏃‍♂️ ${widget.example} - HIIT'; // Mostra a prática + HIIT
+    }
+  }
+
+  void _resetAfterCompletion() {
+    switch (_currentMode) {
+      case TimerMode.chronometer:
+        setState(() {
+          _elapsed = Duration.zero;
+          _isRunning = false;
+        });
+        break;
+      case TimerMode.pomodoro:
+        _resetPomodoro();
+        break;
+      case TimerMode.hiit:
+        _resetHiit();
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _saveLog(
+      Duration duration, int? consciousnessLevel, String? difficultyStr) {
+    final log = ActivityLog(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      group: _isBreak ? 'Pausa Pomodoro' : widget.group,
+      example: _getExampleText(),
+      energy: _isBreak ? 'Passiva' : widget.energy,
+      flow: difficultyStr ?? widget.flow,
+      organ: _isBreak ? 'Corpo/Mente' : widget.organ,
+      duration: duration,
+      timestamp: DateTime.now(),
+      consciousnessLevel: consciousnessLevel,
+      difficultyFeedback: difficultyStr,
+    );
+
+    print('=== LOG SALVO ===');
+    print('Group: ${log.group}');
+    print('Example: ${log.example}');
+    print('Duration: ${log.duration.inMinutes} min');
+    print('Consciousness: ${consciousnessLevel ?? "null"}');
+    print('Difficulty: ${difficultyStr ?? "null"}');
+    print('ID: ${log.id}');
+    print('Timestamp: ${log.timestamp}');
+    print('================');
+
+    // Volta para a tela anterior e passa o log
+    Navigator.pop(context, log);
   }
 
   String _formatDuration(Duration d) {
@@ -574,8 +533,6 @@ class _TimerScreenState extends State<TimerScreen>
     _timer?.cancel();
     _pulseController.dispose();
     _progressAnimationController.dispose();
-    _hoursController.dispose();
-    _minutesController.dispose();
     super.dispose();
   }
 
@@ -599,7 +556,7 @@ class _TimerScreenState extends State<TimerScreen>
             children: [
               _buildAppBar(),
               const SizedBox(height: 8),
-              _buildModeToggle(),
+              _buildModeSelector(),
               const SizedBox(height: 16),
               Expanded(
                 child: Center(
@@ -626,13 +583,6 @@ class _TimerScreenState extends State<TimerScreen>
         color: Colors.white.withOpacity(0.5),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -671,21 +621,19 @@ class _TimerScreenState extends State<TimerScreen>
               ],
             ),
           ),
-          if (_isPomodoroMode)
+          if (_currentMode == TimerMode.pomodoro && _isBreak)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: _isBreak
-                    ? Colors.green.withOpacity(0.15)
-                    : Colors.red.withOpacity(0.15),
+                color: Colors.green.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                _isBreak ? '☕ Pausa' : '🍅 Foco',
+                '☕ Pausa',
                 style: GoogleFonts.lato(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
-                  color: _isBreak ? Colors.green : Colors.red,
+                  color: Colors.green,
                 ),
               ),
             ),
@@ -694,20 +642,169 @@ class _TimerScreenState extends State<TimerScreen>
     );
   }
 
-  // ========== RELÓGIO CIRCULAR COM PULSO E PROGRESSO ==========
+  Widget _buildModeSelector() {
+    if (_isRunning || _isPomodoroRunning || _isHiitRunning) {
+      return const SizedBox();
+    }
+
+    final modes = [
+      (TimerMode.chronometer, 'Cronômetro', Icons.timer_rounded, _energyColor),
+      (TimerMode.pomodoro, 'Pomodoro', Icons.timer_rounded, Colors.red[400]!),
+      (TimerMode.manual, 'Manual', Icons.edit_calendar_rounded, Colors.orange),
+      (TimerMode.hiit, 'HIIT', Icons.fitness_center_rounded, Colors.purple),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: modes.map((mode) {
+          final isSelected = _currentMode == mode.$1;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _currentMode = mode.$1;
+                  if (_currentMode == TimerMode.pomodoro) {
+                    _resetPomodoro();
+                  } else if (_currentMode == TimerMode.hiit) {
+                    _resetHiit();
+                  }
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? mode.$4 : Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? mode.$4 : Colors.white,
+                    width: isSelected ? 1.5 : 0.5,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(mode.$3,
+                        size: 18, color: isSelected ? Colors.white : mode.$4),
+                    const SizedBox(height: 2),
+                    Text(
+                      mode.$2,
+                      style: GoogleFonts.lato(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : mode.$4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildCircularTimer() {
-    final displayDuration = _isPomodoroMode ? _pomodoroRemaining : _elapsed;
-    final primaryColor = _isPomodoroMode
-        ? (_isBreak ? Colors.green : Colors.red[400]!)
-        : _energyColor;
+    // Se for modo manual, mostra o relógio simplificado que criamos
+    if (_currentMode == TimerMode.manual) {
+      final selectedDuration =
+          Duration(hours: _manualHours, minutes: _manualMinutes);
+      final hours = selectedDuration.inHours;
+      final minutes = selectedDuration.inMinutes.remainder(60);
+
+      return Container(
+        width: 280,
+        height: 280,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Círculo de fundo suave
+            Container(
+              width: 280,
+              height: 280,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.4),
+                    Colors.grey.withOpacity(0.05),
+                  ],
+                ),
+              ),
+            ),
+            // Círculo interno branco
+            Container(
+              width: 240,
+              height: 240,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('📝', style: TextStyle(fontSize: 40)),
+                  const SizedBox(height: 16),
+                  Text(
+                    '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:00',
+                    style: GoogleFonts.lato(
+                      fontSize: 42,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tempo selecionado',
+                    style: GoogleFonts.lato(
+                      fontSize: 12,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Código original para os outros modos
+    final displayDuration = _currentDuration;
+    Color primaryColor;
+
+    switch (_currentMode) {
+      case TimerMode.pomodoro:
+        primaryColor = _isBreak ? Colors.green : Colors.red[400]!;
+        break;
+      case TimerMode.hiit:
+        if (_hiitIntervals.isNotEmpty &&
+            _currentIntervalIndex < _hiitIntervals.length) {
+          primaryColor = _hiitIntervals[_currentIntervalIndex].color;
+        } else {
+          primaryColor = Colors.purple;
+        }
+        break;
+      default:
+        primaryColor = _energyColor;
+    }
+
+    final isActive = _isRunning || _isPomodoroRunning || _isHiitRunning;
 
     return AnimatedBuilder(
       animation:
           Listenable.merge([_pulseController, _progressAnimationController]),
       builder: (context, child) {
-        final scale = (_isRunning || _isPomodoroRunning)
-            ? 1.0 + _pulseController.value * 0.02
-            : 1.0;
+        final scale = isActive ? 1.0 + _pulseController.value * 0.02 : 1.0;
 
         return Transform.scale(
           scale: scale,
@@ -717,7 +814,6 @@ class _TimerScreenState extends State<TimerScreen>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Círculo de fundo
                 Container(
                   width: 280,
                   height: 280,
@@ -738,8 +834,6 @@ class _TimerScreenState extends State<TimerScreen>
                     ],
                   ),
                 ),
-
-                // Círculo de progresso
                 SizedBox(
                   width: 280,
                   height: 280,
@@ -750,8 +844,6 @@ class _TimerScreenState extends State<TimerScreen>
                     valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                   ),
                 ),
-
-                // Círculo interno
                 Container(
                   width: 240,
                   height: 240,
@@ -769,10 +861,7 @@ class _TimerScreenState extends State<TimerScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        _isPomodoroMode ? (_isBreak ? '☕' : '🍅') : '🧘',
-                        style: const TextStyle(fontSize: 40),
-                      ),
+                      _buildTimerIcon(),
                       const SizedBox(height: 16),
                       Text(
                         _formatDuration(displayDuration),
@@ -784,32 +873,7 @@ class _TimerScreenState extends State<TimerScreen>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        _isRunning || _isPomodoroRunning
-                            ? (_isPomodoroMode
-                                ? (_isBreak
-                                    ? '⏸️ Pausa em andamento...'
-                                    : '🎯 Focando...')
-                                : '⏱️ Em andamento...')
-                            : '▶️ Pronto para iniciar',
-                        style: GoogleFonts.lato(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                      if (_isPomodoroMode &&
-                          !_isBreak &&
-                          _pomodoroRemaining.inMinutes > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'Meta: ${_pomodoroDuration.inMinutes} min',
-                            style: GoogleFonts.lato(
-                              fontSize: 10,
-                              color: primaryColor.withOpacity(0.7),
-                            ),
-                          ),
-                        ),
+                      _buildTimerSubtitle(),
                     ],
                   ),
                 ),
@@ -821,192 +885,115 @@ class _TimerScreenState extends State<TimerScreen>
     );
   }
 
-  // ========== TOGGLE DE MODO ==========
-  Widget _buildModeToggle() {
-    if (_isRunning || _isPomodoroRunning) return const SizedBox();
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isPomodoroMode = false;
-                  _resetPomodoro();
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: !_isPomodoroMode ? _energyColor : Colors.transparent,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.timer_rounded,
-                        size: 18,
-                        color: !_isPomodoroMode ? Colors.white : _energyColor),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Cronômetro',
-                      style: GoogleFonts.lato(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            !_isPomodoroMode ? Colors.white : Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
+  Widget _buildTimerIcon() {
+    switch (_currentMode) {
+      case TimerMode.chronometer:
+        return const Text('⏱️', style: TextStyle(fontSize: 40));
+      case TimerMode.pomodoro:
+        return Text(_isBreak ? '☕' : '🍅',
+            style: const TextStyle(fontSize: 40));
+      case TimerMode.manual:
+        // Não mostra ícone nenhum ou mostra um ícone minimalista
+        return const SizedBox.shrink(); // Remove o ícone completamente
+      case TimerMode.hiit:
+        if (_hiitIntervals.isNotEmpty &&
+            _currentIntervalIndex < _hiitIntervals.length) {
+          return Column(
+            children: [
+              Text(_hiitIntervals[_currentIntervalIndex].icon,
+                  style: const TextStyle(fontSize: 32)),
+              const SizedBox(height: 4),
+              Text(
+                _hiitIntervals[_currentIntervalIndex].name,
+                style:
+                    GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.bold),
               ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isPomodoroMode = true;
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _isPomodoroMode ? Colors.red[400] : Colors.transparent,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.timer_rounded,
-                        size: 18,
-                        color:
-                            _isPomodoroMode ? Colors.white : Colors.grey[600]),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Pomodoro',
-                      style: GoogleFonts.lato(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            _isPomodoroMode ? Colors.white : Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ========== CONTROLES ==========
-  Widget _buildControls() {
-    if (_isPomodoroMode) {
-      return _buildPomodoroControls();
-    } else {
-      return _buildTimerControls();
+            ],
+          );
+        }
+        return const Text('🏃‍♂️', style: TextStyle(fontSize: 40));
     }
   }
 
-  Widget _buildTimerControls() {
-    return Column(
-      children: [
-        if (!_isRunning && !_showManualInput)
-          Row(
-            children: [
-              Expanded(
-                child: _controlButton(
-                  icon: Icons.play_arrow_rounded,
-                  label: 'INICIAR',
-                  onTap: _startTimer,
-                  isPrimary: true,
-                ),
-              ),
-            ],
-          ),
-        if (_isRunning)
-          Row(
-            children: [
-              Expanded(
-                child: _controlButton(
-                  icon: Icons.pause_rounded,
-                  label: 'PAUSAR',
-                  onTap: _pauseTimer,
-                  color: Colors.orange,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _controlButton(
-                  icon: Icons.stop_rounded,
-                  label: 'FINALIZAR',
-                  onTap: _stopTimer,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-        if (!_isRunning && !_showManualInput)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: GestureDetector(
-              onTap: () => setState(() => _showManualInput = true),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: _energyColor.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: _energyColor.withOpacity(0.15)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.edit_calendar_rounded,
-                        size: 16, color: _energyColor),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Inserir tempo manualmente',
-                      style: GoogleFonts.lato(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: _energyColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+  Widget _buildTimerSubtitle() {
+    final isActive = _isRunning || _isPomodoroRunning || _isHiitRunning;
+
+    if (_currentMode == TimerMode.manual) {
+      return Text(
+        '📝 Selecione o tempo abaixo',
+        style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[500]),
+      );
+    }
+
+    if (_currentMode == TimerMode.hiit && _hiitIntervals.isNotEmpty) {
+      return Text(
+        '${_currentIntervalIndex + 1}/${_hiitIntervals.length} • ${isActive ? "▶️ Em andamento" : "⏸️ Pausado"}',
+        style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[500]),
+      );
+    }
+
+    return Text(
+      isActive ? '▶️ Em andamento...' : '⏸️ Pronto para iniciar',
+      style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[500]),
+    );
+  }
+
+  Widget _buildControls() {
+    switch (_currentMode) {
+      case TimerMode.chronometer:
+        return _buildChronometerControls();
+      case TimerMode.pomodoro:
+        return _buildPomodoroControls();
+      case TimerMode.manual:
+        return _buildManualControls();
+      case TimerMode.hiit:
+        return _buildHiitControls();
+    }
+  }
+
+  Widget _buildChronometerControls() {
+    if (_isRunning) {
+      return Row(
+        children: [
+          Expanded(
+            child: _controlButton(
+              icon: Icons.pause_rounded,
+              label: 'PAUSAR',
+              onTap: _pauseTimer,
+              color: Colors.orange,
             ),
           ),
-        if (_showManualInput) _buildManualInput(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _controlButton(
+              icon: Icons.stop_rounded,
+              label: 'FINALIZAR',
+              onTap: _stopTimer,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: _controlButton(
+            icon: Icons.play_arrow_rounded,
+            label: 'INICIAR',
+            onTap: _startTimer,
+            isPrimary: true,
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildPomodoroControls() {
-    return Column(
-      children: [
-        if (!_isPomodoroRunning) ...[
+    if (!_isPomodoroRunning && _pomodoroRemaining == _pomodoroDuration) {
+      return Column(
+        children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [15, 25, 30, 45].map((min) {
@@ -1022,11 +1009,6 @@ class _TimerScreenState extends State<TimerScreen>
                       color:
                           sel ? Colors.red[400] : Colors.white.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: sel
-                            ? Colors.red[400]!
-                            : Colors.white.withOpacity(0.6),
-                      ),
                     ),
                     child: Text(
                       '${min}min',
@@ -1045,61 +1027,313 @@ class _TimerScreenState extends State<TimerScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _smallPauseButton('☕ 5min', 5, Colors.green),
+              _smallButton('☕ 5min', () => _startBreak(5), Colors.green),
               const SizedBox(width: 8),
-              _smallPauseButton('😴 10min', 10, Colors.teal),
+              _smallButton('😴 10min', () => _startBreak(10), Colors.teal),
             ],
           ),
           const SizedBox(height: 12),
+          _controlButton(
+            icon: Icons.play_arrow_rounded,
+            label: 'INICIAR',
+            onTap: _startPomodoro,
+            isPrimary: true,
+          ),
         ],
-        Row(
-          children: [
-            if (_isPomodoroRunning || _pomodoroRemaining != _pomodoroDuration)
-              Expanded(
-                child: _controlButton(
-                  icon: Icons.refresh_rounded,
-                  label: 'RESET',
-                  onTap: _resetPomodoro,
-                  color: Colors.grey,
-                ),
-              ),
-            if (_isPomodoroRunning || _pomodoroRemaining != _pomodoroDuration)
-              const SizedBox(width: 12),
-            Expanded(
-              flex: 2,
-              child: _controlButton(
-                icon: _isPomodoroRunning
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
-                label: _isPomodoroRunning ? 'PAUSAR' : 'INICIAR',
-                onTap: _startPomodoro,
-                isPrimary: true,
-                color: _isBreak ? Colors.green : Colors.red[400],
-              ),
-            ),
-            if (_pomodoroRemaining != _pomodoroDuration) ...[
-              const SizedBox(width: 12),
-              Expanded(
-                child: _controlButton(
-                  icon: Icons.stop_rounded,
-                  label: 'PARAR',
-                  onTap: _stopPomodoroAndSave,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: _controlButton(
+            icon: Icons.refresh_rounded,
+            label: 'RESET',
+            onTap: _resetPomodoro,
+            color: Colors.grey,
+          ),
         ),
-        if (_isPomodoroRunning)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              _isBreak
-                  ? '☕ Hora de descansar a mente'
-                  : '🍅 Mantenha o foco total',
-              style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500]),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 2,
+          child: _controlButton(
+            icon: _isPomodoroRunning
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
+            label: _isPomodoroRunning ? 'PAUSAR' : 'INICIAR',
+            onTap: _startPomodoro,
+            isPrimary: true,
+            color: _isBreak ? Colors.green : Colors.red[400],
+          ),
+        ),
+        if (_pomodoroRemaining != _pomodoroDuration) ...[
+          const SizedBox(width: 12),
+          Expanded(
+            child: _controlButton(
+              icon: Icons.stop_rounded,
+              label: 'PARAR',
+              onTap: _stopPomodoroAndSave,
+              color: Colors.red,
             ),
           ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildManualControls() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            children: [
+              // Título
+              Text(
+                'Registrar Tempo Manualmente',
+                style: GoogleFonts.lato(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Adicione uma atividade já realizada',
+                style: GoogleFonts.lato(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Horas (linha separada)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.schedule, size: 20, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Horas',
+                      style: GoogleFonts.lato(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        if (_manualHours > 0) {
+                          setState(() => _manualHours--);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _energyColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child:
+                            Icon(Icons.remove, color: _energyColor, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      width: 60,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border:
+                            Border.all(color: _energyColor.withOpacity(0.3)),
+                      ),
+                      child: Text(
+                        _manualHours.toString().padLeft(2, '0'),
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.lato(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: _energyColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () {
+                        if (_manualHours < 24) {
+                          setState(() => _manualHours++);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _energyColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.add, color: _energyColor, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Minutos (linha separada)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.timer, size: 20, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Minutos',
+                      style: GoogleFonts.lato(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        if (_manualMinutes > 0) {
+                          setState(() => _manualMinutes--);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _energyColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child:
+                            Icon(Icons.remove, color: _energyColor, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      width: 60,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border:
+                            Border.all(color: _energyColor.withOpacity(0.3)),
+                      ),
+                      child: Text(
+                        _manualMinutes.toString().padLeft(2, '0'),
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.lato(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: _energyColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () {
+                        if (_manualMinutes < 59) {
+                          setState(() => _manualMinutes++);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _energyColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.add, color: _energyColor, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Botão salvar
+              _controlButton(
+                icon: Icons.save_rounded,
+                label: 'SALVAR REGISTRO',
+                onTap: _saveManualTime,
+                isPrimary: true,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHiitControls() {
+    if (_hiitIntervals.isEmpty) return const SizedBox();
+
+    if (!_isHiitRunning && _hiitRemaining == _hiitIntervals[0].duration) {
+      return Column(
+        children: [
+          _controlButton(
+            icon: Icons.play_arrow_rounded,
+            label: 'INICIAR HIIT',
+            onTap: _startHiit,
+            isPrimary: true,
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: _controlButton(
+            icon: Icons.refresh_rounded,
+            label: 'RESET',
+            onTap: _resetHiit,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 2,
+          child: _controlButton(
+            icon:
+                _isHiitRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
+            label: _isHiitRunning ? 'PAUSAR' : 'INICIAR',
+            onTap: _startHiit,
+            isPrimary: true,
+            color: Colors.purple,
+          ),
+        ),
+        if (_hiitRemaining != _hiitIntervals[0].duration) ...[
+          const SizedBox(width: 12),
+          Expanded(
+            child: _controlButton(
+              icon: Icons.stop_rounded,
+              label: 'PARAR',
+              onTap: _completeHiit,
+              color: Colors.red,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -1159,9 +1393,9 @@ class _TimerScreenState extends State<TimerScreen>
     );
   }
 
-  Widget _smallPauseButton(String label, int minutes, Color color) {
+  Widget _smallButton(String label, VoidCallback onTap, Color color) {
     return GestureDetector(
-      onTap: () => _iniciarPausa(minutes),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -1180,93 +1414,436 @@ class _TimerScreenState extends State<TimerScreen>
       ),
     );
   }
+}
 
-  Widget _buildManualInput() {
-    return Container(
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.5)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Registrar tempo manualmente',
-            style: GoogleFonts.lato(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(child: _timeField(_hoursController, 'Horas')),
-              const SizedBox(width: 10),
-              Expanded(child: _timeField(_minutesController, 'Minutos')),
+class HiitInterval {
+  final String name;
+  final Duration duration;
+  final Color color;
+  final String icon;
+
+  HiitInterval({
+    required this.name,
+    required this.duration,
+    required this.color,
+    this.icon = '💪',
+  });
+}
+
+// TELA DE CONCLUSÃO - VERSÃO COM BOTÕES DO MESMO TAMANHO
+class CompletionScreen extends StatefulWidget {
+  final String group;
+  final String example;
+  final String energy;
+  final String flow;
+  final String organ;
+  final Duration duration;
+  final Color energyColor;
+  final Color flowColor;
+  final Function(int?, String?) onSave;
+
+  const CompletionScreen({
+    super.key,
+    required this.group,
+    required this.example,
+    required this.energy,
+    required this.flow,
+    required this.organ,
+    required this.duration,
+    required this.energyColor,
+    required this.flowColor,
+    required this.onSave,
+  });
+
+  @override
+  State<CompletionScreen> createState() => _CompletionScreenState();
+}
+
+class _CompletionScreenState extends State<CompletionScreen> {
+  int? _consciousnessLevel;
+  int? _difficultyLevel;
+
+  String get _formattedDuration {
+    final d = widget.duration;
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) return '${h}h ${m}min';
+    if (m > 0) return '${m}min ${s}s';
+    return '${s}s';
+  }
+
+  String? get _difficultyString {
+    switch (_difficultyLevel) {
+      case 0:
+        return 'Fácil';
+      case 1:
+        return 'Médio';
+      case 2:
+        return 'Difícil';
+      default:
+        return null;
+    }
+  }
+
+  String? get _consciousnessString {
+    switch (_consciousnessLevel) {
+      case 0:
+        return 'Automático';
+      case 1:
+        return 'Presente';
+      case 2:
+        return 'Focado';
+      case 3:
+        return 'Fluindo';
+      default:
+        return null;
+    }
+  }
+
+  Future<void> _shareResult() async {
+    final shareText = '''
+🏆 Completei minha atividade! 🏆
+
+📋 ${widget.group}
+⏱️ Duração: $_formattedDuration
+${_consciousnessString != null ? '🧠 Estado: $_consciousnessString' : ''}
+${_difficultyString != null ? '⚡ Dificuldade: $_difficultyString' : ''}
+
+✨ "${widget.example}"
+
+#HawkinsTracker #Produtividade #Mindfulness
+    ''';
+    await Share.share(shareText);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+        child: Container(
+          margin: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: _saveManualTime,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [_energyColor, _flowColor]),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Text(
-                'SALVAR REGISTRO',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.lato(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1.5,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Indicador de arrasto
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => setState(() => _showManualInput = false),
-            child: Text(
-              'Voltar para cronômetro',
-              style: GoogleFonts.lato(
-                fontSize: 12,
-                color: Colors.grey[500],
+
+              // Ícone de celebração
+              Container(
+                margin: const EdgeInsets.only(top: 16),
+                child: const Text('🎉', style: TextStyle(fontSize: 48)),
               ),
-            ),
+
+              // Título
+              Text(
+                'Atividade Concluída!',
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: widget.energyColor,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Cards de informação (compactos)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text('📋', style: TextStyle(fontSize: 20)),
+                          const SizedBox(height: 2),
+                          Text('Categoria',
+                              style: GoogleFonts.lato(
+                                  fontSize: 10, color: Colors.grey[500])),
+                          Text(widget.group,
+                              style: GoogleFonts.lato(
+                                  fontSize: 12, fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center),
+                        ],
+                      ),
+                    ),
+                    Container(width: 1, height: 40, color: Colors.grey[200]),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text('⏱️', style: TextStyle(fontSize: 20)),
+                          const SizedBox(height: 2),
+                          Text('Duração',
+                              style: GoogleFonts.lato(
+                                  fontSize: 10, color: Colors.grey[500])),
+                          Text(_formattedDuration,
+                              style: GoogleFonts.lato(
+                                  fontSize: 12, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Prática
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: widget.energyColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('✨', style: TextStyle(fontSize: 14)),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        widget.example,
+                        style: GoogleFonts.lato(
+                            fontSize: 12, fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Divider
+              Container(
+                  height: 1,
+                  color: Colors.grey[200],
+                  margin: const EdgeInsets.symmetric(horizontal: 16)),
+
+              const SizedBox(height: 16),
+
+              // Feedback - Nível de Consciência (com texto alterado)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  children: [
+                    Text('Você estava consciente durante a prática?',
+                        style: GoogleFonts.lato(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700]),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _feedbackButton(
+                            '😴', 'Automático', 0, _consciousnessLevel, () {
+                          setState(() => _consciousnessLevel =
+                              _consciousnessLevel == 0 ? null : 0);
+                        }, widget.energyColor),
+                        _feedbackButton(
+                            '😐', 'Presente', 1, _consciousnessLevel, () {
+                          setState(() => _consciousnessLevel =
+                              _consciousnessLevel == 1 ? null : 1);
+                        }, widget.energyColor),
+                        _feedbackButton('🔥', 'Focado', 2, _consciousnessLevel,
+                            () {
+                          setState(() => _consciousnessLevel =
+                              _consciousnessLevel == 2 ? null : 2);
+                        }, widget.energyColor),
+                        _feedbackButton('✨', 'Fluindo', 3, _consciousnessLevel,
+                            () {
+                          setState(() => _consciousnessLevel =
+                              _consciousnessLevel == 3 ? null : 3);
+                        }, widget.energyColor),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Feedback - Dificuldade
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  children: [
+                    Text('Nível de dificuldade?',
+                        style: GoogleFonts.lato(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700])),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _feedbackButton('🌊', 'Fácil', 0, _difficultyLevel, () {
+                          setState(() => _difficultyLevel =
+                              _difficultyLevel == 0 ? null : 0);
+                        }, Colors.green),
+                        _feedbackButton('⚡', 'Médio', 1, _difficultyLevel, () {
+                          setState(() => _difficultyLevel =
+                              _difficultyLevel == 1 ? null : 1);
+                        }, Colors.orange),
+                        _feedbackButton('🔥', 'Difícil', 2, _difficultyLevel,
+                            () {
+                          setState(() => _difficultyLevel =
+                              _difficultyLevel == 2 ? null : 2);
+                        }, Colors.red),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Divider
+              Container(
+                  height: 1,
+                  color: Colors.grey[200],
+                  margin: const EdgeInsets.symmetric(horizontal: 16)),
+
+              const SizedBox(height: 12),
+
+              // Botões de ação
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _shareResult,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.share_rounded,
+                                  size: 16, color: Colors.blue),
+                              const SizedBox(width: 6),
+                              Text('Compartilhar',
+                                  style: GoogleFonts.lato(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.blue)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => widget.onSave(
+                            _consciousnessLevel, _difficultyString),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: [widget.energyColor, widget.flowColor]),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_circle_rounded,
+                                  size: 16, color: Colors.white),
+                              const SizedBox(width: 6),
+                              Text('Finalizar',
+                                  style: GoogleFonts.lato(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Botão pular
+              TextButton(
+                onPressed: () => widget.onSave(null, null),
+                child: Text('Pular feedback',
+                    style: GoogleFonts.lato(
+                        fontSize: 10, color: Colors.grey[400])),
+              ),
+
+              const SizedBox(height: 12),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _timeField(TextEditingController ctrl, String label) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.6)),
-      ),
-      child: TextField(
-        controller: ctrl,
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        style: GoogleFonts.lato(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: _energyColor,
+  Widget _feedbackButton(String emoji, String label, int value, int? current,
+      VoidCallback onTap, Color color) {
+    final isSelected = current == value;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 65, // Largura fixa para todos os botões
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? color : Colors.grey[200]!,
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500]),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 24)),
+            const SizedBox(height: 4),
+            Text(label,
+                style: GoogleFonts.lato(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? Colors.white : Colors.grey[600],
+                ),
+                textAlign: TextAlign.center),
+          ],
         ),
       ),
     );
