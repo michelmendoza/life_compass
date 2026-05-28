@@ -25,17 +25,21 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
 
   // Controle de som
   bool _isSoundOn = true;
+  bool _isWeb = false;
   late AnimationController _soundController;
   late Animation<double> _soundAnimation;
   IconData _soundIcon = Icons.volume_up_rounded;
 
-  // Áudio multiplataforma
+  // Áudio
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _audioInitialized = false;
 
   @override
   void initState() {
     super.initState();
+
+    // Detecta Web
+    _isWeb = identical(0, 0.0) ? false : true;
 
     _fadeController = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
@@ -55,7 +59,14 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
         CurvedAnimation(parent: _soundController, curve: Curves.easeInOut));
 
     _fadeController.forward();
-    _initAudio();
+
+    // Só inicializa áudio se não for Web
+    if (!_isWeb) {
+      _initAudio();
+    } else {
+      print('🎵 Web: Som desabilitado');
+      _audioInitialized = false;
+    }
   }
 
   Future<void> _initAudio() async {
@@ -66,7 +77,6 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
       _audioInitialized = true;
       print('🎵 Player pronto');
 
-      // Tenta tocar direto
       try {
         await _audioPlayer.play(AssetSource('sounds/forest_ambience.mp3'));
         print('🎵 Tocando auto');
@@ -80,6 +90,16 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
   }
 
   void _toggleSound() async {
+    if (_isWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Som disponível apenas no aplicativo móvel'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isSoundOn = !_isSoundOn;
     });
@@ -88,11 +108,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
       _soundIcon = Icons.volume_up_rounded;
       _soundController.reverse();
       try {
-        // Para e toca de novo (solução garantida)
-        await _audioPlayer.stop();
-        await _audioPlayer.play(AssetSource('sounds/forest_ambience.mp3'));
-        await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-        await _audioPlayer.setVolume(0.25);
+        await _audioPlayer.resume();
         print('🎵 Tocando!');
       } catch (e) {
         print('🎵 Erro: $e');
@@ -109,9 +125,25 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
     }
   }
 
+  void _stopAudio() {
+    if (!_isWeb && _audioInitialized) {
+      try {
+        _audioPlayer.stop();
+        print('🎵 Áudio parado');
+      } catch (e) {
+        print('🎵 Erro ao parar áudio: $e');
+      }
+    }
+  }
+
+  void _closeOnboarding() {
+    _stopAudio();
+    // Navigator.pop(context);
+  }
+
   @override
   void dispose() {
-    _audioPlayer.stop();
+    _stopAudio();
     _audioPlayer.dispose();
     _pageController.dispose();
     _fadeController.dispose();
@@ -124,7 +156,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
     _PremiumSlide(
       imagePath: 'assets/images/onboarding_1.png',
       overlayColors: [
-        const Color(0xFF2D3436).withOpacity(0.7), // Cinza escuro
+        const Color(0xFF2D3436).withOpacity(0.7),
         const Color(0xFF636E72).withOpacity(0.4),
       ],
       icon: '🌫️',
@@ -136,7 +168,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
     _PremiumSlide(
       imagePath: 'assets/images/onboarding_2.png',
       overlayColors: [
-        const Color(0xFF4A5D23).withOpacity(0.6), // Verde escuro do app
+        const Color(0xFF4A5D23).withOpacity(0.6),
         const Color(0xFF6B8E23).withOpacity(0.3),
       ],
       icon: '🧭',
@@ -148,7 +180,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
     _PremiumSlide(
       imagePath: 'assets/images/onboarding_3.png',
       overlayColors: [
-        const Color(0xFF8B6914).withOpacity(0.5), // Marrom ocre
+        const Color(0xFF8B6914).withOpacity(0.5),
         const Color(0xFF6B8E23).withOpacity(0.3),
       ],
       icon: '🌿',
@@ -157,10 +189,8 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
       buttonText: 'COMPREENDER',
       buttonColor: const Color(0xFF8B6914),
     ),
-
-    // 🔥 NOVO: Slide 4 - Como Usar
     _PremiumSlide(
-      imagePath: 'assets/images/onboarding_4.png',
+      imagePath: 'assets/images/onboarding_4c.png',
       overlayColors: [
         const Color(0xFF6B8E23).withOpacity(0.4),
         const Color(0xFF4A5D23).withOpacity(0.3)
@@ -170,9 +200,8 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
       subtitle: '',
       buttonText: 'ENTENDI',
       buttonColor: const Color(0xFF6B8E23),
-      isTutorial: true, // ← NOVO
+      isTutorial: true,
     ),
-
     _PremiumSlide(
       imagePath: 'assets/images/onboarding_4.png',
       overlayColors: [
@@ -199,8 +228,23 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
         _fadeController.forward();
       });
     } else {
+      print('🎯 COMEÇAR JORNADA CLICADO!');
+
+      // Para o áudio
+      _stopAudio();
+
+      // ⭐ APENAS chama o onComplete - NÃO faz Navigator.pop aqui!
+      // O runApp vai recriar o app inteiro
       widget.onComplete();
     }
+  }
+
+  void _skipToEnd() {
+    _pageController.animateToPage(
+      _totalPages - 1,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -220,7 +264,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
             itemBuilder: (context, index) => _buildSlide(index),
           ),
 
-          // ===== TOPO: Botões de Som e Pular =====
+          // Topo
           Positioned(
             top: 50,
             left: 20,
@@ -228,27 +272,31 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Botão de Som
-                GestureDetector(
-                  onTap: _toggleSound,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                // Botão de Som (só mostra se não for Web)
+                if (!_isWeb)
+                  GestureDetector(
+                    onTap: _toggleSound,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border:
+                            Border.all(color: Colors.white.withOpacity(0.2)),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(_soundIcon, color: Colors.white, size: 16),
+                        const SizedBox(width: 4),
+                        Text(_isSoundOn ? 'Som' : 'Mudo',
+                            style: GoogleFonts.lato(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.8))),
+                      ]),
                     ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(_soundIcon, color: Colors.white, size: 16),
-                      const SizedBox(width: 4),
-                      Text(_isSoundOn ? 'Som' : 'Mudo',
-                          style: GoogleFonts.lato(
-                              fontSize: 11,
-                              color: Colors.white.withOpacity(0.8))),
-                    ]),
                   ),
-                ),
+
+                // Botão Fechar (X) para sair do onboarding
                 // Pular
                 if (_currentPage < _totalPages - 1)
                   GestureDetector(
@@ -272,7 +320,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
             ),
           ),
 
-          // ===== BOTTOM: Indicadores (NÃO SOBREPÕEM O BOTÃO) =====
+          // Indicadores
           Positioned(
             bottom: 120,
             left: 0,
@@ -325,8 +373,6 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
             child: Column(
               children: [
                 const Spacer(flex: 3),
-
-                // Ícone pulsante
                 AnimatedBuilder(
                   animation: _pulseAnimation,
                   builder: (context, child) => Transform.scale(
@@ -346,10 +392,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
                     ),
                   ),
                 ),
-
                 const Spacer(flex: 1),
-
-                // Título
                 FadeTransition(
                   opacity: _fadeAnimation,
                   child: Text(slide.title,
@@ -365,10 +408,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
                                 blurRadius: 20)
                           ])),
                 ),
-
                 const SizedBox(height: 16),
-
-                // Subtítulo
                 if (slide.isTutorial)
                   _buildTutorialSteps()
                 else
@@ -386,10 +426,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
                                   blurRadius: 10)
                             ])),
                   ),
-
                 const Spacer(flex: 2),
-
-                // Botão de ação (COM CORES DO APP)
                 FadeTransition(
                   opacity: _fadeAnimation,
                   child: GestureDetector(
@@ -428,7 +465,6 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 30),
               ],
             ),

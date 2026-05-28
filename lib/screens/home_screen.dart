@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/activity_log.dart';
+import '../screens/onboarding_premium_screen.dart'; // ⭐ Adicione este import
 
 class HomeScreen extends StatefulWidget {
   final List<ActivityLog> activityLogs;
@@ -28,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final Random _random = Random();
   Timer? _timer;
 
-  // Lista de mensagens motivacionais (você pode modificar depois)
   final List<String> _messages = [
     "✨ Pequenos passos todos os dias levam a grandes mudanças",
     "🌟 Você está mais perto do que imagina",
@@ -49,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _motivationalMessages = List.from(_messages);
     _updateMessage();
-    // Muda a mensagem a cada 10 segundos
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       if (mounted) _updateMessage();
     });
@@ -68,16 +67,26 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Calcula a área de maior equilíbrio baseada nos logs
+  void _showOnboarding() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OnboardingPremiumScreen(
+          onComplete: () {
+            Navigator.pop(context); // Volta para a HomeScreen
+          },
+        ),
+      ),
+    );
+  }
+
   String _getDominantArea() {
     int body = 0, mind = 0, spirit = 0;
 
     for (var log in widget.activityLogs) {
-      // Verifica se é de hoje
       if (log.timestamp.day == DateTime.now().day &&
           log.timestamp.month == DateTime.now().month &&
           log.timestamp.year == DateTime.now().year) {
-        // Classifica por tipo
         if (log.organ == 'Corpo/Mente' ||
             log.group == 'Saúde' ||
             log.group == 'Exercício') {
@@ -95,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final total = body + mind + spirit;
-    if (total == 0) return 'Mental 70%'; // Valor padrão
+    if (total == 0) return 'Mental 70%';
 
     if (body >= mind && body >= spirit) {
       final percent = ((body / total) * 100).round();
@@ -109,7 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Conta práticas de hoje
   int _getTodayPracticesCount() {
     return widget.activityLogs
         .where((log) =>
@@ -119,7 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .length;
   }
 
-  // Distribuição de dificuldade
   Map<String, int> _getDifficultyDistribution() {
     Map<String, int> distribution = {'Fácil': 0, 'Médio': 0, 'Difícil': 0};
 
@@ -144,27 +151,38 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // Header com Welcome
             SliverToBoxAdapter(
               child: Container(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Logo e Welcome
+                    // Logo e Welcome com botão de replay na logo
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF6B8E23), Color(0xFF8FBC8F)],
+                        // ⭐ BOTÃO DE REPLAY NA LOGO ⭐
+                        GestureDetector(
+                          onTap: _showOnboarding,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF6B8E23), Color(0xFF8FBC8F)],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      const Color(0xFF6B8E23).withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: const Text(
-                            '🧭',
-                            style: TextStyle(fontSize: 28),
+                            child: const Text(
+                              '🧭',
+                              style: TextStyle(fontSize: 28),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -193,31 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    //////////////////
-                    // GestureDetector(
-                    //   onTap: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (_) => OnboardingScreen(
-                    //           onComplete: () {
-                    //             Navigator.pop(context);
-                    //           },
-                    //         ),
-                    //       ),
-                    //     );
-                    //   },
-                    //   child: Container(
-                    //     padding: const EdgeInsets.all(8),
-                    //     decoration: BoxDecoration(
-                    //       color: const Color(0xFF8B6914).withOpacity(0.1),
-                    //       borderRadius: BorderRadius.circular(10),
-                    //     ),
-                    //     child: const Icon(Icons.replay_rounded,
-                    //         color: Color(0xFF8B6914), size: 18),
-                    //   ),
-                    // ),
-                    //////////////////
+
                     // Card de equilíbrio
                     Container(
                       padding: const EdgeInsets.all(16),

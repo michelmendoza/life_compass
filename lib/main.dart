@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:life_compass/screens/onboarding_premium_screen.dart';
+import 'package:life_compass/screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/dashboard_screen.dart';
@@ -74,7 +75,6 @@ class LifeCompassApp extends StatelessWidget {
       title: 'Life Compass',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
-      // 🔴 MUDANÇA: Remove SplashScreen, usa onboarding diretamente
       home: hasSeenOnboarding
           ? MainNavigator(logsBox: logsBox, settingsBox: settingsBox)
           : OnboardingPremiumScreen(
@@ -82,9 +82,7 @@ class LifeCompassApp extends StatelessWidget {
                 print('🟢 ONBOARDING: onComplete CHAMADO!');
                 await settingsBox.put('onboarding_complete', true);
 
-                print('🟢 ONBOARDING: settings salvo!');
-
-                // Recria o app com o novo estado
+                // ⭐ Recria o app com o novo estado (funcionava antes!)
                 runApp(LifeCompassApp(
                   logsBox: logsBox,
                   hasSeenOnboarding: true,
@@ -95,8 +93,6 @@ class LifeCompassApp extends StatelessWidget {
     );
   }
 }
-
-// ... resto do MainNavigator igual
 
 class MainNavigator extends StatefulWidget {
   final Box logsBox;
