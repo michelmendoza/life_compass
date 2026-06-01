@@ -997,17 +997,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         const SizedBox(height: 4),
                         Text(log.example,
                             style: GoogleFonts.lato(
-                                fontSize: 12, color: Colors.grey[600]),
+                                fontSize: 13, color: Colors.grey[600]),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 4),
-                        Row(
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
                             _smallChip(log.energy, energyColor,
                                 log.energy == 'Ativa' ? '⚡' : '🍃'),
-                            const SizedBox(width: 6),
                             _smallChip(log.flow, flowColor, '🔄'),
-                            const SizedBox(width: 6),
                             _smallChip(log.organ, organColor, organIcon),
                           ],
                         ),
@@ -1036,7 +1036,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const SizedBox(height: 4),
                       Text(DateFormat('HH:mm').format(log.timestamp),
                           style: GoogleFonts.lato(
-                              fontSize: 9, color: Colors.grey[400])),
+                              fontSize: 11, color: Colors.grey[400])),
                     ],
                   ),
                 ],
@@ -1056,11 +1056,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   children: [
                     if (consciousnessEmoji.isNotEmpty) ...[
                       Text(consciousnessEmoji,
-                          style: const TextStyle(fontSize: 11)),
+                          style: const TextStyle(fontSize: 13)),
                       const SizedBox(width: 4),
                       Text(consciousnessText,
                           style: GoogleFonts.lato(
-                              fontSize: 9,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF6B8E23))),
                     ],
@@ -1084,14 +1084,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const SizedBox(width: 4),
                       Text(log.difficultyFeedback!,
                           style: GoogleFonts.lato(
-                              fontSize: 9,
+                              fontSize: 11,
                               fontStyle: FontStyle.italic,
                               color: Colors.grey[500])),
                     ],
                     const Spacer(),
                     Text('feedback',
                         style: GoogleFonts.lato(
-                            fontSize: 8,
+                            fontSize: 10,
                             fontStyle: FontStyle.italic,
                             color: Colors.grey[400])),
                   ],
@@ -1114,11 +1114,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 10)),
+          Text(icon, style: const TextStyle(fontSize: 11)),
           const SizedBox(width: 3),
           Text(text,
               style: GoogleFonts.lato(
-                  fontSize: 9, fontWeight: FontWeight.w500, color: color)),
+                  fontSize: 11, fontWeight: FontWeight.w500, color: color)),
         ],
       ),
     );
