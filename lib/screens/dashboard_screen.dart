@@ -332,6 +332,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return streak;
   }
 
+  List<int> get _last7DaysMinutes {
+    final today = DateTime.now();
+    return List.generate(7, (i) {
+      final day = today.subtract(Duration(days: 6 - i));
+      return widget.logs
+          .where((log) =>
+              log.timestamp.day == day.day &&
+              log.timestamp.month == day.month &&
+              log.timestamp.year == day.year)
+          .fold(0, (sum, log) => sum + log.duration.inMinutes);
+    });
+  }
+
+  String _getDayLabel(int weekday) {
+    const labels = {1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex', 6: 'Sáb', 7: 'Dom'};
+    return labels[weekday] ?? '';
+  }
+
   bool get _isTrendingUp => _totalMinutes > _previousTotalMinutes;
   int get _trendPercent {
     if (_previousTotalMinutes == 0) return 100;
@@ -402,9 +420,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       else ...[
                         _buildHeroStatsCard(),
                         const SizedBox(height: 16),
-                        _buildSmartSuggestion(),
-                        const SizedBox(height: 16),
                         _buildEquilibrioCard(),
+                        const SizedBox(height: 16),
+                        _buildSmartSuggestion(),
                         const SizedBox(height: 16),
                         _buildConsciousnessCard(),
                         const SizedBox(height: 16),
@@ -412,23 +430,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 16),
                         _buildEnergyBalanceCard(),
                         const SizedBox(height: 16),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: _buildFlowDistributionCard()),
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildChallengeIndexCard()),
-                          ],
-                        ),
+                        _buildFlowDistributionCard(),
                         const SizedBox(height: 16),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(child: _buildOrganBalanceCard()),
+                            Expanded(child: _buildChallengeIndexCard()),
                             const SizedBox(width: 16),
-                            Expanded(child: _buildCategoriesCard()),
+                            Expanded(child: _buildOrganBalanceCard()),
                           ],
                         ),
+                        const SizedBox(height: 16),
+                        _buildCategoriesCard(),
                         const SizedBox(height: 16),
                         _buildRecentActivitiesCard(),
                       ],
@@ -778,6 +791,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          _buildWeeklySparkline(),
         ],
       ),
     );
@@ -825,6 +840,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_previousTotalMinutes == 0) return 'Primeiros registros! 🎉';
     if (_isTrendingUp) return '${_trendPercent}% mais que período anterior';
     return '${_trendPercent}% menos que período anterior';
+  }
+
+  Widget _buildWeeklySparkline() {
+    final minutes = _last7DaysMinutes;
+    final maxMin = minutes.reduce((a, b) => a > b ? a : b);
+    final today = DateTime.now();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(height: 1, color: Colors.white.withOpacity(0.2)),
+        const SizedBox(height: 12),
+        Text(
+          'ÚLTIMOS 7 DIAS',
+          style: GoogleFonts.lato(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: Colors.white60,
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: List.generate(7, (i) {
+            final day = today.subtract(Duration(days: 6 - i));
+            final mins = minutes[i];
+            final proportion = maxMin > 0 ? mins / maxMin : 0.0;
+            final isToday = i == 6;
+            final barHeight = proportion > 0
+                ? (proportion * 36).clamp(4.0, 36.0)
+                : 3.0;
+
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (mins > 0)
+                      Text(
+                        _formatMinutes(mins),
+                        style: GoogleFonts.lato(
+                          fontSize: 8,
+                          color: isToday
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.55),
+                        ),
+                      ),
+                    const SizedBox(height: 3),
+                    Container(
+                      height: barHeight,
+                      decoration: BoxDecoration(
+                        color: mins > 0
+                            ? (isToday
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.5))
+                            : Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getDayLabel(day.weekday),
+                      style: GoogleFonts.lato(
+                        fontSize: 9,
+                        color: isToday
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.55),
+                        fontWeight: isToday
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
   }
 
   // ========== CARD DE EQUILÍBRIO ==========
@@ -935,12 +1032,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           const SizedBox(height: 4),
-          Text(
-            'Total: ${_formatUPs(_totalUPs)} UPs em $_totalActivities atividades',
-            style: GoogleFonts.lato(
-              fontSize: 11,
-              color: Colors.grey[500],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total: ${_formatUPs(_totalUPs)} UPs em $_totalActivities atividades',
+                style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500]),
+              ),
+              Text(
+                '* barras relativas ao maior valor',
+                style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400]),
+              ),
+            ],
           ),
         ],
       ),
@@ -1040,7 +1143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Row(
             children: [
-              _consciousnessBar('😴', 0, counts[0] ?? 0, total, Colors.grey),
+              _consciousnessBar('😴', 0, counts[0] ?? 0, total, const Color(0xFFE57373)),
               const SizedBox(width: 8),
               _consciousnessBar(
                   '😐', 1, counts[1] ?? 0, total, const Color(0xFFFFEB3B)),
@@ -1050,6 +1153,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(width: 8),
               _consciousnessBar(
                   '✨', 3, counts[3] ?? 0, total, const Color(0xFF6B8E23)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('← mais automático',
+                  style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
+              Text('mais consciente →',
+                  style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
             ],
           ),
           const SizedBox(height: 10),
@@ -1497,6 +1610,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: Colors.grey[600],
             ),
           ),
+          const SizedBox(height: 6),
+          Text(
+            '0 = Suave · 100 = Intenso',
+            style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[400]),
+          ),
         ],
       ),
     );
@@ -1562,60 +1680,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final categoryDistribution = _calculateCategoryDistribution();
     final sorted = categoryDistribution.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    final top = sorted.take(4).toList();
+    final top = sorted.take(6).toList();
+
+    final rows = <Widget>[];
+    for (var i = 0; i < top.length; i += 2) {
+      final left = top[i];
+      final right = i + 1 < top.length ? top[i + 1] : null;
+      rows.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Row(
+            children: [
+              Expanded(child: _categoryBar(left)),
+              if (right != null) ...[
+                const SizedBox(width: 16),
+                Expanded(child: _categoryBar(right)),
+              ] else
+                const Expanded(child: SizedBox()),
+            ],
+          ),
+        ),
+      );
+    }
 
     return _glassCard(
       title: 'Top Categorias',
       icon: Icons.pie_chart_rounded,
-      child: Column(
-        children: top.map((entry) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      entry.key,
-                      style: GoogleFonts.lato(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      '${(entry.value * 100).round()}%',
-                      style: GoogleFonts.lato(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF6B8E23),
-                      ),
-                    ),
-                  ],
+      child: Column(children: rows),
+    );
+  }
+
+  Widget _categoryBar(MapEntry<String, double> entry) {
+    final color = _getCorCategoria(entry.key);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                entry.key,
+                style: GoogleFonts.lato(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
                 ),
-                const SizedBox(height: 4),
-                LinearProgressIndicator(
-                  value: entry.value,
-                  backgroundColor: Colors.grey[200],
-                  valueColor:
-                      const AlwaysStoppedAnimation<Color>(Color(0xFF6B8E23)),
-                  borderRadius: BorderRadius.circular(6),
-                  minHeight: 6,
-                ),
-              ],
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          );
-        }).toList(),
-      ),
+            const SizedBox(width: 4),
+            Text(
+              '${(entry.value * 100).round()}%',
+              style: GoogleFonts.lato(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        LinearProgressIndicator(
+          value: entry.value,
+          backgroundColor: Colors.grey[200],
+          valueColor: AlwaysStoppedAnimation<Color>(color),
+          borderRadius: BorderRadius.circular(6),
+          minHeight: 6,
+        ),
+      ],
     );
   }
 
   // ========== CARD ATIVIDADES RECENTES ==========
   Widget _buildRecentActivitiesCard() {
-    final recent = _filteredLogs.take(5).toList();
+    final limit = _selectedPeriod == 'Hoje'
+        ? 10
+        : _selectedPeriod == 'Semana'
+            ? 10
+            : _selectedPeriod == 'Mês'
+                ? 15
+                : 20;
+    final sorted = List<ActivityLog>.from(_filteredLogs)
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final recent = sorted.take(limit).toList();
 
     return _glassCard(
       title: 'Atividades Recentes',
