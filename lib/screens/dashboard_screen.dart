@@ -7,12 +7,10 @@ import '../data/activities.dart';
 
 class DashboardScreen extends StatefulWidget {
   final List<ActivityLog> logs;
-  final VoidCallback onLogsChanged;
 
   const DashboardScreen({
     super.key,
     required this.logs,
-    required this.onLogsChanged,
   });
 
   @override

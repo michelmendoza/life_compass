@@ -1,18 +1,20 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/activity_log.dart';
 import '../data/colors.dart';
 
 class HistoryScreen extends StatefulWidget {
   final List<ActivityLog> logs;
-  final VoidCallback onLogsChanged;
   final Function(ActivityLog)? onDeleteLog;
 
   const HistoryScreen({
     super.key,
     required this.logs,
-    required this.onLogsChanged,
     this.onDeleteLog,
   });
 
@@ -148,6 +150,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Color _getOrganColor(String organ) =>
       HawkinsColors.organGradients[organ]?[0] ?? Colors.grey;
 
+  Future<void> _exportLogs() async {
+    if (widget.logs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Nenhuma atividade para exportar.',
+              style: GoogleFonts.lato()),
+          backgroundColor: Colors.grey[700],
+        ),
+      );
+      return;
+    }
+
+    final jsonData = const JsonEncoder.withIndent('  ')
+        .convert(widget.logs.map((l) => l.toJson()).toList());
+
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/life_compass_export.json');
+    await file.writeAsString(jsonData);
+
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: 'application/json')],
+        subject: 'Life Compass — Histórico de atividades',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final groups = _groupedLogs;
@@ -262,6 +291,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF6B8E23),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _exportLogs,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6B8E23).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.upload_rounded,
+                size: 18,
+                color: Color(0xFF6B8E23),
               ),
             ),
           ),
@@ -883,9 +928,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       onDismissed: (_) {
         if (widget.onDeleteLog != null) {
           widget.onDeleteLog!(log);
-        } else {
-          setState(() => widget.logs.remove(log));
-          widget.onLogsChanged();
         }
       },
       child: Container(

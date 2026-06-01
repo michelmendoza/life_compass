@@ -12,8 +12,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'models/activity_log.dart';
 
-List<ActivityLog> globalLogs = [];
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -25,12 +23,8 @@ void main() async {
 
   await initializeDateFormatting('pt_BR', null);
 
-  // Carrega dados salvos
-  if (logsBox.isNotEmpty) {
-    globalLogs = logsBox.values
-        .map((e) => ActivityLog.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
-  }
+  // Migra entradas salvas com chave int (box.add) para chave string (log.id)
+  await _migrateLogsToIdKeys(logsBox);
 
   final hasSeenOnboarding =
       settingsBox.get('onboarding_complete', defaultValue: false);
@@ -40,6 +34,20 @@ void main() async {
     hasSeenOnboarding: hasSeenOnboarding,
     settingsBox: settingsBox,
   ));
+}
+
+Future<void> _migrateLogsToIdKeys(Box logsBox) async {
+  final hasIntKeys = logsBox.keys.any((k) => k is int);
+  if (!hasIntKeys) return;
+
+  final all = logsBox.values
+      .map((e) => ActivityLog.fromJson(Map<String, dynamic>.from(e)))
+      .toList();
+
+  await logsBox.clear();
+  for (final log in all) {
+    await logsBox.put(log.id, log.toJson());
+  }
 }
 
 class ActivityLogAdapter extends TypeAdapter<ActivityLog> {
@@ -129,127 +137,99 @@ class _MainNavigatorState extends State<MainNavigator> {
   }
 
   Future<void> _addLog(ActivityLog log) async {
-    await widget.logsBox.add(log.toJson());
-    setState(() => globalLogs.insert(0, log));
+    await widget.logsBox.put(log.id, log.toJson());
   }
 
   Future<void> _removeLog(ActivityLog log) async {
-    print('🗑️ Tentando remover: ${log.id}');
-
-    for (var i = 0; i < widget.logsBox.length; i++) {
-      final data = Map<String, dynamic>.from(widget.logsBox.getAt(i));
-      if (data['id'] == log.id) {
-        await widget.logsBox.deleteAt(i);
-        print('🗑️ Removido do Hive no índice $i');
-        break;
-      }
-    }
-
-    setState(() {
-      globalLogs.removeWhere((l) => l.id == log.id);
-    });
-
-    print('📦 Total após remoção: ${globalLogs.length}');
+    await widget.logsBox.delete(log.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    print('🔵 MAINNAVIGATOR: build - _currentIndex = $_currentIndex');
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          // HOME SCREEN (índice 0)
-          HomeScreen(
-            activityLogs: globalLogs,
-            onAddPractice: () {
-              setState(() => _currentIndex = 5); // Vai para tela de ação
+    return ValueListenableBuilder<Box>(
+      valueListenable: widget.logsBox.listenable(),
+      builder: (context, box, _) {
+        final logs = box.values
+            .map((e) => ActivityLog.fromJson(Map<String, dynamic>.from(e)))
+            .toList()
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+        return Scaffold(
+          body: IndexedStack(
+            index: _currentIndex,
+            children: [
+              HomeScreen(
+                activityLogs: logs,
+                onAddPractice: () => setState(() => _currentIndex = 5),
+                onExplore: () => setState(() => _currentIndex = 1),
+                onActNow: () => setState(() => _currentIndex = 5),
+              ),
+              SmartCompassScreen(
+                logs: logs,
+                onStartActivity: (log) => _addLog(log),
+              ),
+              const SizedBox.shrink(),
+              DashboardScreen(
+                logs: logs,
+              ),
+              HistoryScreen(
+                logs: logs,
+                onDeleteLog: _removeLog,
+              ),
+              ConsciousActionScreen(
+                logs: logs,
+                onStartActivity: (log) {
+                  if (log != null) _addLog(log);
+                  setState(() => _currentIndex = 0);
+                },
+              ),
+            ],
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _currentIndex >= 5 ? 2 : _currentIndex,
+            onTap: (index) {
+              if (index != 2) setState(() => _currentIndex = index);
             },
-            onExplore: () {
-              setState(() => _currentIndex = 1);
-            },
-            onActNow: () {
-              setState(() => _currentIndex = 5); // Vai para tela de ação
-            },
+            backgroundColor: const Color(0xFFF5F9E9),
+            selectedItemColor: const Color(0xFF6B8E23),
+            unselectedItemColor: Colors.grey[400],
+            type: BottomNavigationBarType.fixed,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            elevation: 8,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded),
+                label: 'Início',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.local_florist),
+                label: 'Match',
+              ),
+              BottomNavigationBarItem(
+                icon: SizedBox.shrink(),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_rounded),
+                label: 'Dashboard',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.history_rounded),
+                label: 'Histórico',
+              ),
+            ],
           ),
-          // SMART COMPASS SCREEN - Bússola (índice 1)
-          SmartCompassScreen(
-            logs: globalLogs,
-            onStartActivity: (log) => _addLog(log),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => setState(() => _currentIndex = 5),
+            backgroundColor: const Color(0xFF8FBC8F),
+            elevation: 4,
+            shape: const CircleBorder(),
+            child: const Text('🌿', style: TextStyle(fontSize: 28)),
           ),
-          // ESPAÇO VAZIO - índice 2 (não usado, só para espaçamento)
-          const SizedBox.shrink(),
-          // DASHBOARD SCREEN (índice 3)
-          DashboardScreen(
-            logs: globalLogs,
-            onLogsChanged: () => setState(() {}),
-          ),
-          // HISTORY SCREEN (índice 4)
-          HistoryScreen(
-            logs: globalLogs,
-            onLogsChanged: () => setState(() {}),
-            onDeleteLog: _removeLog,
-          ),
-          // CONSCIOUS ACTION SCREEN (índice 5)
-          ConsciousActionScreen(
-            logs: globalLogs,
-            onStartActivity: (log) {
-              if (log != null) _addLog(log);
-              setState(() => _currentIndex = 0); // Volta para Home após salvar
-            },
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex >= 5
-            ? 2
-            : _currentIndex, // Se estiver na tela de ação, marca o índice vazio
-        onTap: (index) {
-          // Não faz nada se clicar no índice 2 (espaço vazio)
-          if (index != 2) {
-            setState(() => _currentIndex = index);
-          }
-        },
-        backgroundColor: const Color(0xFFF5F9E9),
-        selectedItemColor: const Color(0xFF6B8E23),
-        unselectedItemColor: Colors.grey[400],
-        type: BottomNavigationBarType.fixed,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        elevation: 8,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Início',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_florist),
-            label: 'Match',
-          ),
-          BottomNavigationBarItem(
-            icon: SizedBox.shrink(),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_rounded),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_rounded),
-            label: 'Histórico',
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() => _currentIndex = 5); // Abre a tela de ação
-        },
-        child: const Text('🌿', style: TextStyle(fontSize: 28)),
-        backgroundColor: const Color(0xFF8FBC8F),
-        elevation: 4,
-        shape: const CircleBorder(),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        );
+      },
     );
   }
 }
