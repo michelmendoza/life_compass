@@ -28,11 +28,21 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
 
   double _dragOffset = 0;
   double _dragRotation = 0;
+  bool _isSwiping = false;
+
+  late AnimationController _flyController;
 
   @override
   void initState() {
     super.initState();
+    _flyController = AnimationController(vsync: this);
     _generateSuggestions();
+  }
+
+  @override
+  void dispose() {
+    _flyController.dispose();
+    super.dispose();
   }
 
   // =========================================================
@@ -255,6 +265,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
   // =========================================================
 
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
+    if (_isSwiping) return;
     setState(() {
       _dragOffset += details.delta.dx;
       _dragRotation = _dragOffset / 500;
@@ -262,16 +273,87 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
   }
 
   void _onHorizontalDragEnd(DragEndDetails details) {
+    if (_isSwiping) return;
     final screenWidth = MediaQuery.of(context).size.width;
     if (_dragOffset > screenWidth * 0.2) {
-      _startPractice(_cards[_currentIndex]);
+      _animateFlyOut(screenWidth * 1.5, () => _startPractice(_cards[_currentIndex]));
     } else if (_dragOffset < -(screenWidth * 0.2)) {
-      _nextCard();
+      _animateFlyOut(-screenWidth * 1.5, _nextCard);
+    } else {
+      _animateSnapBack();
     }
-    setState(() {
-      _dragOffset = 0;
-      _dragRotation = 0;
-    });
+  }
+
+  Future<void> _animateFlyOut(double target, VoidCallback onDone) async {
+    if (!mounted) return;
+    _isSwiping = true;
+
+    final startOffset = _dragOffset;
+    final startRot = _dragRotation;
+    final endRot = target / 500;
+
+    _flyController.duration = const Duration(milliseconds: 300);
+    final anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flyController, curve: Curves.easeIn),
+    );
+    _flyController.reset();
+
+    void listener() {
+      if (mounted) {
+        setState(() {
+          _dragOffset = startOffset + anim.value * (target - startOffset);
+          _dragRotation = startRot + anim.value * (endRot - startRot);
+        });
+      }
+    }
+
+    anim.addListener(listener);
+    await _flyController.forward();
+    anim.removeListener(listener);
+
+    if (mounted) {
+      setState(() {
+        _dragOffset = 0;
+        _dragRotation = 0;
+        _isSwiping = false;
+      });
+      onDone();
+    }
+  }
+
+  Future<void> _animateSnapBack() async {
+    if (!mounted) return;
+    _isSwiping = true;
+
+    final startOffset = _dragOffset;
+    final startRot = _dragRotation;
+
+    _flyController.duration = const Duration(milliseconds: 200);
+    final anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flyController, curve: Curves.easeOut),
+    );
+    _flyController.reset();
+
+    void listener() {
+      if (mounted) {
+        setState(() {
+          _dragOffset = startOffset * (1 - anim.value);
+          _dragRotation = startRot * (1 - anim.value);
+        });
+      }
+    }
+
+    anim.addListener(listener);
+    await _flyController.forward();
+    anim.removeListener(listener);
+
+    if (mounted) {
+      setState(() {
+        _dragOffset = 0;
+        _dragRotation = 0;
+        _isSwiping = false;
+      });
+    }
   }
 
   // =========================================================
@@ -311,12 +393,11 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
                     GestureDetector(
                       onHorizontalDragUpdate: _onHorizontalDragUpdate,
                       onHorizontalDragEnd: _onHorizontalDragEnd,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 120),
-                        curve: Curves.easeOut,
+                      child: Transform(
                         transform: Matrix4.identity()
-                          ..translate(_dragOffset)
+                          ..translateByDouble(_dragOffset, 0, 0, 1)
                           ..rotateZ(_dragRotation),
+                        alignment: Alignment.center,
                         child: Stack(
                           children: [
                             _buildCard(currentCard),

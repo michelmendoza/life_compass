@@ -1779,20 +1779,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, size: 18, color: const Color(0xFF6B8E23)),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.lato(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.grey[500],
-                  letterSpacing: 1.2,
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.lato(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.grey[500],
+                    letterSpacing: 1.2,
+                  ),
+                  maxLines: 2,
+                  softWrap: true,
                 ),
               ),
-              const Spacer(),
-              if (rightWidget != null) rightWidget,
+              if (rightWidget != null) ...[
+                const SizedBox(width: 8),
+                rightWidget,
+              ],
             ],
           ),
           const SizedBox(height: 16),
