@@ -319,8 +319,8 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
               color: const Color(0xFF6B8E23).withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.settings_rounded,
-                color: Color(0xFF4A5D23), size: 20),
+            child: const Icon(Icons.add_rounded,
+                color: Color(0xFF4A5D23), size: 22),
           ),
         ),
       ]),
@@ -613,9 +613,12 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                 ),
                 const SizedBox(width: 8),
                 _infoChip(
-                  practice.organ == 'Mente'
-                      ? '🧠'
-                      : (practice.organ == 'Corpo' ? '💪' : '🧘'),
+                  switch (practice.organ) {
+                    'Mente' => '🧠',
+                    'Corpo' => '💪',
+                    'Espírito' => '🙏',
+                    _ => '🧘',
+                  },
                   practice.organ,
                   organColor,
                 ),

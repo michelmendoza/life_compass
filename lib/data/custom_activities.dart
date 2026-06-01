@@ -22,23 +22,21 @@ class CustomActivitiesManager {
         final practicesJson = map['practices'] as List? ?? [];
         final practices = practicesJson.map((p) => _parsePractice(p)).toList();
 
-        if (practices.isNotEmpty) {
-          final groupName = map['group']?.toString() ?? '';
-          if (groupName.isNotEmpty) {
-            customNames.add(groupName);
+        final groupName = map['group']?.toString() ?? '';
+        if (groupName.isNotEmpty) {
+          customNames.add(groupName);
 
-            final customActivity = Activity(
-              group: groupName,
-              icon: map['icon']?.toString() ?? '✨',
-              practices: practices,
-            );
+          final customActivity = Activity(
+            group: groupName,
+            icon: map['icon']?.toString() ?? '✨',
+            practices: practices,
+          );
 
-            // Remove a padrão com o mesmo nome (se existir)
-            result.removeWhere((a) => a.group == groupName);
+          // Remove a padrão com o mesmo nome (se existir)
+          result.removeWhere((a) => a.group == groupName);
 
-            // Adiciona a customizada
-            result.add(customActivity);
-          }
+          // Adiciona a customizada (mesmo que vazia)
+          result.add(customActivity);
         }
       }
     }

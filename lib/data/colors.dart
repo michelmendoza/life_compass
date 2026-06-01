@@ -17,9 +17,10 @@ class HawkinsColors {
   };
 
   static const Map<String, List<Color>> organGradients = {
-    'Mente': [Color(0xFF6C5CE7), Color(0xFFA8A4E6)],     // Roxo mente
-    'Corpo': [Color(0xFFFF6B35), Color(0xFFFFA07A)],     // Laranja corpo
+    'Mente': [Color(0xFF6C5CE7), Color(0xFFA8A4E6)],       // Roxo mente
+    'Corpo': [Color(0xFFFF6B35), Color(0xFFFFA07A)],       // Laranja corpo
     'Corpo/Mente': [Color(0xFF00B894), Color(0xFF55EFC4)], // Verde integração
+    'Espírito': [Color(0xFF9B59B6), Color(0xFFD7BDE2)],    // Violeta espírito
   };
 
   // Fundo neumórfico

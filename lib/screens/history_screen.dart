@@ -847,11 +847,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final energyColor = _getEnergyColor(log.energy);
     final flowColor = _getFlowColor(log.flow);
     final organColor = _getOrganColor(log.organ);
-    final organIcon = log.organ == 'Mente'
-        ? '🧠'
-        : log.organ == 'Corpo'
-            ? '💪'
-            : '🧘';
+    final organIcon = switch (log.organ) {
+      'Mente' => '🧠',
+      'Corpo' => '💪',
+      'Espírito' => '🙏',
+      _ => '🧘',
+    };
 
     final hasFeedback = (log.consciousnessLevel != null &&
             log.consciousnessLevel! >

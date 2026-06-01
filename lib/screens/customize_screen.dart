@@ -125,10 +125,13 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
   }
 
   void _addPractice(Activity activity) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (_) => _PracticeFormDialog(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _PracticeFormSheet(
         categoryName: activity.group,
+        categoryIcon: activity.icon,
         onSave: (practice) async {
           final updated = List<Practice>.from(activity.practices)
             ..add(practice);
@@ -333,27 +336,54 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
             ],
           ]),
         ),
+        // Empty state quando não há práticas
+        if (activity.practices.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.07),
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(16)),
+              border: Border(
+                  top: BorderSide(color: Colors.amber.withOpacity(0.3))),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.info_outline_rounded,
+                    size: 13, color: Colors.amber[700]),
+                const SizedBox(width: 6),
+                Text('Nenhuma prática — toque em + para adicionar',
+                    style: GoogleFonts.lato(
+                        fontSize: 11,
+                        color: Colors.amber[800],
+                        fontStyle: FontStyle.italic)),
+              ],
+            ),
+          ),
         // Botão + Prática
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
             color: const Color(0xFF6B8E23).withOpacity(0.03),
-            borderRadius:
-                const BorderRadius.vertical(bottom: Radius.circular(16)),
+            borderRadius: activity.practices.isEmpty
+                ? BorderRadius.zero
+                : const BorderRadius.vertical(bottom: Radius.circular(16)),
             border: Border(top: BorderSide(color: Colors.grey[200]!)),
           ),
           child: GestureDetector(
             onTap: () => _addPractice(activity),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               child:
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const Icon(Icons.add_rounded,
-                    size: 14, color: Color(0xFF6B8E23)),
-                const SizedBox(width: 4),
+                    size: 15, color: Color(0xFF6B8E23)),
+                const SizedBox(width: 5),
                 Text('Adicionar prática',
                     style: GoogleFonts.lato(
-                        fontSize: 10,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF6B8E23))),
               ]),
@@ -457,15 +487,15 @@ class _CategoryFormDialog extends StatefulWidget {
 class _CategoryFormDialogState extends State<_CategoryFormDialog> {
   final _nameCtrl = TextEditingController();
   final _iconCtrl = TextEditingController(text: '✨');
-  final _practiceCtrl = TextEditingController();
-  String _energy = 'Ativa', _flow = 'Médio', _organ = 'Mente';
   List<Practice> _practices = [];
 
   bool get _isEditing => widget.initialData != null;
+  bool get _canSave => _nameCtrl.text.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
+    _nameCtrl.addListener(() => setState(() {}));
     if (_isEditing) {
       _nameCtrl.text = widget.initialData!['group'] ?? '';
       _iconCtrl.text = widget.initialData!['icon'] ?? '✨';
@@ -480,20 +510,8 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
     }
   }
 
-  void _add() {
-    if (_practiceCtrl.text.trim().isEmpty) return;
-    setState(() {
-      _practices.add(Practice(
-          name: _practiceCtrl.text.trim(),
-          energy: _energy,
-          flow: _flow,
-          organ: _organ));
-      _practiceCtrl.clear();
-    });
-  }
-
   void _save() {
-    if (_nameCtrl.text.trim().isEmpty || _practices.isEmpty) return;
+    if (!_canSave) return;
     widget.onSave(Activity(
         group: _nameCtrl.text.trim(),
         icon: _iconCtrl.text.trim().isEmpty ? '✨' : _iconCtrl.text.trim(),
@@ -505,7 +523,6 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
   void dispose() {
     _nameCtrl.dispose();
     _iconCtrl.dispose();
-    _practiceCtrl.dispose();
     super.dispose();
   }
 
@@ -514,206 +531,242 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
             color: const Color(0xFFF8F9FA),
-            borderRadius: BorderRadius.circular(20)),
-        child: SingleChildScrollView(
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              colors: [Color(0xFF6B8E23), Color(0xFF8B6914)]),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Text(_isEditing ? '✏️' : '✨',
-                          style: const TextStyle(
-                              fontSize: 18, color: Colors.white))),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child: Text(
+            borderRadius: BorderRadius.circular(24)),
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(children: [
+                Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                            colors: [Color(0xFF6B8E23), Color(0xFF8B6914)]),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Text(_isEditing ? '✏️' : '✨',
+                        style: const TextStyle(fontSize: 20))),
+                const SizedBox(width: 12),
+                Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      Text(
                           _isEditing ? 'Editar Categoria' : 'Nova Categoria',
                           style: GoogleFonts.playfairDisplay(
-                              fontSize: 18, fontWeight: FontWeight.bold))),
-                  GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.close_rounded,
-                              size: 16, color: Colors.grey))),
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      if (!_isEditing)
+                        Text('As práticas são adicionadas depois',
+                            style: GoogleFonts.lato(
+                                fontSize: 11,
+                                color: Colors.grey[400],
+                                fontStyle: FontStyle.italic)),
+                    ])),
+                GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.close_rounded,
+                            size: 18, color: Colors.grey))),
+              ]),
+              const SizedBox(height: 24),
+
+              // Ícone + Nome lado a lado
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _label('Ícone'),
+                  SizedBox(
+                    width: 64,
+                    child: _field(_iconCtrl, '✨', textAlign: TextAlign.center),
+                  ),
                 ]),
-                const SizedBox(height: 16),
-                _label('Nome'),
-                _field(_nameCtrl, 'Ex: Yoga, Jardinagem...'),
-                const SizedBox(height: 10),
-                _label('Ícone'),
-                _field(_iconCtrl, '✨'),
-                const SizedBox(height: 16),
-                Text('Adicionar Prática',
-                    style: GoogleFonts.lato(
-                        fontSize: 13, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
+                const SizedBox(width: 12),
+                Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                  _label('Nome da categoria'),
+                  _field(_nameCtrl, 'Ex: Yoga, Jardinagem...'),
+                ])),
+              ]),
+
+              // Lista de práticas (apenas no modo edição)
+              if (_isEditing) ...[
+                const SizedBox(height: 20),
                 Row(children: [
-                  Expanded(child: _field(_practiceCtrl, 'Nome da prática')),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                      onTap: _add,
-                      child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFF6B8E23),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: const Icon(Icons.add_rounded,
-                              color: Colors.white, size: 20)))
+                  Text('Práticas',
+                      style: GoogleFonts.lato(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey[600])),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFF6B8E23).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Text('${_practices.length}',
+                        style: GoogleFonts.lato(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF6B8E23))),
+                  ),
                 ]),
                 const SizedBox(height: 8),
-                _segmented(['Ativa', 'Passiva'], _energy,
-                    (v) => setState(() => _energy = v)),
-                const SizedBox(height: 6),
-                _segmented([
-                  'Fácil',
-                  'Fácil – Médio',
-                  'Médio',
-                  'Médio – Difícil',
-                  'Difícil'
-                ], _flow, (v) => setState(() => _flow = v)),
-                const SizedBox(height: 6),
-                _segmented(['Mente', 'Corpo', 'Corpo/Mente'], _organ,
-                    (v) => setState(() => _organ = v)),
-                if (_practices.isNotEmpty) ...[
-                  const SizedBox(height: 12),
+                if (_practices.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.07),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: Colors.amber.withOpacity(0.3))),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.info_outline_rounded,
+                              size: 14, color: Colors.amber[700]),
+                          const SizedBox(width: 6),
+                          Text('Nenhuma prática ainda',
+                              style: GoogleFonts.lato(
+                                  fontSize: 12,
+                                  color: Colors.amber[800],
+                                  fontStyle: FontStyle.italic)),
+                        ]),
+                  )
+                else
                   ..._practices.asMap().entries.map((e) => Container(
-                        margin: const EdgeInsets.only(bottom: 4),
+                        margin: const EdgeInsets.only(bottom: 6),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
+                            horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.grey[200]!)),
                         child: Row(children: [
                           Expanded(
-                              child: Text(
-                                  '${e.value.name} (${e.value.energy}·${e.value.flow}·${e.value.organ})',
-                                  style: GoogleFonts.lato(fontSize: 11))),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                Text(e.value.name,
+                                    style: GoogleFonts.lato(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF2D3436))),
+                                const SizedBox(height: 2),
+                                Text(
+                                    '${e.value.energy} · ${e.value.flow} · ${e.value.organ}',
+                                    style: GoogleFonts.lato(
+                                        fontSize: 11,
+                                        color: Colors.grey[500])),
+                              ])),
                           GestureDetector(
                               onTap: () =>
                                   setState(() => _practices.removeAt(e.key)),
-                              child: const Icon(Icons.close_rounded,
-                                  size: 14, color: Colors.red)),
+                              child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(8)),
+                                  child: const Icon(Icons.delete_outline_rounded,
+                                      size: 16, color: Colors.red))),
                         ]),
                       )),
-                ],
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: (_nameCtrl.text.isNotEmpty && _practices.isNotEmpty)
-                      ? _save
-                      : null,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [
-                          const Color(0xFF6B8E23).withOpacity(
-                              (_nameCtrl.text.isNotEmpty &&
-                                      _practices.isNotEmpty)
-                                  ? 1.0
-                                  : 0.4),
-                          const Color(0xFF8B6914).withOpacity(
-                              (_nameCtrl.text.isNotEmpty &&
-                                      _practices.isNotEmpty)
-                                  ? 1.0
-                                  : 0.4)
-                        ]),
-                        borderRadius: BorderRadius.circular(15)),
-                    child: Text(_isEditing ? 'SALVAR' : 'CRIAR CATEGORIA',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.lato(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white)),
-                  ),
+              ],
+
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: _canSave ? _save : null,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [
+                        const Color(0xFF6B8E23)
+                            .withOpacity(_canSave ? 1.0 : 0.35),
+                        const Color(0xFF8B6914)
+                            .withOpacity(_canSave ? 1.0 : 0.35),
+                      ]),
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Text(_isEditing ? 'SALVAR' : 'CRIAR CATEGORIA',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.lato(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                          color: Colors.white)),
                 ),
-              ]),
-        ),
+              ),
+            ]),
       ),
     );
   }
 
   Widget _label(String t) => Padding(
-      padding: const EdgeInsets.only(bottom: 3),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Text(t,
           style: GoogleFonts.lato(
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
               color: Colors.grey[600])));
-  Widget _field(TextEditingController c, String h) => Container(
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey[200]!)),
-      child: TextField(
-          controller: c,
-          style: GoogleFonts.lato(fontSize: 13),
-          decoration: InputDecoration(
-              hintText: h,
-              hintStyle:
-                  GoogleFonts.lato(fontSize: 12, color: Colors.grey[400]),
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10))));
 
-  Widget _segmented(List<String> opts, String cur, Function(String) onCh) =>
+  Widget _field(TextEditingController c, String h,
+          {TextAlign textAlign = TextAlign.start}) =>
       Container(
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-            color: Colors.grey[100], borderRadius: BorderRadius.circular(10)),
-        child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-                children: opts.map((o) {
-              final sel = cur == o;
-              return GestureDetector(
-                  onTap: () => onCh(o),
-                  child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 7),
-                      decoration: BoxDecoration(
-                          color: sel
-                              ? const Color(0xFF6B8E23)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text(o,
-                          style: GoogleFonts.lato(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: sel ? Colors.white : Colors.grey[600]))));
-            }).toList())),
-      );
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!)),
+          child: TextField(
+              controller: c,
+              textAlign: textAlign,
+              style: GoogleFonts.lato(fontSize: 14),
+              decoration: InputDecoration(
+                  hintText: h,
+                  hintStyle:
+                      GoogleFonts.lato(fontSize: 13, color: Colors.grey[400]),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12))));
 }
 
-// ========== DIÁLOGO: ADICIONAR PRÁTICA ==========
-class _PracticeFormDialog extends StatefulWidget {
+// ========== BOTTOM SHEET: ADICIONAR PRÁTICA ==========
+class _PracticeFormSheet extends StatefulWidget {
   final String categoryName;
+  final String categoryIcon;
   final Function(Practice) onSave;
-  const _PracticeFormDialog({required this.categoryName, required this.onSave});
+  const _PracticeFormSheet({
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.onSave,
+  });
 
   @override
-  State<_PracticeFormDialog> createState() => _PracticeFormDialogState();
+  State<_PracticeFormSheet> createState() => _PracticeFormSheetState();
 }
 
-class _PracticeFormDialogState extends State<_PracticeFormDialog> {
+class _PracticeFormSheetState extends State<_PracticeFormSheet> {
   final _ctrl = TextEditingController();
   String _energy = 'Ativa', _flow = 'Médio', _organ = 'Mente';
 
+  bool get _canSave => _ctrl.text.trim().isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl.addListener(() => setState(() {}));
+  }
+
   void _save() {
-    if (_ctrl.text.trim().isEmpty) return;
+    if (!_canSave) return;
     widget.onSave(Practice(
         name: _ctrl.text.trim(), energy: _energy, flow: _flow, organ: _organ));
     Navigator.pop(context);
@@ -727,117 +780,186 @@ class _PracticeFormDialogState extends State<_PracticeFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
-            borderRadius: BorderRadius.circular(20)),
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.fromLTRB(24, 20, 24, 24 + bottomPadding),
+      child: SingleChildScrollView(
         child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Nova Prática em "${widget.categoryName}"',
-                  style: GoogleFonts.playfairDisplay(
-                      fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Header
+            Row(children: [
               Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey[200]!)),
-                  child: TextField(
-                      controller: _ctrl,
-                      style: GoogleFonts.lato(fontSize: 13),
-                      decoration: InputDecoration(
-                          hintText: 'Nome da prática',
-                          hintStyle: GoogleFonts.lato(
-                              fontSize: 12, color: Colors.grey[400]),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10)))),
-              const SizedBox(height: 12),
-              Text('Energia',
-                  style: GoogleFonts.lato(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey[600])),
-              _seg(['Ativa', 'Passiva'], _energy,
-                  (v) => setState(() => _energy = v)),
-              const SizedBox(height: 8),
-              Text('Flow',
-                  style: GoogleFonts.lato(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey[600])),
-              _seg([
-                'Fácil',
-                'Fácil – Médio',
-                'Médio',
-                'Médio – Difícil',
-                'Difícil'
-              ], _flow, (v) => setState(() => _flow = v)),
-              const SizedBox(height: 8),
-              Text('Foco',
-                  style: GoogleFonts.lato(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey[600])),
-              _seg(['Mente', 'Corpo', 'Corpo/Mente'], _organ,
-                  (v) => setState(() => _organ = v)),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: _ctrl.text.isNotEmpty ? _save : null,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [
-                        const Color(0xFF6B8E23)
-                            .withOpacity(_ctrl.text.isNotEmpty ? 1.0 : 0.4),
-                        const Color(0xFF8B6914)
-                            .withOpacity(_ctrl.text.isNotEmpty ? 1.0 : 0.4)
-                      ]),
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Text('ADICIONAR PRÁTICA',
-                      textAlign: TextAlign.center,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    color: const Color(0xFF6B8E23).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12)),
+                child: Text(widget.categoryIcon,
+                    style: const TextStyle(fontSize: 22)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text('Nova Prática',
+                      style: GoogleFonts.playfairDisplay(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('em ${widget.categoryName}',
                       style: GoogleFonts.lato(
                           fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
-                ),
+                          color: const Color(0xFF6B8E23),
+                          fontWeight: FontWeight.w600)),
+                ]),
               ),
             ]),
+            const SizedBox(height: 24),
+
+            // Nome
+            _sheetLabel('Nome da prática'),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.grey[200]!)),
+              child: TextField(
+                controller: _ctrl,
+                autofocus: true,
+                style: GoogleFonts.lato(fontSize: 15),
+                decoration: InputDecoration(
+                    hintText: 'Ex: Meditação guiada, Leitura...',
+                    hintStyle:
+                        GoogleFonts.lato(fontSize: 14, color: Colors.grey[400]),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14)),
+              ),
+            ),
+            const SizedBox(height: 22),
+
+            // Energia
+            _sheetLabel('⚡ Energia'),
+            _sheetSubLabel('Qual tipo de energia essa prática mobiliza?'),
+            const SizedBox(height: 8),
+            _chips(['Ativa', 'Passiva'], _energy,
+                (v) => setState(() => _energy = v)),
+            const SizedBox(height: 20),
+
+            // Dificuldade
+            _sheetLabel('🌊 Dificuldade'),
+            _sheetSubLabel('Qual o nível de esforço necessário?'),
+            const SizedBox(height: 8),
+            _chips(
+                ['Fácil', 'Fácil – Médio', 'Médio', 'Médio – Difícil', 'Difícil'],
+                _flow,
+                (v) => setState(() => _flow = v)),
+            const SizedBox(height: 20),
+
+            // Foco
+            _sheetLabel('🎯 Foco'),
+            _sheetSubLabel('Qual dimensão essa prática desenvolve?'),
+            const SizedBox(height: 8),
+            _chips(['Mente', 'Corpo', 'Corpo/Mente', 'Espírito'], _organ,
+                (v) => setState(() => _organ = v)),
+            const SizedBox(height: 28),
+
+            // Botão salvar
+            GestureDetector(
+              onTap: _canSave ? _save : null,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      const Color(0xFF6B8E23)
+                          .withOpacity(_canSave ? 1.0 : 0.35),
+                      const Color(0xFF8B6914)
+                          .withOpacity(_canSave ? 1.0 : 0.35),
+                    ]),
+                    borderRadius: BorderRadius.circular(16)),
+                child: Text('ADICIONAR PRÁTICA',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.lato(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                        color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _seg(List<String> opts, String cur, Function(String) onCh) =>
-      Container(
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-            color: Colors.grey[100], borderRadius: BorderRadius.circular(10)),
-        child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-                children: opts.map((o) {
-              final sel = cur == o;
-              return GestureDetector(
-                  onTap: () => onCh(o),
-                  child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 7),
-                      decoration: BoxDecoration(
-                          color: sel
-                              ? const Color(0xFF6B8E23)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text(o,
-                          style: GoogleFonts.lato(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: sel ? Colors.white : Colors.grey[600]))));
-            }).toList())),
+  Widget _sheetLabel(String t) => Padding(
+        padding: const EdgeInsets.only(bottom: 2),
+        child: Text(t,
+            style: GoogleFonts.lato(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF2D3436))),
+      );
+
+  Widget _sheetSubLabel(String t) => Padding(
+        padding: const EdgeInsets.only(bottom: 0),
+        child: Text(t,
+            style: GoogleFonts.lato(
+                fontSize: 12,
+                color: Colors.grey[500],
+                fontStyle: FontStyle.italic)),
+      );
+
+  Widget _chips(List<String> opts, String cur, Function(String) onCh) =>
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: opts.map((o) {
+          final sel = cur == o;
+          return GestureDetector(
+            onTap: () => onCh(o),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: sel
+                    ? const Color(0xFF6B8E23)
+                    : Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: sel
+                      ? const Color(0xFF6B8E23)
+                      : Colors.grey[300]!,
+                  width: sel ? 2 : 1,
+                ),
+              ),
+              child: Text(o,
+                  style: GoogleFonts.lato(
+                      fontSize: 13,
+                      fontWeight:
+                          sel ? FontWeight.w700 : FontWeight.w500,
+                      color: sel ? Colors.white : Colors.grey[700])),
+            ),
+          );
+        }).toList(),
       );
 }
