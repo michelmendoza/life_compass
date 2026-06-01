@@ -88,7 +88,6 @@ class LifeCompassApp extends StatelessWidget {
           ? MainNavigator(logsBox: logsBox, settingsBox: settingsBox)
           : OnboardingPremiumScreen(
               onComplete: () async {
-                print('🟢 ONBOARDING: onComplete CHAMADO!');
                 await settingsBox.put('onboarding_complete', true);
 
                 // ⭐ Recria o app com o novo estado (funcionava antes!)
@@ -123,7 +122,6 @@ class _MainNavigatorState extends State<MainNavigator> {
   @override
   void initState() {
     super.initState();
-    print('🔵 MAINNAVIGATOR: initState - _currentIndex = $_currentIndex');
 
     // FORÇA a HomeScreen
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -131,7 +129,6 @@ class _MainNavigatorState extends State<MainNavigator> {
         setState(() {
           _currentIndex = 0;
         });
-        print('🔵 MAINNAVIGATOR: FORÇADO _currentIndex = 0');
       }
     });
   }

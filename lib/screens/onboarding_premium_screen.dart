@@ -64,7 +64,6 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
     if (!_isWeb) {
       _initAudio();
     } else {
-      print('🎵 Web: Som desabilitado');
       _audioInitialized = false;
     }
   }
@@ -75,16 +74,12 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
       await _audioPlayer.setVolume(0.25);
       _audioInitialized = true;
-      print('🎵 Player pronto');
 
       try {
         await _audioPlayer.play(AssetSource('sounds/forest_ambience.mp3'));
-        print('🎵 Tocando auto');
       } catch (e) {
-        print('🎵 Autoplay bloqueado: $e');
       }
     } catch (e) {
-      print('🎵 Erro init: $e');
       _audioInitialized = false;
     }
   }
@@ -109,18 +104,14 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
       _soundController.reverse();
       try {
         await _audioPlayer.resume();
-        print('🎵 Tocando!');
       } catch (e) {
-        print('🎵 Erro: $e');
       }
     } else {
       _soundIcon = Icons.volume_off_rounded;
       _soundController.forward();
       try {
         await _audioPlayer.pause();
-        print('🎵 Pausado');
       } catch (e) {
-        print('🎵 Erro pausa: $e');
       }
     }
   }
@@ -129,9 +120,7 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
     if (!_isWeb && _audioInitialized) {
       try {
         _audioPlayer.stop();
-        print('🎵 Áudio parado');
       } catch (e) {
-        print('🎵 Erro ao parar áudio: $e');
       }
     }
   }
@@ -228,7 +217,6 @@ class _OnboardingPremiumScreenState extends State<OnboardingPremiumScreen>
         _fadeController.forward();
       });
     } else {
-      print('🎯 COMEÇAR JORNADA CLICADO!');
 
       // Para o áudio
       _stopAudio();

@@ -84,10 +84,7 @@ class CustomActivitiesManager {
       }
     }
 
-    print('📦 Custom activities: ${result.length}');
     for (final r in result) {
-      print(
-          '   - ${r['group']}: ${(r['practices'] as List?)?.length ?? 0} práticas');
     }
 
     return result;
