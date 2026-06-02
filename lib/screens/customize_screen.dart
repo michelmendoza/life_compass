@@ -459,18 +459,6 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF4A5D23))),
         const Spacer(),
-        GestureDetector(
-          onTap: () async {
-            await CustomActivitiesManager.resetToDefault();
-            await _loadData();
-            widget.onActivitiesChanged();
-          },
-          child: Text('Reset',
-              style: GoogleFonts.lato(
-                  fontSize: 11,
-                  color: Colors.red[400],
-                  fontWeight: FontWeight.w600)),
-        ),
       ]),
     );
   }

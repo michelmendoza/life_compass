@@ -164,6 +164,7 @@ class _MainNavigatorState extends State<MainNavigator> {
               SmartCompassScreen(
                 logs: logs,
                 onStartActivity: (log) => _addLog(log),
+                isSelected: _currentIndex == 1,
               ),
               const SizedBox.shrink(),
               DashboardScreen(

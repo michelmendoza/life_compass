@@ -10,11 +10,13 @@ import 'timer_screen.dart';
 class SmartCompassScreen extends StatefulWidget {
   final List<ActivityLog> logs;
   final Function(ActivityLog) onStartActivity;
+  final bool isSelected;
 
   const SmartCompassScreen({
     super.key,
     required this.logs,
     required this.onStartActivity,
+    this.isSelected = false,
   });
 
   @override
@@ -37,6 +39,16 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
     super.initState();
     _flyController = AnimationController(vsync: this);
     _generateSuggestions();
+  }
+
+  @override
+  void didUpdateWidget(SmartCompassScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final becameVisible = widget.isSelected && !oldWidget.isSelected;
+    final logsChanged = widget.logs.length != oldWidget.logs.length;
+    if (becameVisible || logsChanged) {
+      _generateSuggestions();
+    }
   }
 
   @override
@@ -130,6 +142,32 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             : (_dominantFlow == 'muito_facil' ? 'Confortável' : 'Equilibrado'),
       },
     };
+  }
+
+  String get _insightMessage {
+    if (_recentWeek.isEmpty) {
+      return 'Sem registros nos últimos 7 dias. Sugestões baseadas em práticas equilibradas.';
+    }
+    final parts = <String>[];
+    if (_dominantEnergy == 'muito_ativa') {
+      parts.add('energia alta');
+    } else if (_dominantEnergy == 'muito_passiva') {
+      parts.add('energia baixa');
+    }
+    if (_dominantOrgan == 'muita_mente') {
+      parts.add('mente sobrecarregada');
+    } else if (_dominantOrgan == 'muito_corpo') {
+      parts.add('corpo muito ativo');
+    }
+    if (_dominantFlow == 'muito_dificil') {
+      parts.add('práticas muito desafiadoras');
+    } else if (_dominantFlow == 'muito_facil') {
+      parts.add('zona de conforto');
+    }
+    if (parts.isEmpty) {
+      return 'Seu perfil dos últimos 7 dias está equilibrado. Continue assim!';
+    }
+    return 'Nos últimos 7 dias: ${parts.join(', ')}. As sugestões abaixo visam compensar e reequilibrar.';
   }
 
   // =========================================================
@@ -380,7 +418,9 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             _buildHeader(),
             const SizedBox(height: 12),
             _buildStatusSection(statusData),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            _buildInsightBanner(),
+            const SizedBox(height: 12),
             _buildProgressBar(progress, _currentIndex, _cards.length),
             const SizedBox(height: 20),
             Expanded(
@@ -468,6 +508,18 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
               ],
             ),
           ),
+          GestureDetector(
+            onTap: _generateSuggestions,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6B8E23).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.refresh_rounded,
+                  color: Color(0xFF6B8E23), size: 20),
+            ),
+          ),
         ],
       ),
     );
@@ -518,6 +570,37 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInsightBanner() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF6B8E23).withOpacity(0.07),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+              color: const Color(0xFF6B8E23).withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            const Text('💡', style: TextStyle(fontSize: 13)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _insightMessage,
+                style: GoogleFonts.lato(
+                  fontSize: 11,
+                  height: 1.4,
+                  color: const Color(0xFF4A5D23),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -606,7 +689,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
         scale: scale,
         child: Container(
           width: MediaQuery.of(context).size.width - 48,
-          height: MediaQuery.of(context).size.height * 0.58,
+          height: MediaQuery.of(context).size.height * 0.50,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.5),
             borderRadius: BorderRadius.circular(24),
@@ -648,7 +731,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(18),
         child: Column(
           children: [
             // Categoria no topo
@@ -656,7 +739,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
               alignment: Alignment.topRight,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
                   color: energyColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(30),
@@ -666,7 +749,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
                   style: GoogleFonts.lato(
                       color: energyColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12),
+                      fontSize: 11),
                 ),
               ),
             ),
@@ -677,8 +760,8 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             Hero(
               tag: card.practice.name,
               child: Container(
-                width: 120,
-                height: 120,
+                width: 90,
+                height: 90,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -690,42 +773,42 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
                 ),
                 child: Center(
                   child: Text(card.categoryIcon,
-                      style: const TextStyle(fontSize: 64)),
+                      style: const TextStyle(fontSize: 46)),
                 ),
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
 
             // Nome da prática
             Text(
               card.practice.name,
               textAlign: TextAlign.center,
               style: GoogleFonts.playfairDisplay(
-                fontSize: 28,
+                fontSize: 24,
                 height: 1.2,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF2D3436),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             // Razão
             Text(
               card.reason,
               textAlign: TextAlign.center,
               style: GoogleFonts.lato(
-                  fontSize: 14, height: 1.4, color: Colors.grey[700]),
+                  fontSize: 13, height: 1.4, color: Colors.grey[700]),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
 
             // Chips
             Wrap(
               alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 10,
+              spacing: 8,
+              runSpacing: 6,
               children: [
                 _chip(card.practice.energy, energyColor),
                 _chip(card.practice.flow, flowColor),
@@ -739,12 +822,12 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.swipe_rounded, size: 16, color: Colors.grey[400]),
+                Icon(Icons.swipe_rounded, size: 14, color: Colors.grey[400]),
                 const SizedBox(width: 6),
                 Text(
                   'Arraste para os lados',
                   style:
-                      GoogleFonts.lato(fontSize: 11, color: Colors.grey[500]),
+                      GoogleFonts.lato(fontSize: 10, color: Colors.grey[500]),
                 ),
               ],
             ),
