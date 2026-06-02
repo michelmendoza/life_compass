@@ -1,16 +1,20 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/colors.dart';
 import '../models/activity_log.dart';
 import '../models/hiit_interval.dart';
 import '../models/timer_mode.dart';
+import '../services/sound_service.dart';
 import '../widgets/timer/circular_timer.dart';
 import '../widgets/timer/control_button.dart';
 import '../widgets/timer/manual_time_picker.dart';
 import '../widgets/timer/timer_app_bar.dart';
 import '../widgets/timer/timer_mode_selector.dart';
 import 'completion_screen.dart';
+
+enum HiitProtocol { tabata, interval }
 
 class TimerScreen extends StatefulWidget {
   final String group;
@@ -57,6 +61,25 @@ class _TimerScreenState extends State<TimerScreen>
   int _currentIntervalIndex = 0;
   bool _isHiitRunning = false;
   Duration _hiitRemaining = Duration.zero;
+  HiitProtocol _hiitProtocol = HiitProtocol.tabata;
+  int _intervalWorkSeconds = 40;
+  int _intervalRestSeconds = 20;
+  int _intervalRounds = 8;
+
+  // ── Chronometer lap ──────────────────────────────────────────────────────
+  int _chronometerLap = 0;
+  late Color _chronometerLapColor;
+
+  static const _lapColorPalette = [
+    Color(0xFF5C6BC0),
+    Color(0xFF00897B),
+    Color(0xFFE65100),
+    Color(0xFF6A1B9A),
+    Color(0xFFAD1457),
+    Color(0xFF2E7D32),
+    Color(0xFF0277BD),
+    Color(0xFFF57F17),
+  ];
 
   // ── Animations ───────────────────────────────────────────────────────────
   late AnimationController _pulseController;
@@ -69,6 +92,9 @@ class _TimerScreenState extends State<TimerScreen>
   @override
   void initState() {
     super.initState();
+    _chronometerLapColor =
+        HawkinsColors.energyColors[widget.energy] ?? Colors.grey;
+    SoundService.init();
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -79,7 +105,7 @@ class _TimerScreenState extends State<TimerScreen>
     )..addListener(() {
         setState(() => _animatedProgress = _progressController.value);
       });
-    _initDefaultHiit();
+    _rebuildHiitIntervals();
   }
 
   @override
@@ -101,6 +127,8 @@ class _TimerScreenState extends State<TimerScreen>
 
   Color get _primaryColor {
     switch (_currentMode) {
+      case TimerMode.chronometer:
+        return _chronometerLapColor;
       case TimerMode.pomodoro:
         return _isBreak ? Colors.green : Colors.red[400]!;
       case TimerMode.hiit:
@@ -127,22 +155,26 @@ class _TimerScreenState extends State<TimerScreen>
     }
   }
 
+  // Progress always goes 0→1 (ring fills up as time passes).
   double get _currentProgress {
     switch (_currentMode) {
       case TimerMode.chronometer:
-        if (!_isRunning || _elapsed.inSeconds == 0) return 0;
+        if (_elapsed.inSeconds == 0) return 0;
         const maxSeconds = 3600;
         return (_elapsed.inSeconds % maxSeconds) / maxSeconds;
       case TimerMode.pomodoro:
         if (_pomodoroDuration.inSeconds == 0) return 0;
-        return (_pomodoroRemaining.inSeconds / _pomodoroDuration.inSeconds)
+        return (1.0 -
+                _pomodoroRemaining.inSeconds / _pomodoroDuration.inSeconds)
             .clamp(0.0, 1.0);
       case TimerMode.hiit:
-        if (_hiitIntervals.isEmpty) return 0;
-        final total = _hiitIntervals.fold(
-            Duration.zero, (sum, i) => sum + i.duration);
-        final elapsed = total - _hiitRemaining;
-        return (elapsed.inSeconds / total.inSeconds).clamp(0.0, 1.0);
+        if (_hiitIntervals.isEmpty ||
+            _currentIntervalIndex >= _hiitIntervals.length) {
+          return 0;
+        }
+        final d = _hiitIntervals[_currentIntervalIndex].duration.inSeconds;
+        if (d == 0) return 0;
+        return (1.0 - _hiitRemaining.inSeconds / d).clamp(0.0, 1.0);
       default:
         return 0;
     }
@@ -162,35 +194,87 @@ class _TimerScreenState extends State<TimerScreen>
     );
   }
 
-  // ── HIIT setup ────────────────────────────────────────────────────────────
-  void _initDefaultHiit() {
-    _hiitIntervals = [
-      HiitInterval(name: 'Aquecimento', duration: const Duration(seconds: 30), color: Colors.green, icon: '🔥'),
-      HiitInterval(name: 'Exercício', duration: const Duration(seconds: 20), color: Colors.red, icon: '💪'),
-      HiitInterval(name: 'Descanso', duration: const Duration(seconds: 10), color: Colors.blue, icon: '😮‍💨'),
-      HiitInterval(name: 'Exercício', duration: const Duration(seconds: 20), color: Colors.red, icon: '💪'),
-      HiitInterval(name: 'Descanso', duration: const Duration(seconds: 10), color: Colors.blue, icon: '😮‍💨'),
-      HiitInterval(name: 'Exercício', duration: const Duration(seconds: 20), color: Colors.red, icon: '💪'),
-      HiitInterval(name: 'Descanso', duration: const Duration(seconds: 10), color: Colors.blue, icon: '😮‍💨'),
-      HiitInterval(name: 'Exercício', duration: const Duration(seconds: 20), color: Colors.red, icon: '💪'),
-      HiitInterval(name: 'Resfriamento', duration: const Duration(seconds: 30), color: Colors.green, icon: '🧘'),
-    ];
-    _hiitRemaining = _hiitIntervals[0].duration;
+  // ── HIIT builders ─────────────────────────────────────────────────────────
+  void _rebuildHiitIntervals() {
+    _hiitIntervals = _hiitProtocol == HiitProtocol.tabata
+        ? _buildTabata()
+        : _buildInterval();
+    _currentIntervalIndex = 0;
+    if (_hiitIntervals.isNotEmpty) {
+      _hiitRemaining = _hiitIntervals[0].duration;
+    }
+  }
+
+  List<HiitInterval> _buildTabata() {
+    final intervals = <HiitInterval>[];
+    for (int i = 0; i < 8; i++) {
+      intervals.add(HiitInterval(
+        name: 'Exercício ${i + 1}/8',
+        duration: const Duration(seconds: 20),
+        color: Colors.red,
+        icon: '💪',
+      ));
+      intervals.add(HiitInterval(
+        name: i < 7 ? 'Descanso' : 'Resfriamento',
+        duration: const Duration(seconds: 10),
+        color: i < 7 ? Colors.blue : Colors.teal,
+        icon: i < 7 ? '😮‍💨' : '🧘',
+      ));
+    }
+    return intervals;
+  }
+
+  List<HiitInterval> _buildInterval() {
+    final intervals = <HiitInterval>[];
+    for (int i = 0; i < _intervalRounds; i++) {
+      intervals.add(HiitInterval(
+        name: 'Round ${i + 1}/$_intervalRounds',
+        duration: Duration(seconds: _intervalWorkSeconds),
+        color: Colors.red,
+        icon: '💪',
+      ));
+      if (i < _intervalRounds - 1) {
+        intervals.add(HiitInterval(
+          name: 'Descanso',
+          duration: Duration(seconds: _intervalRestSeconds),
+          color: Colors.blue,
+          icon: '😮‍💨',
+        ));
+      }
+    }
+    return intervals;
+  }
+
+  Color _randomLapColor() {
+    return _lapColorPalette[math.Random().nextInt(_lapColorPalette.length)];
+  }
+
+  String _formatSeconds(int s) {
+    if (s < 60) return '${s}s';
+    final m = s ~/ 60;
+    final rem = s % 60;
+    return rem == 0 ? '${m}min' : '${m}m${rem}s';
   }
 
   // ── Chronometer ───────────────────────────────────────────────────────────
   void _startTimer() {
+    SoundService.beepStart();
     setState(() {
       _isRunning = true;
       _startTime = DateTime.now().subtract(_elapsed);
     });
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
-        setState(() {
-          _elapsed = DateTime.now().difference(_startTime!);
-          _animateProgress();
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _elapsed = DateTime.now().difference(_startTime!);
+        final newLap = _elapsed.inHours;
+        if (newLap > _chronometerLap) {
+          _chronometerLap = newLap;
+          _chronometerLapColor = _randomLapColor();
+          SoundService.beepLong();
+        }
+        _animateProgress();
+      });
     });
   }
 
@@ -202,6 +286,7 @@ class _TimerScreenState extends State<TimerScreen>
   void _stopTimer() {
     _timer?.cancel();
     _completionDuration = _elapsed;
+    SoundService.beepLong();
     _showCompletionScreen();
   }
 
@@ -211,17 +296,19 @@ class _TimerScreenState extends State<TimerScreen>
       _pausePomodoro();
       return;
     }
+    SoundService.beepStart();
     setState(() => _isPomodoroRunning = true);
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
+      if (!mounted) return;
+      if (_pomodoroRemaining.inSeconds > 0) {
         setState(() {
-          if (_pomodoroRemaining.inSeconds > 0) {
-            _pomodoroRemaining -= const Duration(seconds: 1);
-            _animateProgress();
-          } else {
-            _pomodoroComplete();
-          }
+          _pomodoroRemaining -= const Duration(seconds: 1);
+          _animateProgress();
+          final rem = _pomodoroRemaining.inSeconds;
+          if (rem == 3 || rem == 2 || rem == 1) SoundService.beepShort();
         });
+      } else {
+        _pomodoroComplete();
       }
     });
   }
@@ -234,19 +321,22 @@ class _TimerScreenState extends State<TimerScreen>
   void _pomodoroComplete() {
     _timer?.cancel();
     setState(() => _isPomodoroRunning = false);
+    SoundService.beepVictory();
     _completionDuration = _pomodoroDuration;
     _showCompletionScreen();
   }
 
+  void _resetPomodoroState() {
+    _isPomodoroRunning = false;
+    _isBreak = false;
+    _pomodoroDuration = const Duration(minutes: 25);
+    _pomodoroRemaining = const Duration(minutes: 25);
+  }
+
   void _resetPomodoro() {
     _timer?.cancel();
-    setState(() {
-      _isPomodoroRunning = false;
-      _isBreak = false;
-      _pomodoroDuration = const Duration(minutes: 25);
-      _pomodoroRemaining = const Duration(minutes: 25);
-      _animateProgress();
-    });
+    setState(_resetPomodoroState);
+    _progressController.value = 0;
   }
 
   void _setPomodoroDuration(int minutes) {
@@ -255,8 +345,8 @@ class _TimerScreenState extends State<TimerScreen>
       _isBreak = false;
       _pomodoroDuration = Duration(minutes: minutes);
       _pomodoroRemaining = Duration(minutes: minutes);
-      _animateProgress();
     });
+    _progressController.value = 0;
   }
 
   void _startBreak(int minutes) {
@@ -266,8 +356,8 @@ class _TimerScreenState extends State<TimerScreen>
       _isPomodoroRunning = false;
       _pomodoroDuration = Duration(minutes: minutes);
       _pomodoroRemaining = Duration(minutes: minutes);
-      _animateProgress();
     });
+    _progressController.value = 0;
   }
 
   void _stopPomodoroAndSave() {
@@ -275,6 +365,7 @@ class _TimerScreenState extends State<TimerScreen>
     final completed = _pomodoroDuration - _pomodoroRemaining;
     if (completed.inSeconds > 0) {
       _completionDuration = completed;
+      SoundService.beepLong();
       _showCompletionScreen();
     }
   }
@@ -285,28 +376,31 @@ class _TimerScreenState extends State<TimerScreen>
       _pauseHiit();
       return;
     }
-    if (_hiitRemaining == Duration.zero) _resetHiit();
+    SoundService.beepStart();
     setState(() => _isHiitRunning = true);
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
+      if (!mounted) return;
+      if (_hiitRemaining.inSeconds > 0) {
         setState(() {
-          if (_hiitRemaining.inSeconds > 0) {
-            _hiitRemaining -= const Duration(seconds: 1);
-            _animateProgress();
-          } else {
-            _nextHiitInterval();
-          }
+          _hiitRemaining -= const Duration(seconds: 1);
+          _animateProgress();
+          final rem = _hiitRemaining.inSeconds;
+          if (rem == 3 || rem == 2 || rem == 1) SoundService.beepShort();
         });
+      } else {
+        _nextHiitInterval();
       }
     });
   }
 
   void _nextHiitInterval() {
+    SoundService.beepLong();
     if (_currentIntervalIndex + 1 < _hiitIntervals.length) {
       setState(() {
         _currentIntervalIndex++;
         _hiitRemaining = _hiitIntervals[_currentIntervalIndex].duration;
       });
+      _progressController.value = 0;
     } else {
       _completeHiit();
     }
@@ -314,9 +408,10 @@ class _TimerScreenState extends State<TimerScreen>
 
   void _completeHiit() {
     _timer?.cancel();
+    SoundService.beepVictory();
     setState(() => _isHiitRunning = false);
-    final total = _hiitIntervals.fold(
-        Duration.zero, (sum, i) => sum + i.duration);
+    final total =
+        _hiitIntervals.fold(Duration.zero, (sum, i) => sum + i.duration);
     _completionDuration = total;
     _showCompletionScreen();
   }
@@ -330,10 +425,9 @@ class _TimerScreenState extends State<TimerScreen>
     _timer?.cancel();
     setState(() {
       _isHiitRunning = false;
-      _currentIntervalIndex = 0;
-      _hiitRemaining = _hiitIntervals[0].duration;
-      _animateProgress();
+      _rebuildHiitIntervals();
     });
+    _progressController.value = 0;
   }
 
   // ── Manual ────────────────────────────────────────────────────────────────
@@ -409,11 +503,16 @@ class _TimerScreenState extends State<TimerScreen>
   }
 
   void _onModeChanged(TimerMode mode) {
+    _timer?.cancel();
     setState(() {
       _currentMode = mode;
-      if (mode == TimerMode.pomodoro) _resetPomodoro();
-      if (mode == TimerMode.hiit) _resetHiit();
+      _isRunning = false;
+      _isPomodoroRunning = false;
+      _isHiitRunning = false;
+      if (mode == TimerMode.pomodoro) _resetPomodoroState();
+      if (mode == TimerMode.hiit) _rebuildHiitIntervals();
     });
+    _progressController.value = 0;
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -599,6 +698,7 @@ class _TimerScreenState extends State<TimerScreen>
           onTap: _resetPomodoro,
           accentColor: _energyColor,
           color: Colors.grey,
+          showLabel: false,
         ),
       ),
       const SizedBox(width: 12),
@@ -613,6 +713,7 @@ class _TimerScreenState extends State<TimerScreen>
           accentColor: _energyColor,
           color: _isBreak ? Colors.green : Colors.red[400],
           isPrimary: true,
+          showLabel: false,
         ),
       ),
       if (_pomodoroRemaining != _pomodoroDuration) ...[
@@ -624,6 +725,7 @@ class _TimerScreenState extends State<TimerScreen>
             onTap: _stopPomodoroAndSave,
             accentColor: _energyColor,
             color: Colors.red,
+            showLabel: false,
           ),
         ),
       ],
@@ -655,16 +757,36 @@ class _TimerScreenState extends State<TimerScreen>
     if (_hiitIntervals.isEmpty) return const SizedBox.shrink();
 
     final isIdle = !_isHiitRunning &&
+        _currentIntervalIndex == 0 &&
         _hiitRemaining == _hiitIntervals[0].duration;
 
     if (isIdle) {
-      return ControlButton(
-        icon: Icons.play_arrow_rounded,
-        label: 'INICIAR HIIT',
-        onTap: _startHiit,
-        accentColor: _energyColor,
-        color: Colors.purple,
-        isPrimary: true,
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _hiitProtocolChip(HiitProtocol.tabata, 'Tabata'),
+              const SizedBox(width: 8),
+              _hiitProtocolChip(HiitProtocol.interval, 'Interval'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_hiitProtocol == HiitProtocol.tabata)
+            _buildTabataInfo()
+          else
+            _buildIntervalConfig(),
+          const SizedBox(height: 12),
+          ControlButton(
+            icon: Icons.play_arrow_rounded,
+            label: 'INICIAR HIIT',
+            onTap: _startHiit,
+            accentColor: _energyColor,
+            color: Colors.purple,
+            isPrimary: true,
+          ),
+        ],
       );
     }
 
@@ -676,33 +798,178 @@ class _TimerScreenState extends State<TimerScreen>
           onTap: _resetHiit,
           accentColor: _energyColor,
           color: Colors.grey,
+          showLabel: false,
         ),
       ),
       const SizedBox(width: 12),
       Expanded(
         flex: 2,
         child: ControlButton(
-          icon:
-              _isHiitRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
-          label: _isHiitRunning ? 'PAUSAR' : 'INICIAR',
+          icon: _isHiitRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
+          label: _isHiitRunning ? 'PAUSAR' : 'CONTINUAR',
           onTap: _startHiit,
           accentColor: _energyColor,
           color: Colors.purple,
           isPrimary: true,
+          showLabel: false,
         ),
       ),
-      if (_hiitRemaining != _hiitIntervals[0].duration) ...[
-        const SizedBox(width: 12),
-        Expanded(
-          child: ControlButton(
-            icon: Icons.stop_rounded,
-            label: 'PARAR',
-            onTap: _completeHiit,
-            accentColor: _energyColor,
-            color: Colors.red,
+      const SizedBox(width: 12),
+      Expanded(
+        child: ControlButton(
+          icon: Icons.stop_rounded,
+          label: 'PARAR',
+          onTap: _completeHiit,
+          accentColor: _energyColor,
+          color: Colors.red,
+          showLabel: false,
+        ),
+      ),
+    ]);
+  }
+
+  Widget _hiitProtocolChip(HiitProtocol protocol, String label) {
+    final isSelected = _hiitProtocol == protocol;
+    return GestureDetector(
+      onTap: () => setState(() {
+        _hiitProtocol = protocol;
+        _rebuildHiitIntervals();
+        _progressController.value = 0;
+      }),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.purple : Colors.white.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.purple : Colors.grey.withOpacity(0.3),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.lato(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : Colors.grey[600],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabataInfo() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        '20s exercício + 10s descanso × 8 rounds = 4min',
+        textAlign: TextAlign.center,
+        style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[600]),
+      ),
+    );
+  }
+
+  Widget _buildIntervalConfig() {
+    final totalWork = _intervalRounds * _intervalWorkSeconds;
+    final totalRest = (_intervalRounds - 1) * _intervalRestSeconds;
+    final total = totalWork + totalRest;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _hiitConfigRow(
+          'Trabalho',
+          _formatSeconds(_intervalWorkSeconds),
+          onDec: () => setState(() {
+            _intervalWorkSeconds = (_intervalWorkSeconds - 5).clamp(5, 300);
+            _rebuildHiitIntervals();
+          }),
+          onInc: () => setState(() {
+            _intervalWorkSeconds = (_intervalWorkSeconds + 5).clamp(5, 300);
+            _rebuildHiitIntervals();
+          }),
+        ),
+        _hiitConfigRow(
+          'Descanso',
+          _formatSeconds(_intervalRestSeconds),
+          onDec: () => setState(() {
+            _intervalRestSeconds = (_intervalRestSeconds - 5).clamp(5, 300);
+            _rebuildHiitIntervals();
+          }),
+          onInc: () => setState(() {
+            _intervalRestSeconds = (_intervalRestSeconds + 5).clamp(5, 300);
+            _rebuildHiitIntervals();
+          }),
+        ),
+        _hiitConfigRow(
+          'Rounds',
+          '$_intervalRounds',
+          onDec: () => setState(() {
+            _intervalRounds = (_intervalRounds - 1).clamp(1, 20);
+            _rebuildHiitIntervals();
+          }),
+          onInc: () => setState(() {
+            _intervalRounds = (_intervalRounds + 1).clamp(1, 20);
+            _rebuildHiitIntervals();
+          }),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Total: ${_formatSeconds(total)}',
+          style: GoogleFonts.lato(
+            fontSize: 11,
+            color: Colors.purple.withOpacity(0.7),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
-    ]);
+    );
+  }
+
+  Widget _hiitConfigRow(
+    String label,
+    String value, {
+    required VoidCallback onDec,
+    required VoidCallback onInc,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.lato(fontSize: 13, color: Colors.grey[600]),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.remove_circle_outline, size: 20),
+          onPressed: onDec,
+          color: Colors.purple.withOpacity(0.7),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
+        SizedBox(
+          width: 52,
+          child: Text(
+            value,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lato(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.add_circle_outline, size: 20),
+          onPressed: onInc,
+          color: Colors.purple.withOpacity(0.7),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
+      ],
+    );
   }
 }

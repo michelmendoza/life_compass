@@ -8,6 +8,7 @@ class ControlButton extends StatelessWidget {
   final Color accentColor;
   final Color? color;
   final bool isPrimary;
+  final bool showLabel;
 
   const ControlButton({
     super.key,
@@ -17,6 +18,7 @@ class ControlButton extends StatelessWidget {
     required this.accentColor,
     this.color,
     this.isPrimary = false,
+    this.showLabel = true,
   });
 
   @override
@@ -53,16 +55,18 @@ class ControlButton extends StatelessWidget {
           children: [
             Icon(icon,
                 color: isPrimary ? Colors.white : buttonColor, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.lato(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isPrimary ? Colors.white : buttonColor,
-                letterSpacing: 1,
+            if (showLabel) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.lato(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isPrimary ? Colors.white : buttonColor,
+                  letterSpacing: 1,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

@@ -16,11 +16,11 @@ class TimerModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final modes = <(TimerMode, String, IconData, Color)>[
-      (TimerMode.chronometer, 'Cronômetro', Icons.timer_rounded, energyColor),
-      (TimerMode.pomodoro, 'Pomodoro', Icons.timer_rounded, Colors.red[400]!),
-      (TimerMode.manual, 'Manual', Icons.edit_calendar_rounded, Colors.orange),
-      (TimerMode.hiit, 'HIIT', Icons.fitness_center_rounded, Colors.purple),
+    final modes = <(TimerMode, String, Widget Function(Color), Color)>[
+      (TimerMode.chronometer, 'Cronômetro', (c) => Icon(Icons.timer_rounded, size: 18, color: c), energyColor),
+      (TimerMode.pomodoro, 'Pomodoro', (_) => const Text('🍅', style: TextStyle(fontSize: 16)), Colors.red[400]!),
+      (TimerMode.manual, 'Manual', (c) => Icon(Icons.edit_calendar_rounded, size: 18, color: c), Colors.orange),
+      (TimerMode.hiit, 'HIIT', (c) => Icon(Icons.fitness_center_rounded, size: 18, color: c), Colors.purple),
     ];
 
     return Container(
@@ -35,9 +35,7 @@ class TimerModeSelector extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? mode.$4
-                      : Colors.white.withOpacity(0.3),
+                  color: isSelected ? mode.$4 : Colors.white.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected ? mode.$4 : Colors.white,
@@ -46,9 +44,7 @@ class TimerModeSelector extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Icon(mode.$3,
-                        size: 18,
-                        color: isSelected ? Colors.white : mode.$4),
+                    mode.$3(isSelected ? Colors.white : mode.$4),
                     const SizedBox(height: 2),
                     Text(
                       mode.$2,
