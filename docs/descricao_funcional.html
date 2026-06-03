@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RootFlow — Descrição Funcional</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Lato:wght@300;400;600;700&display=swap');
+
+  :root {
+    --green-dark:   #4A5D23;
+    --green-mid:    #6B8E23;
+    --green-light:  #8FBC8F;
+    --green-pale:   #EDF4E1;
+    --green-bg:     #F5F9E9;
+    --teal:         #20B2AA;
+    --orange:       #E07B39;
+    --gold:         #8B6914;
+    --text-dark:    #2D3436;
+    --text-mid:     #555F69;
+    --text-light:   #8A9BA8;
+    --border:       #D4E8C2;
+    --white:        #FFFFFF;
+    --shadow:       rgba(74,93,35,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 10.5pt;
+    line-height: 1.65;
+  }
+
+  /* ── CAPA ─────────────────────────────────── */
+  .cover {
+    page-break-after: always;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #2D3E10 0%, #4A5D23 40%, #6B8E23 75%, #8FBC8F 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 60px 40px;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    top: -200px; right: -200px;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    bottom: -150px; left: -100px;
+  }
+  .cover-icon {
+    font-size: 72pt;
+    margin-bottom: 24px;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));
+  }
+  .cover-label {
+    font-family: 'Lato', sans-serif;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 12px;
+  }
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 52pt;
+    font-weight: 900;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .cover-sub {
+    font-family: 'Playfair Display', serif;
+    font-size: 18pt;
+    font-weight: 400;
+    color: rgba(255,255,255,0.75);
+    text-align: center;
+    font-style: italic;
+    margin-bottom: 48px;
+  }
+  .cover-divider {
+    width: 80px; height: 2px;
+    background: rgba(255,255,255,0.4);
+    margin: 0 auto 48px;
+    border-radius: 2px;
+  }
+  .cover-pills {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 56px;
+  }
+  .cover-pill {
+    padding: 6px 18px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 9pt;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.5px;
+  }
+  .cover-footer {
+    position: absolute;
+    bottom: 36px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 8pt;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+  }
+
+  /* ── ÍNDICE ───────────────────────────────── */
+  .toc-page {
+    page-break-after: always;
+    padding: 56px 64px;
+    min-height: 100vh;
+    background: var(--green-bg);
+  }
+  .toc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28pt;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin-bottom: 8px;
+  }
+  .toc-rule {
+    width: 60px; height: 3px;
+    background: linear-gradient(to right, var(--green-mid), var(--green-light));
+    border-radius: 2px;
+    margin-bottom: 40px;
+  }
+  .toc-group { margin-bottom: 28px; }
+  .toc-group-label {
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    background: var(--white);
+    border: 1px solid var(--border);
+  }
+  .toc-num {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-light));
+    color: white;
+    font-size: 8.5pt;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 14px;
+  }
+  .toc-name {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--text-dark);
+    flex: 1;
+  }
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--border);
+    margin: 0 12px;
+  }
+  .toc-page-num {
+    font-size: 9pt;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  /* ── LAYOUT CONTEÚDO ─────────────────────── */
+  .content {
+    padding: 48px 64px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* ── CABEÇALHO DE SEÇÃO ──────────────────── */
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--green-pale);
+  }
+  .section-num {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+    font-size: 14pt;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  .section-title-block {}
+  .section-label {
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-mid);
+    margin-bottom: 2px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.1;
+  }
+
+  /* ── TIPOGRAFIA ──────────────────────────── */
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 14pt;
+    font-weight: 600;
+    color: var(--green-dark);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h3::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 18px;
+    background: linear-gradient(to bottom, var(--green-mid), var(--green-light));
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  p { margin-bottom: 12px; color: var(--text-mid); }
+  strong { color: var(--text-dark); }
+
+  /* ── INFO CARDS ───────────────────────────── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .info-card {
+    background: var(--green-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .info-card-label {
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green-mid);
+    margin-bottom: 6px;
+  }
+  .info-card-value {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+  .info-card-sub {
+    font-size: 9pt;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+
+  /* ── PAIN / BENEFIT CARDS ────────────────── */
+  .pain-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid;
+  }
+  .pain-card.pain {
+    background: #FFF8F0;
+    border-color: #F0D0B0;
+  }
+  .pain-card.benefit {
+    background: var(--green-bg);
+    border-color: var(--border);
+  }
+  .pain-icon {
+    font-size: 18pt;
+    flex-shrink: 0;
+    width: 36px;
+    text-align: center;
+  }
+  .pain-text strong {
+    font-size: 10pt;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .pain-text span {
+    font-size: 9.5pt;
+    color: var(--text-mid);
+  }
+
+  /* ── FLUXOS ──────────────────────────────── */
+  .flow-block {
+    background: #F8FAFF;
+    border: 1px solid #D8E4F8;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .flow-title {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #2A4080;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-title .flow-badge {
+    background: #2A4080;
+    color: white;
+    font-size: 7.5pt;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .flow-steps {
+    list-style: none;
+    position: relative;
+    padding-left: 24px;
+  }
+  .flow-steps::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, #6B8E23, #D4E8C2);
+    border-radius: 1px;
+  }
+  .flow-steps li {
+    position: relative;
+    padding: 5px 0 5px 14px;
+    font-size: 9.5pt;
+    color: var(--text-mid);
+    line-height: 1.5;
+  }
+  .flow-steps li::before {
+    content: '';
+    position: absolute;
+    left: -4px; top: 50%;
+    transform: translateY(-50%);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px var(--green-mid);
+  }
+  .flow-steps li strong {
+    color: var(--green-dark);
+    font-weight: 700;
+  }
+  .flow-steps li.sub {
+    padding-left: 28px;
+    font-size: 9pt;
+    color: var(--text-light);
+  }
+  .flow-steps li.sub::before {
+    width: 5px; height: 5px;
+    background: var(--border);
+    box-shadow: 0 0 0 1px var(--border);
+    left: 8px;
+  }
+
+  /* ── FEATURES ────────────────────────────── */
+  .feature-block {
+    margin-bottom: 40px;
+    page-break-inside: avoid;
+  }
+  .feature-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: linear-gradient(to right, var(--green-dark), var(--green-mid));
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+  }
+  .feature-num {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 11pt;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .feature-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 13pt;
+    font-weight: 600;
+    color: white;
+    flex: 1;
+  }
+  .feature-desc {
+    font-size: 9pt;
+    color: rgba(255,255,255,0.75);
+    font-style: italic;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+  }
+  thead tr {
+    background: var(--green-pale);
+  }
+  thead th {
+    padding: 9px 12px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--green-dark);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr {
+    border-bottom: 1px solid #F0F4E8;
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: #FAFCF5; }
+  td {
+    padding: 8px 12px;
+    vertical-align: top;
+    line-height: 1.5;
+    color: var(--text-mid);
+  }
+  td:first-child {
+    font-weight: 700;
+    color: var(--green-dark);
+    white-space: nowrap;
+    font-size: 8.5pt;
+    width: 60px;
+  }
+  td:nth-child(2) {
+    font-weight: 600;
+    color: var(--text-dark);
+    width: 200px;
+  }
+  td:nth-child(3) { width: 160px; }
+
+  /* ── TECH STACK ──────────────────────────── */
+  .tech-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .tech-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--green-bg);
+    border: 1px solid var(--border);
+    font-size: 9pt;
+    font-weight: 600;
+    color: var(--green-dark);
+  }
+  .tech-chip .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green-mid);
+  }
+
+  /* ── ARCH DIAGRAM ────────────────────────── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .arch-box {
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .arch-box.ui { background: #EEF2FF; border: 1px solid #C7D2FE; }
+  .arch-box.state { background: #FFF7ED; border: 1px solid #FED7AA; }
+  .arch-box.data { background: var(--green-bg); border: 1px solid var(--border); }
+  .arch-box-icon { font-size: 20pt; margin-bottom: 4px; }
+  .arch-box-title { font-size: 9pt; font-weight: 700; color: var(--text-dark); margin-bottom: 3px; }
+  .arch-box-sub { font-size: 8pt; color: var(--text-light); line-height: 1.4; }
+
+  /* ── PAGE BREAK ──────────────────────────── */
+  .page-break { page-break-before: always; }
+  .section-spacer { height: 40px; }
+
+  /* ── PRINT ──────────────────────────────── */
+  @media print {
+    body { font-size: 10pt; }
+    .cover { min-height: 100vh; }
+    .page-break { page-break-before: always; }
+    .feature-block { page-break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ CAPA -->
+<div class="cover">
+  <div class="cover-icon">🧭</div>
+  <div class="cover-label">Documento Funcional</div>
+  <div class="cover-title">RootFlow</div>
+  <div class="cover-sub">Práticas conscientes para uma vida equilibrada</div>
+  <div class="cover-divider"></div>
+  <div class="cover-pills">
+    <span class="cover-pill">Flutter · iOS &amp; Android</span>
+    <span class="cover-pill">Mente · Corpo · Espírito</span>
+    <span class="cover-pill">Offline-First</span>
+    <span class="cover-pill">PT + EN</span>
+    <span class="cover-pill">v1.0 — 2025</span>
+  </div>
+  <div class="cover-footer">Confidencial · RootFlow · 2025</div>
+</div>
+
+<!-- ══════════════════════════════════════════ ÍNDICE -->
+<div class="toc-page">
+  <div class="toc-title">Sumário</div>
+  <div class="toc-rule"></div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Visão Geral</div>
+    <div class="toc-item">
+      <div class="toc-num">1</div>
+      <div class="toc-name">Resumo Técnico e Arquitetura</div>
+      <div class="toc-dots"></div>
+      <div class="toc-page-num">3</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">2</div>
+      <div class="toc-name">Conceito do Projeto</div>
+      <div class="toc-dots"></div>
+      <div class="toc-page-num">4</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">3</div>
+      <div class="toc-name">Dores do Usuário Final</div>
+      <div class="toc-dots"></div>
+      <div class="toc-page-num">5</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">4</div>
+      <div class="toc-name">Benefícios de Uso</div>
+      <div class="toc-dots"></div>
+      <div class="toc-page-num">5</div>
+    </div>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-group-label">Fluxos e Funcionalidades</div>
+    <div class="toc-item">
+      <div class="toc-num">5</div>
+      <div class="toc-name">Fluxos Principais e Alternativos</div>
+      <div class="toc-dots"></div>
+      <div class="toc-page-num">6</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">6</div>
+      <div class="toc-name">Features e Cenários de Teste</div>
+      <div class="toc-dots"></div>
+      <div class="toc-page-num">8</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 40px; padding: 20px 22px; background: white; border-radius: 14px; border: 1px solid var(--border);">
+    <div style="font-size:8pt; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--green-mid); margin-bottom:10px;">Sobre este documento</div>
+    <p style="font-size:9.5pt; color:var(--text-mid); margin:0; line-height:1.6;">
+      Este documento descreve a arquitetura, o conceito, os fluxos e os cenários de teste do aplicativo <strong>RootFlow</strong>. Ele foi produzido para apresentação a stakeholders, times de produto e qualidade.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ SEÇÃO 1 — TECNOLOGIA -->
+<div class="content page-break">
+
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title-block">
+      <div class="section-label">Fundação</div>
+      <div class="section-title">Resumo Técnico e Arquitetura</div>
+    </div>
+  </div>
+
+  <h3>Stack de Tecnologia</h3>
+  <div class="tech-row">
+    <div class="tech-chip"><span class="dot"></span> Flutter (Dart)</div>
+    <div class="tech-chip"><span class="dot"></span> iOS &amp; Android</div>
+    <div class="tech-chip"><span class="dot"></span> Hive (NoSQL local)</div>
+    <div class="tech-chip"><span class="dot"></span> Google Fonts</div>
+    <div class="tech-chip"><span class="dot"></span> flutter_localizations</div>
+    <div class="tech-chip"><span class="dot"></span> audioplayers</div>
+    <div class="tech-chip"><span class="dot"></span> share_plus</div>
+    <div class="tech-chip"><span class="dot"></span> path_provider</div>
+  </div>
+
+  <h3>Arquitetura em Camadas</h3>
+  <div class="arch-grid">
+    <div class="arch-box ui">
+      <div class="arch-box-icon">🖼</div>
+      <div class="arch-box-title">Apresentação</div>
+      <div class="arch-box-sub">Screens · Widgets<br>IndexedStack · Navigator.push</div>
+    </div>
+    <div class="arch-box state">
+      <div class="arch-box-icon">⚙️</div>
+      <div class="arch-box-title">Estado</div>
+      <div class="arch-box-sub">setState · Callbacks<br>ValueListenableBuilder</div>
+    </div>
+    <div class="arch-box data">
+      <div class="arch-box-icon">🗄</div>
+      <div class="arch-box-title">Dados</div>
+      <div class="arch-box-sub">Hive Boxes<br>toJson / fromJson</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-card-label">Persistência</div>
+      <div class="info-card-value">Hive — 3 Boxes</div>
+      <div class="info-card-sub">activity_logs · settings · custom_activities</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">Gerência de Estado</div>
+      <div class="info-card-value">Nativa Flutter</div>
+      <div class="info-card-sub">setState · callbacks · ValueListenable</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">Navegação</div>
+      <div class="info-card-value">IndexedStack + Navigator</div>
+      <div class="info-card-sub">6 slots · FAB central → slot 5</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">Internacionalização</div>
+      <div class="info-card-value">PT + EN</div>
+      <div class="info-card-sub">ARB · DomainTranslations · DateFormat</div>
+    </div>
+  </div>
+
+  <h3>Modelo de Dados Principal</h3>
+  <p>O registro central é o <strong>ActivityLog</strong>, criado ao final de cada sessão. Os campos principais são:</p>
+
+  <div style="background:var(--green-bg); border:1px solid var(--border); border-radius:12px; padding:16px 20px; font-size:9pt; line-height:1.8; font-family:monospace; color:var(--text-dark);">
+    id · timestamp · group (categoria) · energy (Ativa|Passiva)<br>
+    flow (Fácil → Difícil) · organ (Mente|Corpo|Espírito)<br>
+    durationInSeconds · consciousnessLevel (0–3) · difficultyFeedback
+  </div>
+
+  <p style="margin-top:12px;">A métrica <strong>UP (Unidade de Progresso)</strong> é calculada em tempo real no Dashboard: <code>minutos praticados ÷ tempo ideal da categoria</code>. Nunca é armazenada.</p>
+
+</div>
+
+<!-- ══════════════════════════════════════════ SEÇÃO 2 — CONCEITO -->
+<div class="content page-break">
+
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title-block">
+      <div class="section-label">Propósito</div>
+      <div class="section-title">Conceito do Projeto</div>
+    </div>
+  </div>
+
+  <p>RootFlow é um <strong>diário de práticas pessoais conscientes</strong>. O usuário registra o tempo dedicado a atividades nas dimensões de Mente, Corpo e Espírito — trabalho, saúde, espiritualidade, lazer, criação, natureza, autocuidado — e o aplicativo devolve análise de equilíbrio, nível de consciência e sugestões do que praticar a seguir.</p>
+
+  <h3>A Tríade Central</h3>
+  <div class="arch-grid" style="margin-bottom:20px;">
+    <div class="arch-box" style="background:#EEF2FF; border-color:#C7D2FE;">
+      <div class="arch-box-icon">🧠</div>
+      <div class="arch-box-title">Mente</div>
+      <div class="arch-box-sub">Aprendizado · Trabalho · Criação · Social</div>
+    </div>
+    <div class="arch-box" style="background:#FFF1F2; border-color:#FECDD3;">
+      <div class="arch-box-icon">💪</div>
+      <div class="arch-box-title">Corpo</div>
+      <div class="arch-box-sub">Saúde · Natureza · Autocuidado</div>
+    </div>
+    <div class="arch-box" style="background:#FFFBEB; border-color:#FDE68A;">
+      <div class="arch-box-icon">✨</div>
+      <div class="arch-box-title">Espírito</div>
+      <div class="arch-box-sub">Espiritualidade · Lazer · Autocuidado</div>
+    </div>
+  </div>
+
+  <h3>Conceitos-Chave</h3>
+
+  <div class="pain-card benefit">
+    <div class="pain-icon">⚡</div>
+    <div class="pain-text">
+      <strong>Energia: Ativa vs Passiva</strong>
+      <span>Toda prática tem uma energia predominante. Ativas requerem esforço (correr, estudar, trabalhar). Passivas são restauradoras (meditar, alongar, descansar). O equilíbrio entre elas é monitorado.</span>
+    </div>
+  </div>
+
+  <div class="pain-card benefit">
+    <div class="pain-icon">🌊</div>
+    <div class="pain-text">
+      <strong>Flow: Nível de Dificuldade</strong>
+      <span>Escala de Fácil a Difícil que reflete o desafio cognitivo/físico de cada prática. Baseado no conceito de "estado de flow" de Csikszentmihalyi.</span>
+    </div>
+  </div>
+
+  <div class="pain-card benefit">
+    <div class="pain-icon">🔬</div>
+    <div class="pain-text">
+      <strong>Escala de Consciência de Hawkins</strong>
+      <span>O feedback pós-sessão usa 4 níveis (😴 Automático → ✨ Fluindo) inspirados na escala de consciência de David R. Hawkins. Mede a presença e intenção durante a prática.</span>
+    </div>
+  </div>
+
+  <div class="pain-card benefit">
+    <div class="pain-icon">📈</div>
+    <div class="pain-text">
+      <strong>UP — Unidade de Progresso</strong>
+      <span>Métrica relativa: <em>minutos praticados ÷ tempo ideal da categoria</em>. Permite comparar práticas de naturezas distintas em uma mesma escala de dedicação.</span>
+    </div>
+  </div>
+
+  <h3>As 9 Categorias Nativas</h3>
+  <div class="tech-row">
+    <div class="tech-chip">🧘 Espiritualidade</div>
+    <div class="tech-chip">📚 Aprendizado</div>
+    <div class="tech-chip">💼 Trabalho</div>
+    <div class="tech-chip">💪 Saúde</div>
+    <div class="tech-chip">🎮 Lazer</div>
+    <div class="tech-chip">🗣️ Social</div>
+    <div class="tech-chip">🎨 Criação</div>
+    <div class="tech-chip">🌿 Natureza</div>
+    <div class="tech-chip">🛁 Autocuidado</div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ SEÇÃO 3 & 4 — DORES E BENEFÍCIOS -->
+<div class="content page-break">
+
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title-block">
+      <div class="section-label">Problema</div>
+      <div class="section-title">Dores do Usuário Final</div>
+    </div>
+  </div>
+
+  <div class="pain-card pain">
+    <div class="pain-icon">😶</div>
+    <div class="pain-text"><strong>"Não sei se estou equilibrando minha rotina"</strong><span>→ Dashboard com balanceamento visual por órgão e energia, por período.</span></div>
+  </div>
+  <div class="pain-card pain">
+    <div class="pain-icon">🤖</div>
+    <div class="pain-text"><strong>"Fico no piloto automático sem perceber o que faço"</strong><span>→ Registro com nível de consciência (0–3) antes de salvar cada sessão.</span></div>
+  </div>
+  <div class="pain-card pain">
+    <div class="pain-icon">😕</div>
+    <div class="pain-text"><strong>"Não sei por onde começar"</strong><span>→ Smart Compass analisa os últimos 7 dias e sugere o que está faltando em cards deslizáveis.</span></div>
+  </div>
+  <div class="pain-card pain">
+    <div class="pain-icon">⏱</div>
+    <div class="pain-text"><strong>"Perco o fio da meada ao longo do dia"</strong><span>→ FAB sempre visível para registrar uma prática rapidamente; múltiplos modos de timer.</span></div>
+  </div>
+  <div class="pain-card pain">
+    <div class="pain-icon">🔄</div>
+    <div class="pain-text"><strong>"Minha rotina é mecânica, não intencional"</strong><span>→ Cada prática tem energia, flow e órgão — escolha consciente, não no automático.</span></div>
+  </div>
+  <div class="pain-card pain">
+    <div class="pain-icon">📉</div>
+    <div class="pain-text"><strong>"Não consigo manter consistência"</strong><span>→ Histórico completo com evolução de métricas no Dashboard e comparação com período anterior.</span></div>
+  </div>
+  <div class="pain-card pain">
+    <div class="pain-icon">🔒</div>
+    <div class="pain-text"><strong>"Não quero depender de internet ou criar conta"</strong><span>→ Offline-first: tudo local, sem servidor, sem cadastro.</span></div>
+  </div>
+
+  <div class="section-spacer"></div>
+
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title-block">
+      <div class="section-label">Proposta de Valor</div>
+      <div class="section-title">Benefícios de Uso</div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+    <div class="pain-card benefit" style="margin:0;">
+      <div class="pain-icon">👁</div>
+      <div class="pain-text"><strong>Visibilidade imediata</strong><span>UPs e equilíbrio calculados na hora.</span></div>
+    </div>
+    <div class="pain-card benefit" style="margin:0;">
+      <div class="pain-icon">⚡</div>
+      <div class="pain-text"><strong>Baixo atrito</strong><span>FAB central → timer em 2 toques.</span></div>
+    </div>
+    <div class="pain-card benefit" style="margin:0;">
+      <div class="pain-icon">🧭</div>
+      <div class="pain-text"><strong>Sugestão inteligente</strong><span>Smart Compass lê 7 dias e oferece o contrapeso certo.</span></div>
+    </div>
+    <div class="pain-card benefit" style="margin:0;">
+      <div class="pain-icon">⏰</div>
+      <div class="pain-text"><strong>Timer adaptável</strong><span>Crono · Pomodoro · HIIT · Manual.</span></div>
+    </div>
+    <div class="pain-card benefit" style="margin:0;">
+      <div class="pain-icon">🎨</div>
+      <div class="pain-text"><strong>Personalizável</strong><span>Crie suas próprias categorias e práticas.</span></div>
+    </div>
+    <div class="pain-card benefit" style="margin:0;">
+      <div class="pain-icon">📡</div>
+      <div class="pain-text"><strong>Offline-first</strong><span>Sem rede, sem conta, sem dependências externas.</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ SEÇÃO 5 — FLUXOS -->
+<div class="content page-break">
+
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title-block">
+      <div class="section-label">Navegação</div>
+      <div class="section-title">Fluxos Principais e Alternativos</div>
+    </div>
+  </div>
+
+  <!-- Fluxo Principal -->
+  <div class="flow-block">
+    <div class="flow-title">
+      <span class="flow-badge">PRINCIPAL</span>
+      Registrar uma Prática
+    </div>
+    <ul class="flow-steps">
+      <li><strong>HomeScreen</strong> — toque no FAB 🌿 central</li>
+      <li><strong>ConsciousActionScreen</strong> — seleciona categoria no slider horizontal</li>
+      <li class="sub">Passivas aparecem à esquerda, Ativas à direita</li>
+      <li><strong>Prática</strong> — seleciona prática específica e toca <em>Iniciar</em></li>
+      <li><strong>TimerScreen</strong> — escolhe modo e inicia a sessão</li>
+      <li class="sub">Modos disponíveis: Crono · Pomodoro · HIIT · Manual</li>
+      <li><strong>CompletionScreen</strong> — avalia consciência (0–3) e dificuldade</li>
+      <li><strong>Salvar</strong> — ActivityLog gravado no Hive; MainNavigator atualiza via ValueListenable</li>
+    </ul>
+  </div>
+
+  <!-- Smart Compass -->
+  <div class="flow-block" style="background:#F8FFF8; border-color:#C8E6C9;">
+    <div class="flow-title" style="color:#2E7D32;">
+      <span class="flow-badge" style="background:#2E7D32;">MATCH</span>
+      Smart Compass — Sugestão Inteligente
+    </div>
+    <ul class="flow-steps">
+      <li><strong>BottomNav 🌸</strong> — abre SmartCompassScreen</li>
+      <li><strong>Análise automática</strong> — últimos 7 dias de logs avaliados (energia, órgão, flow)</li>
+      <li><strong>Deck de SuggestionCards</strong> — rankeados pelo contrapeso necessário</li>
+      <li>Swipe ← descarta · Swipe → seleciona</li>
+      <li><strong>TimerScreen</strong> — abre diretamente com a prática do card</li>
+    </ul>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="flow-block" style="background:#F3F0FF; border-color:#C4B5FD;">
+    <div class="flow-title" style="color:#5B21B6;">
+      <span class="flow-badge" style="background:#5B21B6;">DASHBOARD</span>
+      Análise do Histórico
+    </div>
+    <ul class="flow-steps">
+      <li><strong>BottomNav 📊</strong> — abre DashboardScreen</li>
+      <li><strong>Seletor de período</strong> — Hoje / Semana / Mês, navega ◄ ►</li>
+      <li>HeroStats · EnergyBalance · OrganBalance · ConsciousnessCard</li>
+      <li>FlowDistribution · ChallengeIndex · SmartSuggestion</li>
+      <li class="sub">Todos os cálculos em tempo real; nada é persistido além dos logs brutos</li>
+    </ul>
+  </div>
+
+  <!-- Histórico -->
+  <div class="flow-block" style="background:#FFF8F0; border-color:#FED7AA;">
+    <div class="flow-title" style="color:#92400E;">
+      <span class="flow-badge" style="background:#92400E;">HISTÓRICO</span>
+      Consulta e Gerência de Registros
+    </div>
+    <ul class="flow-steps">
+      <li><strong>BottomNav 🕐</strong> — abre HistoryScreen</li>
+      <li>Busca por texto · Filtros de período, ano, mês</li>
+      <li>Swipe ou botão de delete para remover log</li>
+      <li><strong>Exportar</strong> — gera JSON e compartilha via share_plus</li>
+    </ul>
+  </div>
+
+  <!-- Customização -->
+  <div class="flow-block" style="background:#FFF0F5; border-color:#FBCFE8;">
+    <div class="flow-title" style="color:#9D174D;">
+      <span class="flow-badge" style="background:#9D174D;">CUSTOM</span>
+      Personalizar Categorias e Práticas
+    </div>
+    <ul class="flow-steps">
+      <li><strong>ConsciousActionScreen → botão +</strong> — abre CustomizeScreen</li>
+      <li>Criar categoria: nome, ícone, energia predominante</li>
+      <li>Criar prática: nome, energia, flow, órgão</li>
+      <li>Categorias custom integradas ao slider e ao Smart Compass</li>
+    </ul>
+  </div>
+
+  <!-- Onboarding -->
+  <div class="flow-block" style="background:#F0FFF4; border-color:#BBF7D0;">
+    <div class="flow-title" style="color:#065F46;">
+      <span class="flow-badge" style="background:#065F46;">ONBOARDING</span>
+      Primeira Execução
+    </div>
+    <ul class="flow-steps">
+      <li>Exibido apenas se <code>onboarding_complete = false</code> no Hive</li>
+      <li>5 páginas animadas com áudio ambiente de floresta</li>
+      <li>Toggle de som disponível em todas as páginas</li>
+      <li>Conclusão persiste <code>onboarding_complete = true</code> e reconstrói o app</li>
+      <li><strong>Replay</strong> — ícone 🧭 na HomeScreen reabre o onboarding via push</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ SEÇÃO 6 — FEATURES & TESTES -->
+<div class="content page-break">
+
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title-block">
+      <div class="section-label">Qualidade</div>
+      <div class="section-title">Features e Cenários de Teste</div>
+    </div>
+  </div>
+
+  <!-- Feature 1 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F1</div>
+      <div>
+        <div class="feature-name">Registro de Prática (Ação Consciente)</div>
+        <div class="feature-desc">Seleção de categoria e prática → abertura do timer</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F1-01</td><td>Iniciar sem categoria selecionada</td><td>Nenhuma categoria selecionada</td><td>SnackBar de alerta: "Selecione uma categoria primeiro"</td></tr>
+        <tr><td>F1-02</td><td>Selecionar categoria e prática</td><td>Saúde → Caminhar</td><td>TimerScreen abre com group=Saúde, energy=Ativa, flow=Fácil, organ=Corpo</td></tr>
+        <tr><td>F1-03</td><td>Ordem do slider</td><td>Lista de categorias</td><td>Passivas aparecem à esquerda das Ativas</td></tr>
+        <tr><td>F1-04</td><td>Categoria custom no slider</td><td>Categoria criada pelo usuário</td><td>Aparece junto às categorias nativas</td></tr>
+        <tr><td>F1-05</td><td>Descrição da categoria</td><td>Espiritualidade selecionada</td><td>Card de descrição renderizado corretamente</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Feature 2 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F2</div>
+      <div>
+        <div class="feature-name">Timer</div>
+        <div class="feature-desc">Modos: Cronômetro · Pomodoro · HIIT · Manual</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F2-01</td><td>Crono: iniciar, pausar, retomar</td><td>Toques play/pause</td><td>Tempo acumula; pausa no tempo exato; retoma do mesmo ponto</td></tr>
+        <tr><td>F2-02</td><td>Pomodoro: ciclo completo</td><td>25 min configurados</td><td>Ao zerar, som tocado + modal de pausa/break</td></tr>
+        <tr><td>F2-03</td><td>HIIT Tabata: rounds</td><td>8 rounds × 40s/20s</td><td>Alterna trabalho/descanso; som na troca de fase</td></tr>
+        <tr><td>F2-04</td><td>HIIT Intervalado customizado</td><td>60s/30s, 5 rounds</td><td>Sequência correta de intervalos e contagem</td></tr>
+        <tr><td>F2-05</td><td>Manual: salvar tempo informado</td><td>1h 30min</td><td>Log com durationInSeconds = 5400</td></tr>
+        <tr><td>F2-06</td><td>Finalizar navega para Completion</td><td>Botão finalizar</td><td>CompletionScreen abre com dados da sessão</td></tr>
+        <tr><td>F2-07</td><td>Fechar sem salvar</td><td>Botão voltar</td><td>Log não gravado; retorna para ConsciousActionScreen</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="content page-break">
+
+  <!-- Feature 3 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F3</div>
+      <div>
+        <div class="feature-name">Completion — Feedback Pós-Sessão</div>
+        <div class="feature-desc">Coleta de consciência e dificuldade antes de salvar</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F3-01</td><td>Salvar com todos os campos</td><td>Consciência=2, Dificuldade=Médio</td><td>Log com consciousnessLevel=2, difficultyFeedback='Médio'</td></tr>
+        <tr><td>F3-02</td><td>Salvar sem consciência</td><td>Nenhum nível selecionado</td><td>Salva com padrão 0 (Automático)</td></tr>
+        <tr><td>F3-03</td><td>Log retorna ao MainNavigator</td><td>Após salvar</td><td>_addLog chamado; Hive atualizado; HomeScreen reflete novo total</td></tr>
+        <tr><td>F3-04</td><td>Double-pop fecha ambas as telas</td><td>Após salvar</td><td>Retorna direto para ConsciousActionScreen; TimerScreen não fica na pilha</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Feature 4 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F4</div>
+      <div>
+        <div class="feature-name">Smart Compass — Match</div>
+        <div class="feature-desc">Sugestão inteligente baseada nos últimos 7 dias</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F4-01</td><td>Muita energia Ativa</td><td>7 dias de práticas Ativas</td><td>Cards com práticas Passivas no topo do deck</td></tr>
+        <tr><td>F4-02</td><td>Muita Mente registrada</td><td>Maioria de logs de Mente</td><td>Cards de Corpo ou Espírito priorizados</td></tr>
+        <tr><td>F4-03</td><td>Swipe right seleciona card</td><td>Arrastar para direita</td><td>TimerScreen abre com dados da prática</td></tr>
+        <tr><td>F4-04</td><td>Swipe left descarta card</td><td>Arrastar para esquerda</td><td>Próximo card do deck fica visível</td></tr>
+        <tr><td>F4-05</td><td>Deck vazio</td><td>Todos os cards descartados</td><td>Estado vazio com opção de regenerar</td></tr>
+        <tr><td>F4-06</td><td>Deck atualiza ao retornar à aba</td><td>Novo log + voltar ao Match</td><td>didUpdateWidget detecta mudança e regenera</td></tr>
+        <tr><td>F4-07</td><td>Sem histórico</td><td>Usuário novo</td><td>Deck com sugestões genéricas balanceadas</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Feature 5 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F5</div>
+      <div>
+        <div class="feature-name">Dashboard</div>
+        <div class="feature-desc">Análise visual do histórico por período</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F5-01</td><td>Sem logs no período</td><td>Hoje sem registros</td><td>EmptyState widget renderizado</td></tr>
+        <tr><td>F5-02</td><td>Filtro "Hoje" correto</td><td>Período = Hoje</td><td>Logs de dias anteriores excluídos</td></tr>
+        <tr><td>F5-03</td><td>Navegar período anterior</td><td>Seta ◄ na semana</td><td>Logs da semana anterior carregados</td></tr>
+        <tr><td>F5-04</td><td>UP calculado corretamente</td><td>30min de Saúde</td><td>UP = 0.67 (30÷45)</td></tr>
+        <tr><td>F5-05</td><td>Balanceamento energético</td><td>3 logs Ativa + 1 Passiva</td><td>EnergyBalance: 75% Ativa / 25% Passiva</td></tr>
+        <tr><td>F5-06</td><td>Nível de consciência médio</td><td>Logs com níveis 1, 2, 3</td><td>ConsciousnessCard exibe média = 2.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="content page-break">
+
+  <!-- Feature 6 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F6</div>
+      <div>
+        <div class="feature-name">Histórico</div>
+        <div class="feature-desc">Listagem, busca, filtro e exportação de registros</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F6-01</td><td>Busca por texto</td><td>"Meditar" no campo</td><td>Apenas logs com nome "Meditar" visíveis</td></tr>
+        <tr><td>F6-02</td><td>Filtro por período</td><td>Filtro = "Esta semana"</td><td>Logs fora do intervalo ocultados</td></tr>
+        <tr><td>F6-03</td><td>Filtro por ano e mês</td><td>2025 · Março</td><td>Apenas logs de março/2025</td></tr>
+        <tr><td>F6-04</td><td>Deletar log</td><td>Swipe ou botão delete</td><td>Removido do Hive; lista atualizada instantaneamente</td></tr>
+        <tr><td>F6-05</td><td>Exportar histórico</td><td>Botão exportar</td><td>JSON gerado e compartilhado via share_plus</td></tr>
+        <tr><td>F6-06</td><td>Lista vazia após filtros</td><td>Filtro sem resultados</td><td>Estado vazio exibido</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Feature 7 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F7</div>
+      <div>
+        <div class="feature-name">Customização</div>
+        <div class="feature-desc">Criação e gerência de categorias e práticas personalizadas</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F7-01</td><td>Criar categoria custom</td><td>Nome=Dança, icon=💃, Ativa</td><td>Salva no box custom_activities; aparece no slider</td></tr>
+        <tr><td>F7-02</td><td>Criar prática em categoria custom</td><td>Prática=Forró, flow=Médio, Corpo</td><td>Prática listada na categoria correspondente</td></tr>
+        <tr><td>F7-03</td><td>Deletar categoria custom</td><td>Categoria custom com práticas</td><td>Categoria removida; logs antigos com esse grupo preservados</td></tr>
+        <tr><td>F7-04</td><td>Categorias nativas não editáveis</td><td>Tentar editar "Saúde"</td><td>Opções de editar/deletar indisponíveis para nativas</td></tr>
+        <tr><td>F7-05</td><td>Custom no Smart Compass</td><td>Prática custom registrada</td><td>Smart Compass considera categoria custom na análise</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Feature 8 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F8</div>
+      <div>
+        <div class="feature-name">Onboarding</div>
+        <div class="feature-desc">Apresentação do app na primeira execução</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F8-01</td><td>Exibido só na primeira abertura</td><td>App nunca aberto antes</td><td>OnboardingPremiumScreen aparece; MainNavigator não</td></tr>
+        <tr><td>F8-02</td><td>Navegar entre 5 páginas</td><td>Swipe ou botão próximo</td><td>Indicador atualiza; conteúdo correto por página</td></tr>
+        <tr><td>F8-03</td><td>Toggle de som</td><td>Botão de mudo</td><td>Áudio para/retoma; ícone muda</td></tr>
+        <tr><td>F8-04</td><td>Concluir onboarding</td><td>Botão "Concluir" na p.5</td><td>onboarding_complete=true salvo; app rebuild</td></tr>
+        <tr><td>F8-05</td><td>Replay via HomeScreen</td><td>Tocar no ícone 🧭</td><td>Onboarding abre via push; não reseta o app</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Feature 9 -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <div class="feature-num">F9</div>
+      <div>
+        <div class="feature-name">Internacionalização</div>
+        <div class="feature-desc">Suporte PT + EN com tradução de interface e domínio</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Cenário</th><th>Entrada</th><th>Resultado Esperado</th></tr></thead>
+      <tbody>
+        <tr><td>F9-01</td><td>App em PT</td><td>Dispositivo em Português</td><td>Interface e domínio (energia, flow, órgão) em PT</td></tr>
+        <tr><td>F9-02</td><td>App em EN</td><td>Dispositivo em English</td><td>Interface e domínio traduzidos via DomainTranslations</td></tr>
+        <tr><td>F9-03</td><td>Meses no histórico localizados</td><td>Filtro por mês · idioma EN</td><td>Nomes de meses em inglês via DateFormat com locale correto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Rodapé -->
+  <div style="margin-top: 48px; padding: 20px 24px; background: var(--green-bg); border-radius: 14px; border: 1px solid var(--border); text-align:center;">
+    <div style="font-size:9pt; color:var(--text-light); line-height:1.7;">
+      <strong style="color:var(--green-dark);">RootFlow</strong> · Documento Funcional v1.0 · 2025<br>
+      🧭 &nbsp; Práticas conscientes para uma vida equilibrada
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
