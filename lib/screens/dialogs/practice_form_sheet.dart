@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/practice.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/domain_translations.dart';
 
 class PracticeFormSheet extends StatefulWidget {
   final String categoryName;
@@ -74,14 +76,15 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
               const SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Nova Prática', style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text('em ${widget.categoryName}',
+                  Text(AppLocalizations.of(context).newPracticeTitle,
+                      style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('${AppLocalizations.of(context).inCategoryPrefix}${widget.categoryName}',
                       style: GoogleFonts.lato(fontSize: 13, color: const Color(0xFF6B8E23), fontWeight: FontWeight.w600)),
                 ]),
               ),
             ]),
             const SizedBox(height: 24),
-            _label('Nome da prática'),
+            _label(AppLocalizations.of(context).practiceNameLabel),
             Container(
               decoration: BoxDecoration(
                   color: Colors.white,
@@ -92,28 +95,32 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
                 autofocus: true,
                 style: GoogleFonts.lato(fontSize: 15),
                 decoration: InputDecoration(
-                    hintText: 'Ex: Meditação guiada, Leitura...',
+                    hintText: AppLocalizations.of(context).practiceNameHint,
                     hintStyle: GoogleFonts.lato(fontSize: 14, color: Colors.grey[400]),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
               ),
             ),
             const SizedBox(height: 22),
-            _label('⚡ Energia'),
-            _subLabel('Qual tipo de energia essa prática mobiliza?'),
+            _label(AppLocalizations.of(context).energySectionLabel),
+            _subLabel(AppLocalizations.of(context).energySectionQuestion),
             const SizedBox(height: 8),
-            _chips(['Ativa', 'Passiva'], _energy, (v) => setState(() => _energy = v)),
+            _chips(['Ativa', 'Passiva'], _energy, (v) => setState(() => _energy = v),
+                translate: (v) => DomainTranslations.energy(context, v)),
             const SizedBox(height: 20),
-            _label('🌊 Dificuldade'),
-            _subLabel('Qual o nível de esforço necessário?'),
+            _label(AppLocalizations.of(context).difficultySectionLabel),
+            _subLabel(AppLocalizations.of(context).difficultySectionQuestion),
             const SizedBox(height: 8),
             _chips(['Fácil', 'Fácil – Médio', 'Médio', 'Médio – Difícil', 'Difícil'], _flow,
-                (v) => setState(() => _flow = v)),
+                (v) => setState(() => _flow = v),
+                translate: (v) => DomainTranslations.flow(context, v)),
             const SizedBox(height: 20),
-            _label('🎯 Foco'),
-            _subLabel('Qual dimensão essa prática desenvolve?'),
+            _label(AppLocalizations.of(context).focusSectionLabel),
+            _subLabel(AppLocalizations.of(context).focusSectionQuestion),
             const SizedBox(height: 8),
-            _chips(['Mente', 'Corpo', 'Corpo/Mente', 'Espírito'], _organ, (v) => setState(() => _organ = v)),
+            _chips(['Mente', 'Corpo', 'Corpo/Mente', 'Espírito'], _organ,
+                (v) => setState(() => _organ = v),
+                translate: (v) => DomainTranslations.organ(context, v)),
             const SizedBox(height: 28),
             GestureDetector(
               onTap: _canSave ? _save : null,
@@ -127,7 +134,7 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
                       const Color(0xFF8B6914).withOpacity(_canSave ? 1.0 : 0.35),
                     ]),
                     borderRadius: BorderRadius.circular(16)),
-                child: Text('ADICIONAR PRÁTICA',
+                child: Text(AppLocalizations.of(context).addPracticeButton,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.lato(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5, color: Colors.white)),
               ),
@@ -148,7 +155,13 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
         child: Text(t, style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[500], fontStyle: FontStyle.italic)),
       );
 
-  Widget _chips(List<String> opts, String cur, Function(String) onCh) => Wrap(
+  Widget _chips(
+    List<String> opts,
+    String cur,
+    Function(String) onCh, {
+    String Function(String)? translate,
+  }) =>
+      Wrap(
         spacing: 8,
         runSpacing: 8,
         children: opts.map((o) {
@@ -163,11 +176,13 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: sel ? const Color(0xFF6B8E23) : Colors.grey[300]!, width: sel ? 2 : 1),
               ),
-              child: Text(o,
-                  style: GoogleFonts.lato(
-                      fontSize: 13,
-                      fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
-                      color: sel ? Colors.white : Colors.grey[700])),
+              child: Text(
+                translate != null ? translate(o) : o,
+                style: GoogleFonts.lato(
+                    fontSize: 13,
+                    fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                    color: sel ? Colors.white : Colors.grey[700]),
+              ),
             ),
           );
         }).toList(),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/activities.dart';
 import '../../data/colors.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/domain_translations.dart';
 import 'glass_card.dart';
 
 class EquilibrioCard extends StatelessWidget {
@@ -51,8 +53,10 @@ class EquilibrioCard extends StatelessWidget {
         ? 1.0
         : upsPorCategoria.values.reduce((a, b) => a > b ? a : b);
 
+    final l10n = AppLocalizations.of(context);
+
     return DashboardGlassCard(
-      title: 'Equilíbrio entre Categorias',
+      title: l10n.cardBalanceCategories,
       icon: Icons.balance_rounded,
       rightWidget: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -78,7 +82,7 @@ class EquilibrioCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(entry.key, style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[700])),
+                      Text(DomainTranslations.category(context, entry.key), style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[700])),
                       Text('${_formatUPs(entry.value)} UP', style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.bold, color: cor)),
                     ],
                   ),
@@ -109,7 +113,9 @@ class EquilibrioCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Não praticado: ${categoriasNaoPraticadas.take(3).join(", ")}',
+                      l10n.notPracticed(categoriasNaoPraticadas.take(3)
+                          .map((c) => DomainTranslations.category(context, c))
+                          .join(', ')),
                       style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ),
@@ -121,7 +127,7 @@ class EquilibrioCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                '✨ Experimente: $sugestaoEquilibrio',
+                l10n.trySuggestion(DomainTranslations.category(context, sugestaoEquilibrio)),
                 style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.w600, color: _equilibrioColor),
               ),
             ),
@@ -130,10 +136,10 @@ class EquilibrioCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total: ${_formatUPs(totalUPs)} UPs em $totalActivities atividades',
+                l10n.totalUPsLabel(_formatUPs(totalUPs), totalActivities),
                 style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500]),
               ),
-              Text('* barras relativas ao maior valor', style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
+              Text(l10n.relativeBarsNote, style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
             ],
           ),
         ],

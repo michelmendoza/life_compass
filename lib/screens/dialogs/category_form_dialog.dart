@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/activities.dart';
 import '../../data/practice.dart';
+import '../../l10n/app_localizations.dart';
 
 class CategoryFormDialog extends StatefulWidget {
   final Map<String, dynamic>? initialData;
@@ -82,11 +83,13 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                       Text(
-                          _isEditing ? 'Editar Categoria' : 'Nova Categoria',
+                          _isEditing
+                              ? AppLocalizations.of(context).editCategoryTitle
+                              : AppLocalizations.of(context).newCategoryTitle,
                           style: GoogleFonts.playfairDisplay(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                       if (!_isEditing)
-                        Text('As práticas são adicionadas depois',
+                        Text(AppLocalizations.of(context).practicesAddedLater,
                             style: GoogleFonts.lato(
                                 fontSize: 11,
                                 color: Colors.grey[400],
@@ -105,7 +108,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
               const SizedBox(height: 24),
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  _label('Ícone'),
+                  _label(AppLocalizations.of(context).iconLabel),
                   SizedBox(
                     width: 64,
                     child: _field(_iconCtrl, '✨', textAlign: TextAlign.center),
@@ -116,14 +119,14 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                  _label('Nome da categoria'),
-                  _field(_nameCtrl, 'Ex: Yoga, Jardinagem...'),
+                  _label(AppLocalizations.of(context).categoryNameLabel),
+                  _field(_nameCtrl, AppLocalizations.of(context).categoryNameHint),
                 ])),
               ]),
               if (_isEditing) ...[
                 const SizedBox(height: 20),
                 Row(children: [
-                  Text('Práticas',
+                  Text(AppLocalizations.of(context).practicesFormLabel,
                       style: GoogleFonts.lato(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -155,7 +158,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                         children: [
                           Icon(Icons.info_outline_rounded, size: 14, color: Colors.amber[700]),
                           const SizedBox(width: 6),
-                          Text('Nenhuma prática ainda',
+                          Text(AppLocalizations.of(context).noPracticesYet,
                               style: GoogleFonts.lato(
                                   fontSize: 12,
                                   color: Colors.amber[800],
@@ -208,7 +211,9 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                         const Color(0xFF8B6914).withOpacity(_canSave ? 1.0 : 0.35),
                       ]),
                       borderRadius: BorderRadius.circular(16)),
-                  child: Text(_isEditing ? 'SALVAR' : 'CRIAR CATEGORIA',
+                  child: Text(_isEditing
+                      ? AppLocalizations.of(context).saveBtn
+                      : AppLocalizations.of(context).createCategoryBtn,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lato(
                           fontSize: 14,

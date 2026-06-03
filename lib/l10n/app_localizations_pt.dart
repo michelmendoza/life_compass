@@ -606,4 +606,344 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get practiceYoga => 'Yoga';
+
+  @override
+  String get welcomeBack => 'Bem-vindo(a) de volta!';
+
+  @override
+  String get greetingMorning => 'Bom dia! 🌅';
+
+  @override
+  String get greetingAfternoon => 'Boa tarde! 🌞';
+
+  @override
+  String get greetingEvening => 'Boa noite! 🌙';
+
+  @override
+  String get homeBalanceToday => 'Equilíbrio hoje';
+
+  @override
+  String get homePracticesToday => 'práticas hoje';
+
+  @override
+  String get homeTotalPractices => 'total práticas';
+
+  @override
+  String get homeFlowLevels => 'Níveis de Flow';
+
+  @override
+  String get homeExplorePractices => '✨ Explorar Práticas';
+
+  @override
+  String get homeDiscoverActivities => 'Descubra novas atividades';
+
+  @override
+  String get homeActNow => '⚡ Agir Agora';
+
+  @override
+  String get homePersonalizedSuggestions =>
+      'Sugestões personalizadas para você';
+
+  @override
+  String homeDominantBody(int percent) {
+    return 'Corpo $percent%';
+  }
+
+  @override
+  String homeDominantMind(int percent) {
+    return 'Mental $percent%';
+  }
+
+  @override
+  String homeDominantSpirit(int percent) {
+    return 'Espírito $percent%';
+  }
+
+  @override
+  String get homeDominantDefault => 'Mental 70%';
+
+  @override
+  String get motivationSmallSteps =>
+      '✨ Pequenos passos todos os dias levam a grandes mudanças';
+
+  @override
+  String get motivationCloser => '🌟 Você está mais perto do que imagina';
+
+  @override
+  String get motivationBelieve => '💪 Acredite no seu potencial';
+
+  @override
+  String get motivationFocusProcess =>
+      '🎯 Foco no processo, não apenas no resultado';
+
+  @override
+  String get motivationSeed => '🌱 Cada prática é uma semente para o futuro';
+
+  @override
+  String get motivationFutureSelf => '🔥 Seu eu do futuro vai agradecer';
+
+  @override
+  String get motivationAction =>
+      '⚡ Um minuto de ação vale mais que horas de planejamento';
+
+  @override
+  String get motivationJourney =>
+      '🌈 A jornada é tão importante quanto o destino';
+
+  @override
+  String get motivationBreathe => '🍃 Respire, concentre-se e siga em frente';
+
+  @override
+  String get motivationCapable => '⭐ Você é capaz de coisas incríveis';
+
+  @override
+  String get motivationPresence => '🎨 Crie momentos de presença hoje';
+
+  @override
+  String get motivationCare => '💙 Cuide de você como cuidaria de um amigo';
+
+  @override
+  String get statTotalTime => 'Tempo total';
+
+  @override
+  String get statActivities => 'Atividades';
+
+  @override
+  String get statStreak => 'Sequência';
+
+  @override
+  String get last7Days => 'ÚLTIMOS 7 DIAS';
+
+  @override
+  String get cardBalanceCategories => 'Equilíbrio entre Categorias';
+
+  @override
+  String notPracticed(String categories) {
+    return 'Não praticado: $categories';
+  }
+
+  @override
+  String trySuggestion(String category) {
+    return '✨ Experimente: $category';
+  }
+
+  @override
+  String totalUPsLabel(String ups, int count) {
+    return 'Total: $ups UPs em $count atividades';
+  }
+
+  @override
+  String get relativeBarsNote => '* barras relativas ao maior valor';
+
+  @override
+  String get cardEnergyBalance => 'Balanço Energético';
+
+  @override
+  String get energyActivePill => '⚡ Ativa';
+
+  @override
+  String get energyPassivePill => '🍃 Passiva';
+
+  @override
+  String get cardFlowDistribution => 'Distribuição do Flow';
+
+  @override
+  String get cardFocusDimension => 'Foco por Dimensão';
+
+  @override
+  String get cardAvgConsciousness => 'Consciência Média';
+
+  @override
+  String get consciousnessHint =>
+      'Responda o feedback rápido após cada atividade para desbloquear suas métricas de consciência.';
+
+  @override
+  String get stateFlowing => 'Fluindo';
+
+  @override
+  String get stateFocused => 'Focado';
+
+  @override
+  String get statePresent => 'Presente';
+
+  @override
+  String get stateAutomatic => 'Automático';
+
+  @override
+  String get moreAutomatic => '← mais automático';
+
+  @override
+  String get moreConscious => 'mais consciente →';
+
+  @override
+  String activitiesWithFeedback(int count) {
+    return '$count atividades com feedback';
+  }
+
+  @override
+  String get cardFlowVsChallenge => 'Flow vs Desafio';
+
+  @override
+  String get flowChallengeHint =>
+      'Ao finalizar cada atividade, avalie a dificuldade e seu nível de flow para desbloquear este gráfico.';
+
+  @override
+  String flowPeak(String zone, int percent) {
+    return 'Pico: $zone $percent%';
+  }
+
+  @override
+  String get flowZoneEasy => '🌊 Fácil';
+
+  @override
+  String get flowZoneMedium => '⚡ Médio';
+
+  @override
+  String get flowZoneHard => '🔥 Difícil';
+
+  @override
+  String flowActivitiesCount(int count) {
+    return '$count ativ.';
+  }
+
+  @override
+  String flowRatePercent(int percent) {
+    return '$percent% flow';
+  }
+
+  @override
+  String flowInZone(String zone) {
+    return 'Você entra em flow principalmente em atividades $zone. Este é seu ponto ideal!';
+  }
+
+  @override
+  String get flowDistributedMsg =>
+      'Flow distribuído. Varie a dificuldade para encontrar seu ponto ideal.';
+
+  @override
+  String get flowLowMsg =>
+      'Poucos momentos de flow. Tente ajustar: nem tão fácil que entedie, nem tão difícil que frustre.';
+
+  @override
+  String get cardChallengeIndex => 'Índice de Desafio';
+
+  @override
+  String get challengeHigh => '🔥 Alta intensidade';
+
+  @override
+  String get challengeModerate => '⚡ Moderado';
+
+  @override
+  String get challengeSmooth => '🌊 Fluxo tranquilo';
+
+  @override
+  String get challengeScale => '0 = Suave · 100 = Intenso';
+
+  @override
+  String get cardTopCategories => 'Top Categorias';
+
+  @override
+  String get cardRecentActivities => 'Atividades Recentes';
+
+  @override
+  String get customizeScreenTitle => 'Categorias';
+
+  @override
+  String get myCategories => '✨ MINHAS CATEGORIAS';
+
+  @override
+  String get newCategory => 'Nova Categoria';
+
+  @override
+  String get defaultCategories => '📦 CATEGORIAS PADRÃO';
+
+  @override
+  String get emptyCustomCategories =>
+      'Nenhuma categoria personalizada.\nToque em \"Nova Categoria\" para criar!';
+
+  @override
+  String practicesCountLabel(int count) {
+    return '$count prática(s)';
+  }
+
+  @override
+  String get noPracticesAddTip => 'Nenhuma prática — toque em + para adicionar';
+
+  @override
+  String get addPracticeToCategory => 'Adicionar prática';
+
+  @override
+  String get removeCategoryTitle => 'Remover?';
+
+  @override
+  String removeCategoryMessage(String name) {
+    return 'A categoria \"$name\" será removida.';
+  }
+
+  @override
+  String get removeCategoryBtn => 'Remover';
+
+  @override
+  String get editCategoryTitle => 'Editar Categoria';
+
+  @override
+  String get newCategoryTitle => 'Nova Categoria';
+
+  @override
+  String get practicesAddedLater => 'As práticas são adicionadas depois';
+
+  @override
+  String get iconLabel => 'Ícone';
+
+  @override
+  String get categoryNameLabel => 'Nome da categoria';
+
+  @override
+  String get categoryNameHint => 'Ex: Yoga, Jardinagem...';
+
+  @override
+  String get practicesFormLabel => 'Práticas';
+
+  @override
+  String get noPracticesYet => 'Nenhuma prática ainda';
+
+  @override
+  String get saveBtn => 'SALVAR';
+
+  @override
+  String get createCategoryBtn => 'CRIAR CATEGORIA';
+
+  @override
+  String get newPracticeTitle => 'Nova Prática';
+
+  @override
+  String get inCategoryPrefix => 'em ';
+
+  @override
+  String get practiceNameLabel => 'Nome da prática';
+
+  @override
+  String get practiceNameHint => 'Ex: Meditação guiada, Leitura...';
+
+  @override
+  String get energySectionLabel => '⚡ Energia';
+
+  @override
+  String get energySectionQuestion =>
+      'Qual tipo de energia essa prática mobiliza?';
+
+  @override
+  String get difficultySectionLabel => '🌊 Dificuldade';
+
+  @override
+  String get difficultySectionQuestion => 'Qual o nível de esforço necessário?';
+
+  @override
+  String get focusSectionLabel => '🎯 Foco';
+
+  @override
+  String get focusSectionQuestion => 'Qual dimensão essa prática desenvolve?';
+
+  @override
+  String get addPracticeButton => 'ADICIONAR PRÁTICA';
 }

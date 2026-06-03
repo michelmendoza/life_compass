@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/colors.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/domain_translations.dart';
 import 'glass_card.dart';
 
 class OrganBalanceCard extends StatelessWidget {
@@ -13,8 +15,9 @@ class OrganBalanceCard extends StatelessWidget {
     const organs = ['Mente', 'Corpo', 'Espírito'];
     const icons = {'Mente': '🧠', 'Corpo': '💪', 'Espírito': '🧘'};
 
+    final l10n = AppLocalizations.of(context);
     return DashboardGlassCard(
-      title: 'Foco por Dimensão',
+      title: l10n.cardFocusDimension,
       icon: Icons.psychology_rounded,
       child: Column(
         children: organs.map((organ) {
@@ -28,7 +31,7 @@ class OrganBalanceCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('$organ ${icons[organ]}', style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[700])),
+                    Text('${DomainTranslations.organ(context, organ)} ${icons[organ]}', style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[700])),
                     Text('$percent%', style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.bold, color: color)),
                   ],
                 ),

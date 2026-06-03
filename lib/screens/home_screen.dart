@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/activity_log.dart';
-import '../screens/onboarding_premium_screen.dart'; // ⭐ Adicione este import
+import '../screens/onboarding_premium_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<ActivityLog> activityLogs;
@@ -24,34 +25,38 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late List<String> _motivationalMessages;
+  List<String> _motivationalMessages = [];
   String _currentMessage = '';
   final Random _random = Random();
   Timer? _timer;
 
-  final List<String> _messages = [
-    "✨ Pequenos passos todos os dias levam a grandes mudanças",
-    "🌟 Você está mais perto do que imagina",
-    "💪 Acredite no seu potencial",
-    "🎯 Foco no processo, não apenas no resultado",
-    "🌱 Cada prática é uma semente para o futuro",
-    "🔥 Seu eu do futuro vai agradecer",
-    "⚡ Um minuto de ação vale mais que horas de planejamento",
-    "🌈 A jornada é tão importante quanto o destino",
-    "🍃 Respire, concentre-se e siga em frente",
-    "⭐ Você é capaz de coisas incríveis",
-    "🎨 Crie momentos de presença hoje",
-    "💙 Cuide de você como cuidaria de um amigo",
-  ];
-
   @override
   void initState() {
     super.initState();
-    _motivationalMessages = List.from(_messages);
-    _updateMessage();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       if (mounted) _updateMessage();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context);
+    _motivationalMessages = [
+      l10n.motivationSmallSteps,
+      l10n.motivationCloser,
+      l10n.motivationBelieve,
+      l10n.motivationFocusProcess,
+      l10n.motivationSeed,
+      l10n.motivationFutureSelf,
+      l10n.motivationAction,
+      l10n.motivationJourney,
+      l10n.motivationBreathe,
+      l10n.motivationCapable,
+      l10n.motivationPresence,
+      l10n.motivationCare,
+    ];
+    if (_currentMessage.isEmpty) _updateMessage();
   }
 
   @override
@@ -103,18 +108,16 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
+    final l10n = AppLocalizations.of(context);
     final total = body + mind + spirit;
-    if (total == 0) return 'Mental 70%';
+    if (total == 0) return l10n.homeDominantDefault;
 
     if (body >= mind && body >= spirit) {
-      final percent = ((body / total) * 100).round();
-      return 'Corpo ${percent}%';
+      return l10n.homeDominantBody(((body / total) * 100).round());
     } else if (mind >= body && mind >= spirit) {
-      final percent = ((mind / total) * 100).round();
-      return 'Mental ${percent}%';
+      return l10n.homeDominantMind(((mind / total) * 100).round());
     } else {
-      final percent = ((spirit / total) * 100).round();
-      return 'Espírito ${percent}%';
+      return l10n.homeDominantSpirit(((spirit / total) * 100).round());
     }
   }
 
@@ -191,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Bem-vindo(a) de volta!',
+                                AppLocalizations.of(context).welcomeBack,
                                 style: GoogleFonts.lato(
                                   fontSize: 14,
                                   color: Colors.grey[600],
@@ -240,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Equilíbrio hoje',
+                                  AppLocalizations.of(context).homeBalanceToday,
                                   style: GoogleFonts.lato(
                                     fontSize: 12,
                                     color: Colors.white70,
@@ -270,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _statCard(
                             '📊',
                             '$todayCount',
-                            'práticas hoje',
+                            AppLocalizations.of(context).homePracticesToday,
                             const Color(0xFF6B8E23),
                           ),
                         ),
@@ -279,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _statCard(
                             '🏆',
                             '${widget.activityLogs.length}',
-                            'total práticas',
+                            AppLocalizations.of(context).homeTotalPractices,
                             Colors.orange,
                           ),
                         ),
@@ -334,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Níveis de Flow',
+                      AppLocalizations.of(context).homeFlowLevels,
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -353,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           _difficultyItem(
                               '🌊',
-                              'Fácil',
+                              AppLocalizations.of(context).flowFacil,
                               totalWithFeedback > 0
                                   ? (distribution['Fácil']! /
                                           totalWithFeedback *
@@ -364,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 8),
                           _difficultyItem(
                               '⚡',
-                              'Médio',
+                              AppLocalizations.of(context).flowMedio,
                               totalWithFeedback > 0
                                   ? (distribution['Médio']! /
                                           totalWithFeedback *
@@ -375,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 8),
                           _difficultyItem(
                               '🔥',
-                              'Difícil',
+                              AppLocalizations.of(context).flowDificil,
                               totalWithFeedback > 0
                                   ? (distribution['Difícil']! /
                                           totalWithFeedback *
@@ -400,16 +403,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     _actionButton(
-                      '✨ Explorar Práticas',
-                      'Descubra novas atividades',
+                      AppLocalizations.of(context).homeExplorePractices,
+                      AppLocalizations.of(context).homeDiscoverActivities,
                       Icons.explore,
                       widget.onExplore,
                       const Color(0xFF6B8E23),
                     ),
                     const SizedBox(height: 12),
                     _actionButton(
-                      '⚡ Agir Agora',
-                      'Sugestões personalizadas para você',
+                      AppLocalizations.of(context).homeActNow,
+                      AppLocalizations.of(context).homePersonalizedSuggestions,
                       Icons.flash_on,
                       widget.onActNow,
                       Colors.orange,
@@ -427,10 +430,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _getGreeting() {
+    final l10n = AppLocalizations.of(context);
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Bom dia! 🌅';
-    if (hour < 18) return 'Boa tarde! 🌞';
-    return 'Boa noite! 🌙';
+    if (hour < 12) return l10n.greetingMorning;
+    if (hour < 18) return l10n.greetingAfternoon;
+    return l10n.greetingEvening;
   }
 
   Widget _statCard(String emoji, String value, String label, Color color) {

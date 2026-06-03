@@ -4,6 +4,8 @@ import '../data/activities.dart';
 import '../data/colors.dart';
 import '../data/custom_activities.dart';
 import '../data/practice.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/domain_translations.dart';
 import 'dialogs/category_form_dialog.dart';
 import 'dialogs/practice_form_sheet.dart';
 
@@ -95,34 +97,37 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
     if (index < 0) return;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFF8F9FA),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title:
-            Text('Remover?', style: GoogleFonts.playfairDisplay(fontSize: 16)),
-        content: Text('A categoria "${activity.group}" será removida.',
-            style: GoogleFonts.lato(fontSize: 13, color: Colors.grey[600])),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar')),
-          Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    colors: [Colors.red[400]!, Colors.red[300]!]),
-                borderRadius: BorderRadius.circular(10)),
-            child: TextButton(
-                onPressed: () async {
-                  await CustomActivitiesManager.removeCustomActivity(index);
-                  await _loadData();
-                  widget.onActivitiesChanged();
-                  Navigator.pop(ctx);
-                },
-                child: const Text('Remover',
-                    style: TextStyle(color: Colors.white))),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          backgroundColor: const Color(0xFFF8F9FA),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(l10n.removeCategoryTitle,
+              style: GoogleFonts.playfairDisplay(fontSize: 16)),
+          content: Text(l10n.removeCategoryMessage(activity.group),
+              style: GoogleFonts.lato(fontSize: 13, color: Colors.grey[600])),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.cancel)),
+            Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [Colors.red[400]!, Colors.red[300]!]),
+                  borderRadius: BorderRadius.circular(10)),
+              child: TextButton(
+                  onPressed: () async {
+                    await CustomActivitiesManager.removeCustomActivity(index);
+                    await _loadData();
+                    widget.onActivitiesChanged();
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                  child: Text(l10n.removeCategoryBtn,
+                      style: const TextStyle(color: Colors.white))),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -181,12 +186,11 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     // ===== MINHAS CATEGORIAS =====
-                    _sectionHeader('✨ MINHAS CATEGORIAS', 'Nova Categoria',
-                        _addNewCategory),
+                    _sectionHeader(AppLocalizations.of(context).myCategories,
+                        AppLocalizations.of(context).newCategory, _addNewCategory),
                     const SizedBox(height: 8),
                     if (_customActivities.isEmpty)
-                      _emptyCard(
-                          'Nenhuma categoria personalizada.\nToque em "Nova Categoria" para criar!')
+                      _emptyCard(AppLocalizations.of(context).emptyCustomCategories)
                     else
                       ..._customActivities
                           .map((a) => _buildCard(a, isCustom: true)),
@@ -194,7 +198,7 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                     const SizedBox(height: 24),
 
                     // ===== CATEGORIAS PADRÃO =====
-                    _sectionHeader('📦 CATEGORIAS PADRÃO', null, null),
+                    _sectionHeader(AppLocalizations.of(context).defaultCategories, null, null),
                     const SizedBox(height: 8),
                     ..._defaultOnly.map((a) => _buildCard(a, isCustom: false)),
 
@@ -292,14 +296,14 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                   Row(children: [
                     Text(activity.icon, style: const TextStyle(fontSize: 16)),
                     const SizedBox(width: 6),
-                    Text(activity.group,
+                    Text(DomainTranslations.category(context, activity.group),
                         style: GoogleFonts.lato(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                             color: const Color(0xFF2D3436))),
                   ]),
                   const SizedBox(height: 4),
-                  Text('${activity.practices.length} prática(s)',
+                  Text(AppLocalizations.of(context).practicesCountLabel(activity.practices.length),
                       style: GoogleFonts.lato(
                           fontSize: 10, color: Colors.grey[500])),
                 ])),
@@ -356,7 +360,7 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                 Icon(Icons.info_outline_rounded,
                     size: 13, color: Colors.amber[700]),
                 const SizedBox(width: 6),
-                Text('Nenhuma prática — toque em + para adicionar',
+                Text(AppLocalizations.of(context).noPracticesAddTip,
                     style: GoogleFonts.lato(
                         fontSize: 11,
                         color: Colors.amber[800],
@@ -383,7 +387,7 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                 const Icon(Icons.add_rounded,
                     size: 15, color: Color(0xFF6B8E23)),
                 const SizedBox(width: 5),
-                Text('Adicionar prática',
+                Text(AppLocalizations.of(context).addPracticeToCategory,
                     style: GoogleFonts.lato(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -453,7 +457,7 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                 child: const Icon(Icons.arrow_back_rounded,
                     color: Color(0xFF6B8E23), size: 20))),
         const SizedBox(width: 10),
-        Text('Categorias',
+        Text(AppLocalizations.of(context).customizeScreenTitle,
             style: GoogleFonts.playfairDisplay(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

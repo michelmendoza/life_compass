@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/activities.dart';
 import '../../data/colors.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/domain_translations.dart';
 import 'glass_card.dart';
 
 class CategoriesCard extends StatelessWidget {
@@ -32,10 +34,10 @@ class CategoriesCard extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 14),
           child: Row(
             children: [
-              Expanded(child: _bar(left)),
+              Expanded(child: _bar(left, context)),
               if (right != null) ...[
                 const SizedBox(width: 16),
-                Expanded(child: _bar(right)),
+                Expanded(child: _bar(right, context)),
               ] else
                 const Expanded(child: SizedBox()),
             ],
@@ -45,13 +47,13 @@ class CategoriesCard extends StatelessWidget {
     }
 
     return DashboardGlassCard(
-      title: 'Top Categorias',
+      title: AppLocalizations.of(context).cardTopCategories,
       icon: Icons.pie_chart_rounded,
       child: Column(children: rows),
     );
   }
 
-  Widget _bar(MapEntry<String, double> entry) {
+  Widget _bar(MapEntry<String, double> entry, BuildContext context) {
     final color = _colorForGroup(entry.key);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +63,7 @@ class CategoriesCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                entry.key,
+                DomainTranslations.category(context, entry.key),
                 style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[700]),
                 overflow: TextOverflow.ellipsis,
               ),

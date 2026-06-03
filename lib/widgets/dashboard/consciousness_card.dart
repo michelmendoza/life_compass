@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/activity_log.dart';
 import 'glass_card.dart';
 
@@ -14,9 +15,11 @@ class ConsciousnessCard extends StatelessWidget {
         .where((l) => l.consciousnessLevel != null && l.consciousnessLevel! > 0)
         .toList();
 
+    final l10n = AppLocalizations.of(context);
+
     if (logsWithData.isEmpty) {
       return DashboardGlassCard(
-        title: 'Consciência Média',
+        title: l10n.cardAvgConsciousness,
         icon: Icons.self_improvement_rounded,
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -30,7 +33,7 @@ class ConsciousnessCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Responda o feedback rápido após cada atividade para desbloquear suas métricas de consciência.',
+                  l10n.consciousnessHint,
                   style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[600], height: 1.4),
                 ),
               ),
@@ -48,10 +51,10 @@ class ConsciousnessCard extends StatelessWidget {
     }
     final total = logsWithData.length;
     final emoji = avgConsciousness >= 3 ? '✨' : avgConsciousness >= 2 ? '🔥' : avgConsciousness >= 1 ? '😐' : '😴';
-    final label = avgConsciousness >= 3 ? 'Fluindo' : avgConsciousness >= 2 ? 'Focado' : avgConsciousness >= 1 ? 'Presente' : 'Automático';
+    final label = avgConsciousness >= 3 ? l10n.stateFlowing : avgConsciousness >= 2 ? l10n.stateFocused : avgConsciousness >= 1 ? l10n.statePresent : l10n.stateAutomatic;
 
     return DashboardGlassCard(
-      title: 'Consciência Média',
+      title: l10n.cardAvgConsciousness,
       icon: Icons.self_improvement_rounded,
       rightWidget: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -81,12 +84,12 @@ class ConsciousnessCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('← mais automático', style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
-              Text('mais consciente →', style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
+              Text(l10n.moreAutomatic, style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
+              Text(l10n.moreConscious, style: GoogleFonts.lato(fontSize: 9, color: Colors.grey[400])),
             ],
           ),
           const SizedBox(height: 10),
-          Text('${logsWithData.length} atividades com feedback', style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500])),
+          Text(l10n.activitiesWithFeedback(logsWithData.length), style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500])),
         ],
       ),
     );

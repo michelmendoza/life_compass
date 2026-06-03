@@ -1183,6 +1183,612 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Yoga'**
   String get practiceYoga;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem-vindo(a) de volta!'**
+  String get welcomeBack;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bom dia! 🌅'**
+  String get greetingMorning;
+
+  /// No description provided for @greetingAfternoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Boa tarde! 🌞'**
+  String get greetingAfternoon;
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In pt, this message translates to:
+  /// **'Boa noite! 🌙'**
+  String get greetingEvening;
+
+  /// No description provided for @homeBalanceToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equilíbrio hoje'**
+  String get homeBalanceToday;
+
+  /// No description provided for @homePracticesToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'práticas hoje'**
+  String get homePracticesToday;
+
+  /// No description provided for @homeTotalPractices.
+  ///
+  /// In pt, this message translates to:
+  /// **'total práticas'**
+  String get homeTotalPractices;
+
+  /// No description provided for @homeFlowLevels.
+  ///
+  /// In pt, this message translates to:
+  /// **'Níveis de Flow'**
+  String get homeFlowLevels;
+
+  /// No description provided for @homeExplorePractices.
+  ///
+  /// In pt, this message translates to:
+  /// **'✨ Explorar Práticas'**
+  String get homeExplorePractices;
+
+  /// No description provided for @homeDiscoverActivities.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descubra novas atividades'**
+  String get homeDiscoverActivities;
+
+  /// No description provided for @homeActNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'⚡ Agir Agora'**
+  String get homeActNow;
+
+  /// No description provided for @homePersonalizedSuggestions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sugestões personalizadas para você'**
+  String get homePersonalizedSuggestions;
+
+  /// No description provided for @homeDominantBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corpo {percent}%'**
+  String homeDominantBody(int percent);
+
+  /// No description provided for @homeDominantMind.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mental {percent}%'**
+  String homeDominantMind(int percent);
+
+  /// No description provided for @homeDominantSpirit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Espírito {percent}%'**
+  String homeDominantSpirit(int percent);
+
+  /// No description provided for @homeDominantDefault.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mental 70%'**
+  String get homeDominantDefault;
+
+  /// No description provided for @motivationSmallSteps.
+  ///
+  /// In pt, this message translates to:
+  /// **'✨ Pequenos passos todos os dias levam a grandes mudanças'**
+  String get motivationSmallSteps;
+
+  /// No description provided for @motivationCloser.
+  ///
+  /// In pt, this message translates to:
+  /// **'🌟 Você está mais perto do que imagina'**
+  String get motivationCloser;
+
+  /// No description provided for @motivationBelieve.
+  ///
+  /// In pt, this message translates to:
+  /// **'💪 Acredite no seu potencial'**
+  String get motivationBelieve;
+
+  /// No description provided for @motivationFocusProcess.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎯 Foco no processo, não apenas no resultado'**
+  String get motivationFocusProcess;
+
+  /// No description provided for @motivationSeed.
+  ///
+  /// In pt, this message translates to:
+  /// **'🌱 Cada prática é uma semente para o futuro'**
+  String get motivationSeed;
+
+  /// No description provided for @motivationFutureSelf.
+  ///
+  /// In pt, this message translates to:
+  /// **'🔥 Seu eu do futuro vai agradecer'**
+  String get motivationFutureSelf;
+
+  /// No description provided for @motivationAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'⚡ Um minuto de ação vale mais que horas de planejamento'**
+  String get motivationAction;
+
+  /// No description provided for @motivationJourney.
+  ///
+  /// In pt, this message translates to:
+  /// **'🌈 A jornada é tão importante quanto o destino'**
+  String get motivationJourney;
+
+  /// No description provided for @motivationBreathe.
+  ///
+  /// In pt, this message translates to:
+  /// **'🍃 Respire, concentre-se e siga em frente'**
+  String get motivationBreathe;
+
+  /// No description provided for @motivationCapable.
+  ///
+  /// In pt, this message translates to:
+  /// **'⭐ Você é capaz de coisas incríveis'**
+  String get motivationCapable;
+
+  /// No description provided for @motivationPresence.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎨 Crie momentos de presença hoje'**
+  String get motivationPresence;
+
+  /// No description provided for @motivationCare.
+  ///
+  /// In pt, this message translates to:
+  /// **'💙 Cuide de você como cuidaria de um amigo'**
+  String get motivationCare;
+
+  /// No description provided for @statTotalTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tempo total'**
+  String get statTotalTime;
+
+  /// No description provided for @statActivities.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividades'**
+  String get statActivities;
+
+  /// No description provided for @statStreak.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sequência'**
+  String get statStreak;
+
+  /// No description provided for @last7Days.
+  ///
+  /// In pt, this message translates to:
+  /// **'ÚLTIMOS 7 DIAS'**
+  String get last7Days;
+
+  /// No description provided for @cardBalanceCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equilíbrio entre Categorias'**
+  String get cardBalanceCategories;
+
+  /// No description provided for @notPracticed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não praticado: {categories}'**
+  String notPracticed(String categories);
+
+  /// No description provided for @trySuggestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'✨ Experimente: {category}'**
+  String trySuggestion(String category);
+
+  /// No description provided for @totalUPsLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total: {ups} UPs em {count} atividades'**
+  String totalUPsLabel(String ups, int count);
+
+  /// No description provided for @relativeBarsNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'* barras relativas ao maior valor'**
+  String get relativeBarsNote;
+
+  /// No description provided for @cardEnergyBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Balanço Energético'**
+  String get cardEnergyBalance;
+
+  /// No description provided for @energyActivePill.
+  ///
+  /// In pt, this message translates to:
+  /// **'⚡ Ativa'**
+  String get energyActivePill;
+
+  /// No description provided for @energyPassivePill.
+  ///
+  /// In pt, this message translates to:
+  /// **'🍃 Passiva'**
+  String get energyPassivePill;
+
+  /// No description provided for @cardFlowDistribution.
+  ///
+  /// In pt, this message translates to:
+  /// **'Distribuição do Flow'**
+  String get cardFlowDistribution;
+
+  /// No description provided for @cardFocusDimension.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foco por Dimensão'**
+  String get cardFocusDimension;
+
+  /// No description provided for @cardAvgConsciousness.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consciência Média'**
+  String get cardAvgConsciousness;
+
+  /// No description provided for @consciousnessHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responda o feedback rápido após cada atividade para desbloquear suas métricas de consciência.'**
+  String get consciousnessHint;
+
+  /// No description provided for @stateFlowing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fluindo'**
+  String get stateFlowing;
+
+  /// No description provided for @stateFocused.
+  ///
+  /// In pt, this message translates to:
+  /// **'Focado'**
+  String get stateFocused;
+
+  /// No description provided for @statePresent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Presente'**
+  String get statePresent;
+
+  /// No description provided for @stateAutomatic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Automático'**
+  String get stateAutomatic;
+
+  /// No description provided for @moreAutomatic.
+  ///
+  /// In pt, this message translates to:
+  /// **'← mais automático'**
+  String get moreAutomatic;
+
+  /// No description provided for @moreConscious.
+  ///
+  /// In pt, this message translates to:
+  /// **'mais consciente →'**
+  String get moreConscious;
+
+  /// No description provided for @activitiesWithFeedback.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} atividades com feedback'**
+  String activitiesWithFeedback(int count);
+
+  /// No description provided for @cardFlowVsChallenge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Flow vs Desafio'**
+  String get cardFlowVsChallenge;
+
+  /// No description provided for @flowChallengeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao finalizar cada atividade, avalie a dificuldade e seu nível de flow para desbloquear este gráfico.'**
+  String get flowChallengeHint;
+
+  /// No description provided for @flowPeak.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pico: {zone} {percent}%'**
+  String flowPeak(String zone, int percent);
+
+  /// No description provided for @flowZoneEasy.
+  ///
+  /// In pt, this message translates to:
+  /// **'🌊 Fácil'**
+  String get flowZoneEasy;
+
+  /// No description provided for @flowZoneMedium.
+  ///
+  /// In pt, this message translates to:
+  /// **'⚡ Médio'**
+  String get flowZoneMedium;
+
+  /// No description provided for @flowZoneHard.
+  ///
+  /// In pt, this message translates to:
+  /// **'🔥 Difícil'**
+  String get flowZoneHard;
+
+  /// No description provided for @flowActivitiesCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} ativ.'**
+  String flowActivitiesCount(int count);
+
+  /// No description provided for @flowRatePercent.
+  ///
+  /// In pt, this message translates to:
+  /// **'{percent}% flow'**
+  String flowRatePercent(int percent);
+
+  /// No description provided for @flowInZone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você entra em flow principalmente em atividades {zone}. Este é seu ponto ideal!'**
+  String flowInZone(String zone);
+
+  /// No description provided for @flowDistributedMsg.
+  ///
+  /// In pt, this message translates to:
+  /// **'Flow distribuído. Varie a dificuldade para encontrar seu ponto ideal.'**
+  String get flowDistributedMsg;
+
+  /// No description provided for @flowLowMsg.
+  ///
+  /// In pt, this message translates to:
+  /// **'Poucos momentos de flow. Tente ajustar: nem tão fácil que entedie, nem tão difícil que frustre.'**
+  String get flowLowMsg;
+
+  /// No description provided for @cardChallengeIndex.
+  ///
+  /// In pt, this message translates to:
+  /// **'Índice de Desafio'**
+  String get cardChallengeIndex;
+
+  /// No description provided for @challengeHigh.
+  ///
+  /// In pt, this message translates to:
+  /// **'🔥 Alta intensidade'**
+  String get challengeHigh;
+
+  /// No description provided for @challengeModerate.
+  ///
+  /// In pt, this message translates to:
+  /// **'⚡ Moderado'**
+  String get challengeModerate;
+
+  /// No description provided for @challengeSmooth.
+  ///
+  /// In pt, this message translates to:
+  /// **'🌊 Fluxo tranquilo'**
+  String get challengeSmooth;
+
+  /// No description provided for @challengeScale.
+  ///
+  /// In pt, this message translates to:
+  /// **'0 = Suave · 100 = Intenso'**
+  String get challengeScale;
+
+  /// No description provided for @cardTopCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'Top Categorias'**
+  String get cardTopCategories;
+
+  /// No description provided for @cardRecentActivities.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividades Recentes'**
+  String get cardRecentActivities;
+
+  /// No description provided for @customizeScreenTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categorias'**
+  String get customizeScreenTitle;
+
+  /// No description provided for @myCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'✨ MINHAS CATEGORIAS'**
+  String get myCategories;
+
+  /// No description provided for @newCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Categoria'**
+  String get newCategory;
+
+  /// No description provided for @defaultCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'📦 CATEGORIAS PADRÃO'**
+  String get defaultCategories;
+
+  /// No description provided for @emptyCustomCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma categoria personalizada.\nToque em \"Nova Categoria\" para criar!'**
+  String get emptyCustomCategories;
+
+  /// No description provided for @practicesCountLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} prática(s)'**
+  String practicesCountLabel(int count);
+
+  /// No description provided for @noPracticesAddTip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma prática — toque em + para adicionar'**
+  String get noPracticesAddTip;
+
+  /// No description provided for @addPracticeToCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar prática'**
+  String get addPracticeToCategory;
+
+  /// No description provided for @removeCategoryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover?'**
+  String get removeCategoryTitle;
+
+  /// No description provided for @removeCategoryMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'A categoria \"{name}\" será removida.'**
+  String removeCategoryMessage(String name);
+
+  /// No description provided for @removeCategoryBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover'**
+  String get removeCategoryBtn;
+
+  /// No description provided for @editCategoryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar Categoria'**
+  String get editCategoryTitle;
+
+  /// No description provided for @newCategoryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Categoria'**
+  String get newCategoryTitle;
+
+  /// No description provided for @practicesAddedLater.
+  ///
+  /// In pt, this message translates to:
+  /// **'As práticas são adicionadas depois'**
+  String get practicesAddedLater;
+
+  /// No description provided for @iconLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ícone'**
+  String get iconLabel;
+
+  /// No description provided for @categoryNameLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da categoria'**
+  String get categoryNameLabel;
+
+  /// No description provided for @categoryNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Yoga, Jardinagem...'**
+  String get categoryNameHint;
+
+  /// No description provided for @practicesFormLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Práticas'**
+  String get practicesFormLabel;
+
+  /// No description provided for @noPracticesYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma prática ainda'**
+  String get noPracticesYet;
+
+  /// No description provided for @saveBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'SALVAR'**
+  String get saveBtn;
+
+  /// No description provided for @createCategoryBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'CRIAR CATEGORIA'**
+  String get createCategoryBtn;
+
+  /// No description provided for @newPracticeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Prática'**
+  String get newPracticeTitle;
+
+  /// No description provided for @inCategoryPrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'em '**
+  String get inCategoryPrefix;
+
+  /// No description provided for @practiceNameLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da prática'**
+  String get practiceNameLabel;
+
+  /// No description provided for @practiceNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Meditação guiada, Leitura...'**
+  String get practiceNameHint;
+
+  /// No description provided for @energySectionLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'⚡ Energia'**
+  String get energySectionLabel;
+
+  /// No description provided for @energySectionQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual tipo de energia essa prática mobiliza?'**
+  String get energySectionQuestion;
+
+  /// No description provided for @difficultySectionLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'🌊 Dificuldade'**
+  String get difficultySectionLabel;
+
+  /// No description provided for @difficultySectionQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual o nível de esforço necessário?'**
+  String get difficultySectionQuestion;
+
+  /// No description provided for @focusSectionLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎯 Foco'**
+  String get focusSectionLabel;
+
+  /// No description provided for @focusSectionQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual dimensão essa prática desenvolve?'**
+  String get focusSectionQuestion;
+
+  /// No description provided for @addPracticeButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'ADICIONAR PRÁTICA'**
+  String get addPracticeButton;
 }
 
 class _AppLocalizationsDelegate

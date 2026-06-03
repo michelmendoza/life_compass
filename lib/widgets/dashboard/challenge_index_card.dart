@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import 'glass_card.dart';
 
 class ChallengeIndexCard extends StatelessWidget {
@@ -15,8 +16,9 @@ class ChallengeIndexCard extends StatelessWidget {
             ? const Color(0xFFFFC107)
             : const Color(0xFF6B8E23);
 
+    final l10n = AppLocalizations.of(context);
     return DashboardGlassCard(
-      title: 'Índice de Desafio',
+      title: l10n.cardChallengeIndex,
       icon: Icons.trending_up_rounded,
       child: Column(
         children: [
@@ -41,11 +43,11 @@ class ChallengeIndexCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            challengeIndex > 70 ? '🔥 Alta intensidade' : challengeIndex > 40 ? '⚡ Moderado' : '🌊 Fluxo tranquilo',
+            challengeIndex > 70 ? l10n.challengeHigh : challengeIndex > 40 ? l10n.challengeModerate : l10n.challengeSmooth,
             style: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[600]),
           ),
           const SizedBox(height: 6),
-          Text('0 = Suave · 100 = Intenso', style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[400])),
+          Text(l10n.challengeScale, style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[400])),
         ],
       ),
     );

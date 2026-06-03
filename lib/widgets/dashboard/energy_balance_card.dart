@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import 'glass_card.dart';
 
 class EnergyBalanceCard extends StatelessWidget {
@@ -12,14 +13,15 @@ class EnergyBalanceCard extends StatelessWidget {
     final activePercent = ((energyBalance['Ativa'] ?? 0) * 100).round();
     final passivePercent = ((energyBalance['Passiva'] ?? 0) * 100).round();
 
+    final l10n = AppLocalizations.of(context);
     return DashboardGlassCard(
-      title: 'Balanço Energético',
+      title: l10n.cardEnergyBalance,
       icon: Icons.bolt_rounded,
       child: Row(
         children: [
-          Expanded(child: _pill('⚡ Ativa', activePercent, const Color(0xFFFF6B35))),
+          Expanded(child: _pill(l10n.energyActivePill, activePercent, const Color(0xFFFF6B35))),
           const SizedBox(width: 16),
-          Expanded(child: _pill('🍃 Passiva', passivePercent, const Color(0xFF4ECDC4))),
+          Expanded(child: _pill(l10n.energyPassivePill, passivePercent, const Color(0xFF4ECDC4))),
         ],
       ),
     );

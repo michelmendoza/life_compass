@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../data/colors.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/domain_translations.dart';
 import '../../models/activity_log.dart';
 import 'glass_card.dart';
 
@@ -24,7 +26,7 @@ class RecentActivitiesCard extends StatelessWidget {
     final dateFormat = DateFormat('dd/MM - HH:mm');
 
     return DashboardGlassCard(
-      title: 'Atividades Recentes',
+      title: AppLocalizations.of(context).cardRecentActivities,
       icon: Icons.history_rounded,
       child: Column(
         children: recent.map((log) {
@@ -48,7 +50,7 @@ class RecentActivitiesCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(log.group, style: GoogleFonts.lato(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF2D3436))),
+                      Text(DomainTranslations.category(context, log.group), style: GoogleFonts.lato(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF2D3436))),
                       const SizedBox(height: 4),
                       Text(log.example, style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[600]), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/activity_log.dart';
 import 'glass_card.dart';
 
@@ -18,9 +19,11 @@ class FlowVsChallengeCard extends StatelessWidget {
             l.consciousnessLevel! > 0)
         .toList();
 
+    final l10n = AppLocalizations.of(context);
+
     if (logsWithFeedback.isEmpty) {
       return DashboardGlassCard(
-        title: 'Flow vs Desafio',
+        title: l10n.cardFlowVsChallenge,
         icon: Icons.show_chart_rounded,
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -34,7 +37,7 @@ class FlowVsChallengeCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Ao finalizar cada atividade, avalie a dificuldade e seu nível de flow para desbloquear este gráfico.',
+                  l10n.flowChallengeHint,
                   style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[600], height: 1.4),
                 ),
               ),
@@ -80,8 +83,14 @@ class FlowVsChallengeCard extends StatelessWidget {
       bestRate = facilRate;
     }
 
+    final translatedBestZone = bestZone == 'Fácil'
+        ? l10n.flowFacil
+        : bestZone == 'Difícil'
+            ? l10n.flowDificil
+            : l10n.flowMedio;
+
     return DashboardGlassCard(
-      title: 'Flow vs Desafio',
+      title: l10n.cardFlowVsChallenge,
       icon: Icons.show_chart_rounded,
       rightWidget: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -90,7 +99,7 @@ class FlowVsChallengeCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
-          'Pico: $bestZone ${(bestRate * 100).round()}%',
+          l10n.flowPeak(translatedBestZone, (bestRate * 100).round()),
           style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF6B8E23)),
         ),
       ),
@@ -98,11 +107,11 @@ class FlowVsChallengeCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              _zoneBar('🌊 Fácil', facilFlow, facilTotal, facilRate, const Color(0xFF4CAF50)),
+              _zoneBar(l10n.flowZoneEasy, facilFlow, facilTotal, facilRate, const Color(0xFF4CAF50), l10n),
               const SizedBox(width: 8),
-              _zoneBar('⚡ Médio', medioFlow, medioTotal, medioRate, const Color(0xFFFFC107)),
+              _zoneBar(l10n.flowZoneMedium, medioFlow, medioTotal, medioRate, const Color(0xFFFFC107), l10n),
               const SizedBox(width: 8),
-              _zoneBar('🔥 Difícil', dificilFlow, dificilTotal, dificilRate, const Color(0xFFF44336)),
+              _zoneBar(l10n.flowZoneHard, dificilFlow, dificilTotal, dificilRate, const Color(0xFFF44336), l10n),
             ],
           ),
           const SizedBox(height: 12),
@@ -119,10 +128,10 @@ class FlowVsChallengeCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     bestRate > 0.6
-                        ? 'Você entra em flow principalmente em atividades $bestZone. Este é seu ponto ideal!'
+                        ? l10n.flowInZone(translatedBestZone)
                         : bestRate > 0.3
-                            ? 'Flow distribuído. Varie a dificuldade para encontrar seu ponto ideal.'
-                            : 'Poucos momentos de flow. Tente ajustar: nem tão fácil que entedie, nem tão difícil que frustre.',
+                            ? l10n.flowDistributedMsg
+                            : l10n.flowLowMsg,
                     style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[700], height: 1.3),
                   ),
                 ),
@@ -134,7 +143,7 @@ class FlowVsChallengeCard extends StatelessWidget {
     );
   }
 
-  Widget _zoneBar(String label, int flowCount, int total, double rate, Color color) {
+  Widget _zoneBar(String label, int flowCount, int total, double rate, Color color, AppLocalizations l10n) {
     return Expanded(
       child: Column(
         children: [
@@ -172,9 +181,9 @@ class FlowVsChallengeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text('$total ativ.', style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[500])),
+          Text(l10n.flowActivitiesCount(total), style: GoogleFonts.lato(fontSize: 10, color: Colors.grey[500])),
           const SizedBox(height: 4),
-          Text('${(rate * 100).round()}% flow', style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+          Text(l10n.flowRatePercent((rate * 100).round()), style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );
