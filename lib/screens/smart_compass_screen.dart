@@ -5,6 +5,8 @@ import '../models/activity_log.dart';
 import '../data/activities.dart';
 import '../data/colors.dart';
 import '../data/practice.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/domain_translations.dart';
 import 'timer_screen.dart';
 
 class SmartCompassScreen extends StatefulWidget {
@@ -113,61 +115,62 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
     return 'equilibrado';
   }
 
-  Map<String, dynamic> get _statusData {
+  Map<String, dynamic> _getStatusData(AppLocalizations l10n) {
     return {
       'energia': {
         'icon': _dominantEnergy == 'muito_ativa'
             ? '⚡'
             : (_dominantEnergy == 'muito_passiva' ? '🍃' : '🌿'),
         'label': _dominantEnergy == 'muito_ativa'
-            ? 'Energia Alta'
+            ? l10n.statusEnergyHigh
             : (_dominantEnergy == 'muito_passiva'
-                ? 'Energia Baixa'
-                : 'Equilibrada'),
+                ? l10n.statusEnergyLow
+                : l10n.statusEnergyBalanced),
       },
       'foco': {
         'icon': _dominantOrgan == 'muita_mente'
             ? '🧠'
             : (_dominantOrgan == 'muito_corpo' ? '💪' : '🌸'),
         'label': _dominantOrgan == 'muita_mente'
-            ? 'Mente Ativa'
-            : (_dominantOrgan == 'muito_corpo' ? 'Corpo Ativo' : 'Equilibrado'),
+            ? l10n.statusOrganMindActive
+            : (_dominantOrgan == 'muito_corpo'
+                ? l10n.statusOrganBodyActive
+                : l10n.statusOrganBalanced),
       },
       'flow': {
         'icon': _dominantFlow == 'muito_dificil'
             ? '🔥'
             : (_dominantFlow == 'muito_facil' ? '💤' : '✨'),
         'label': _dominantFlow == 'muito_dificil'
-            ? 'Desafiador'
-            : (_dominantFlow == 'muito_facil' ? 'Confortável' : 'Equilibrado'),
+            ? l10n.statusFlowChallenging
+            : (_dominantFlow == 'muito_facil'
+                ? l10n.statusFlowComfort
+                : l10n.statusFlowBalanced),
       },
     };
   }
 
-  String get _insightMessage {
-    if (_recentWeek.isEmpty) {
-      return 'Sem registros nos últimos 7 dias. Sugestões baseadas em práticas equilibradas.';
-    }
+  String _buildInsightMessage(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (_recentWeek.isEmpty) return l10n.insightNoData;
     final parts = <String>[];
     if (_dominantEnergy == 'muito_ativa') {
-      parts.add('energia alta');
+      parts.add(l10n.issueHighEnergy);
     } else if (_dominantEnergy == 'muito_passiva') {
-      parts.add('energia baixa');
+      parts.add(l10n.issueLowEnergy);
     }
     if (_dominantOrgan == 'muita_mente') {
-      parts.add('mente sobrecarregada');
+      parts.add(l10n.issueOverloadedMind);
     } else if (_dominantOrgan == 'muito_corpo') {
-      parts.add('corpo muito ativo');
+      parts.add(l10n.issueVeryActiveBody);
     }
     if (_dominantFlow == 'muito_dificil') {
-      parts.add('práticas muito desafiadoras');
+      parts.add(l10n.issueTooChallenging);
     } else if (_dominantFlow == 'muito_facil') {
-      parts.add('zona de conforto');
+      parts.add(l10n.issueComfortZone);
     }
-    if (parts.isEmpty) {
-      return 'Seu perfil dos últimos 7 dias está equilibrado. Continue assim!';
-    }
-    return 'Nos últimos 7 dias: ${parts.join(', ')}. As sugestões abaixo visam compensar e reequilibrar.';
+    if (parts.isEmpty) return l10n.insightBalanced;
+    return l10n.insightWithIssues(parts.join(', '));
   }
 
   // =========================================================
@@ -187,29 +190,29 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
 
         if (energyNeed == 'muito_ativa' && practice.energy == 'Passiva') {
           score += 3;
-          reasons.add('Equilibrar energia');
+          reasons.add('reasonBalanceEnergy');
         } else if (energyNeed == 'muito_passiva' &&
             practice.energy == 'Ativa') {
           score += 3;
-          reasons.add('Despertar vitalidade');
+          reasons.add('reasonAwakVitality');
         }
 
         if (organNeed == 'muita_mente' && practice.organ.contains('Corpo')) {
           score += 2;
-          reasons.add('Ativar o corpo');
+          reasons.add('reasonActivateBody');
         } else if (organNeed == 'muito_corpo' &&
             practice.organ.contains('Mente')) {
           score += 2;
-          reasons.add('Exercitar a mente');
+          reasons.add('reasonExerciseMind');
         }
 
         if (flowNeed == 'muito_dificil' && practice.flow.contains('Fácil')) {
           score += 2;
-          reasons.add('Algo mais leve');
+          reasons.add('reasonLighter');
         } else if (flowNeed == 'muito_facil' &&
             !practice.flow.contains('Fácil')) {
           score += 2;
-          reasons.add('Sair da zona de conforto');
+          reasons.add('reasonChallenge');
         }
 
         if (score >= 2 || reasons.isNotEmpty) {
@@ -217,8 +220,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             practice: practice,
             category: activity.group,
             categoryIcon: activity.icon,
-            reason:
-                reasons.isNotEmpty ? reasons.first : 'Recomendado para você',
+            reason: reasons.isNotEmpty ? reasons.first : 'reasonDefault',
             score: score,
           ));
         }
@@ -238,18 +240,18 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
               organ: 'Mente'),
           category: 'Espiritualidade',
           categoryIcon: '🧘',
-          reason: 'Um momento de pausa renovadora',
+          reason: 'reasonPauseRenew',
           score: 1,
         ),
         SuggestionCard(
           practice: const Practice(
-              name: 'Caminhada',
+              name: 'Caminhar',
               energy: 'Ativa',
               flow: 'Fácil',
               organ: 'Corpo'),
-          category: 'Movimento',
+          category: 'Saúde',
           categoryIcon: '🚶',
-          reason: 'Conecte-se com a natureza',
+          reason: 'reasonConnectNature',
           score: 1,
         ),
       ]);
@@ -407,8 +409,9 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
       );
     }
 
+    final l10n = AppLocalizations.of(context);
     final currentCard = _cards[_currentIndex];
-    final statusData = _statusData;
+    final statusData = _getStatusData(l10n);
     final progress = (_currentIndex + 1) / _cards.length;
 
     return Scaffold(
@@ -422,7 +425,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             const SizedBox(height: 10),
             _buildInsightBanner(),
             const SizedBox(height: 12),
-            _buildProgressBar(progress, _currentIndex, _cards.length),
+            _buildProgressBar(progress, _currentIndex, _cards.length, l10n),
             const SizedBox(height: 20),
             Expanded(
               child: Center(
@@ -492,7 +495,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Match de práticas',
+                  AppLocalizations.of(context).matchTitle,
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -500,7 +503,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
                   ),
                 ),
                 Text(
-                  'Deslize → para iniciar',
+                  AppLocalizations.of(context).matchSubtitle,
                   style: GoogleFonts.lato(
                     fontSize: 10,
                     color: const Color(0xFF6B8E23).withOpacity(0.7),
@@ -548,7 +551,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
               ),
               const SizedBox(width: 8),
               Text(
-                'SEU PERFIL ATUAL',
+                AppLocalizations.of(context).currentProfileLabel,
                 style: GoogleFonts.lato(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
@@ -591,7 +594,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                _insightMessage,
+                _buildInsightMessage(context),
                 style: GoogleFonts.lato(
                   fontSize: 11,
                   height: 1.4,
@@ -644,7 +647,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
   // PROGRESS BAR
   // =========================================================
 
-  Widget _buildProgressBar(double progress, int current, int total) {
+  Widget _buildProgressBar(double progress, int current, int total, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -653,12 +656,12 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '$current de $total',
+                l10n.progressCount(current, total),
                 style: GoogleFonts.lato(
                     fontWeight: FontWeight.bold, color: Colors.grey[700]),
               ),
               Text(
-                'Deslize para explorar',
+                l10n.swipeToExplore,
                 style: GoogleFonts.lato(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
@@ -745,7 +748,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Text(
-                  card.category,
+                  DomainTranslations.category(context, card.category),
                   style: GoogleFonts.lato(
                       color: energyColor,
                       fontWeight: FontWeight.bold,
@@ -782,7 +785,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
 
             // Nome da prática
             Text(
-              card.practice.name,
+              DomainTranslations.practice(context, card.practice.name),
               textAlign: TextAlign.center,
               style: GoogleFonts.playfairDisplay(
                 fontSize: 24,
@@ -796,7 +799,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
 
             // Razão
             Text(
-              card.reason,
+              DomainTranslations.reason(context, card.reason),
               textAlign: TextAlign.center,
               style: GoogleFonts.lato(
                   fontSize: 13, height: 1.4, color: Colors.grey[700]),
@@ -810,9 +813,9 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
               spacing: 8,
               runSpacing: 6,
               children: [
-                _chip(card.practice.energy, energyColor),
-                _chip(card.practice.flow, flowColor),
-                _chip(card.practice.organ, organColor),
+                _chip(DomainTranslations.energy(context, card.practice.energy), energyColor),
+                _chip(DomainTranslations.flow(context, card.practice.flow), flowColor),
+                _chip(DomainTranslations.organ(context, card.practice.organ), organColor),
               ],
             ),
 
@@ -825,7 +828,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
                 Icon(Icons.swipe_rounded, size: 14, color: Colors.grey[400]),
                 const SizedBox(width: 6),
                 Text(
-                  'Arraste para os lados',
+                  AppLocalizations.of(context).swipeInstructions,
                   style:
                       GoogleFonts.lato(fontSize: 10, color: Colors.grey[500]),
                 ),
@@ -885,7 +888,9 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
                       width: 2, color: isRight ? Colors.green : Colors.red),
                 ),
                 child: Text(
-                  isRight ? 'INICIAR' : 'PULAR',
+                  isRight
+                      ? AppLocalizations.of(context).start
+                      : AppLocalizations.of(context).skip,
                   style: GoogleFonts.lato(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

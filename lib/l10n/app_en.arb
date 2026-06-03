@@ -1,0 +1,274 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "RootFlow",
+  "appTagline": "Energy • Flow • Focus",
+
+  "navHome": "Home",
+  "navMatch": "Match",
+  "navDashboard": "Dashboard",
+  "navHistory": "History",
+
+  "start": "START",
+  "skip": "SKIP",
+  "cancel": "Cancel",
+  "apply": "Apply",
+  "clear": "Clear",
+
+  "recordsCount": "{count, plural, =1{1 record} other{{count} records}}",
+  "@recordsCount": {
+    "placeholders": {
+      "count": { "type": "num" }
+    }
+  },
+
+  "consciousActionTitle": "Conscious Action",
+  "consciousActionSubtitle": "Choose with presence",
+  "areaLabel": "🍃 AREA OF PRACTICE",
+  "availablePracticesLabel": "📋 AVAILABLE PRACTICES",
+  "practicesCount": "{count} practices",
+  "@practicesCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "selectCategoryFirst": "Select a category first!",
+  "selectCategoryHint": "Select a category\nto see available practices",
+
+  "dashboardTitle": "Vital Dashboard",
+  "dashboardSubtitle": "Your conscious evolution journey",
+  "dashboardEmptyTitle": "No activity in this period",
+  "dashboardEmptySubtitle": "Change the period or start an activity\nin RootFlow to see your metrics",
+  "periodToday": "Today",
+  "periodWeek": "Week",
+  "periodMonth": "Month",
+  "periodAll": "All",
+  "periodCurrent": "CURRENT",
+  "periodPrevious": "PREVIOUS",
+  "periodDaysAgo": "{count} DAYS AGO",
+  "@periodDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "periodWeeksAgo": "{count} WEEKS AGO",
+  "@periodWeeksAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "periodMonthsAgo": "{count} MONTHS AGO",
+  "@periodMonthsAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "backToCurrent": "Back to current",
+  "statusVeryActive": "🔥 Very Active",
+  "statusContemplative": "🧘 Contemplative",
+  "statusBalanced": "⚖️ Balanced",
+  "statusTendingActive": "⚡ Tend. Active",
+  "statusTendingPassive": "🌿 Tend. Passive",
+  "statusNoData": "No data",
+  "trendFirstRecords": "First records! 🎉",
+  "trendUp": "{percent}% more than last period",
+  "@trendUp": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "trendDown": "{percent}% less than last period",
+  "@trendDown": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "suggestionStart": "Start your first activity in RootFlow to see personalized insights! 🚀",
+  "suggestionMultipleCategories": "You haven't practiced {count} categories yet. How about starting with \"{category}\"? 🌱",
+  "@suggestionMultipleCategories": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "category": { "type": "String" }
+    }
+  },
+  "suggestionOneCategory": "Just \"{category}\" missing to diversify your practices! 🎯",
+  "@suggestionOneCategory": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "suggestionLowBalance": "Your time is concentrated in few categories. Try \"{category}\" to balance! ⚖️",
+  "@suggestionLowBalance": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "suggestionHighBalance": "Excellent balance! {percent}% distribution among categories! ⭐",
+  "@suggestionHighBalance": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "suggestionStreak": "{days} days in a row! {time} of practice! 🔥",
+  "@suggestionStreak": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "time": { "type": "String" }
+    }
+  },
+  "suggestionVary": "Keep varying your activities for more complete development! 📊",
+
+  "matchTitle": "Practice Match",
+  "matchSubtitle": "Swipe → to start",
+  "currentProfileLabel": "YOUR CURRENT PROFILE",
+  "swipeToExplore": "Swipe to explore",
+  "swipeInstructions": "Swipe sideways",
+  "progressCount": "{current} of {total}",
+  "@progressCount": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "statusEnergyHigh": "High Energy",
+  "statusEnergyLow": "Low Energy",
+  "statusEnergyBalanced": "Balanced",
+  "statusOrganMindActive": "Active Mind",
+  "statusOrganBodyActive": "Active Body",
+  "statusOrganBalanced": "Balanced",
+  "statusFlowChallenging": "Challenging",
+  "statusFlowComfort": "Comfortable",
+  "statusFlowBalanced": "Balanced",
+  "insightNoData": "No records in the last 7 days. Suggestions based on balanced practices.",
+  "insightBalanced": "Your profile for the last 7 days is balanced. Keep it up!",
+  "insightWithIssues": "In the last 7 days: {issues}. The suggestions below aim to compensate and rebalance.",
+  "@insightWithIssues": {
+    "placeholders": {
+      "issues": { "type": "String" }
+    }
+  },
+  "issueHighEnergy": "high energy",
+  "issueLowEnergy": "low energy",
+  "issueOverloadedMind": "overloaded mind",
+  "issueVeryActiveBody": "very active body",
+  "issueTooChallenging": "too challenging practices",
+  "issueComfortZone": "comfort zone",
+  "reasonBalanceEnergy": "Balance energy",
+  "reasonAwakVitality": "Awaken vitality",
+  "reasonActivateBody": "Activate the body",
+  "reasonExerciseMind": "Exercise the mind",
+  "reasonLighter": "Something lighter",
+  "reasonChallenge": "Leave the comfort zone",
+  "reasonDefault": "Recommended for you",
+  "reasonPauseRenew": "A moment of renewing pause",
+  "reasonConnectNature": "Connect with nature",
+
+  "historyTitle": "History",
+  "historySubtitle": "Your recorded journey",
+  "searchHint": "Search activity...",
+  "filterPeriodLabel": "PERIOD",
+  "filterAll": "All",
+  "filterToday": "Today",
+  "filterWeek": "Week",
+  "filterMonth": "Month",
+  "filterMonthYear": "Month/Year",
+  "selectPeriodTitle": "Select Period",
+  "selectPeriodPlaceholder": "Select period",
+  "yearLabel": "YEAR",
+  "monthOptionalLabel": "MONTH (OPTIONAL)",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "activityCount": "{count, plural, =1{1 activity} other{{count} activities}}",
+  "@activityCount": {
+    "placeholders": {
+      "count": { "type": "num" }
+    }
+  },
+  "historyEmptyNoResults": "No results found",
+  "historyEmptyNoActivity": "No activity recorded",
+  "historyEmptySearchHint": "Try another term or remove the filters",
+  "historyEmptyActivityHint": "Start an activity in RootFlow\nto see your history here",
+  "exportNoActivity": "No activity to export.",
+
+  "energyAtiva": "Active",
+  "energyPassiva": "Passive",
+  "organMente": "Mind",
+  "organCorpo": "Body",
+  "organEspirito": "Spirit",
+  "organCorpoMente": "Body/Mind",
+  "flowFacil": "Easy",
+  "flowFacilMedio": "Easy – Medium",
+  "flowMedio": "Medium",
+  "flowMedioDificil": "Medium – Difficult",
+  "flowDificil": "Difficult",
+
+  "categoryEspiritualidade": "Spirituality",
+  "categoryAprendizado": "Learning",
+  "categoryTrabalho": "Work",
+  "categorySaude": "Health",
+  "categoryLazer": "Leisure",
+  "categorySocial": "Social",
+  "categoryCriacao": "Creation",
+  "categoryNatureza": "Nature",
+  "categoryAutocuidado": "Self-care",
+
+  "descEspiritualidade": "Practices to quiet the mind and connect with something greater.",
+  "descAprendizado": "Activities that expand knowledge and develop new skills.",
+  "descTrabalho": "Focus and productivity with presence and intention.",
+  "descSaude": "Movement, physical care and body vitality.",
+  "descLazer": "Moments of joy, fun and active rest.",
+  "descSocial": "Human connections that nourish and strengthen bonds.",
+  "descCriacao": "Artistic and creative expression as a form of active meditation.",
+  "descNatureza": "Reconnecting with nature and the rhythm of the natural world.",
+  "descAutocuidado": "Practices to nourish the body and restore vital energy.",
+  "descDefault": "Conscious practices to develop presence and mindfulness in daily life.",
+
+  "practiceAlongamento": "Stretching",
+  "practiceApresentacao": "Presentation",
+  "practiceAssistir": "Watch",
+  "practiceAutoMassagem": "Self-massage",
+  "practiceAcampar": "Camping",
+  "practiceBanhoRelaxante": "Relaxing bath",
+  "practiceBar": "Bar",
+  "practiceCaminhar": "Walk",
+  "practiceChat": "Chat",
+  "practiceContemplacaoPaisagem": "Contemplate landscape",
+  "practiceConversar": "Talk",
+  "practiceCorrida": "Run",
+  "practiceCozinhar": "Cook",
+  "practiceCursoOnline": "Online course",
+  "practiceConsultaMedica": "Medical consultation",
+  "practiceDancar": "Dance",
+  "practiceDesenhar": "Draw",
+  "practiceEstudar": "Study",
+  "practiceEscrever": "Write",
+  "practiceEventoSocial": "Social event",
+  "practiceFotografar": "Photography",
+  "practiceHIIT": "HIIT",
+  "practiceJardinagem": "Gardening",
+  "practiceJejum": "Fasting",
+  "practiceJogar": "Play",
+  "practiceLer": "Read",
+  "practiceLigarAmigo": "Call a friend",
+  "practiceMacaquear": "Physical play",
+  "practiceMalabares": "Juggling",
+  "practiceMassagem": "Massage",
+  "practiceMeditar": "Meditate",
+  "practiceMusica": "Music",
+  "practiceNaoFazerNada": "Do nothing",
+  "practiceOrganizarTarefas": "Organize tasks",
+  "practiceOrar": "Pray",
+  "practiceOuvirAudiolivro": "Listen to audiobook",
+  "practicePlanejamento": "Planning",
+  "practicePlanejar": "Plan",
+  "practicePodcastEducativo": "Educational podcast",
+  "practiceProjetosPessoais": "Personal projects",
+  "practiceReuniaoTrabalho": "Meeting",
+  "practiceRespiracaoConsciente": "Conscious breathing",
+  "practiceRetiroEspiritual": "Spiritual retreat",
+  "practiceSkinCare": "Skin care",
+  "practiceSpaDay": "Spa day",
+  "practiceTrilhas": "Hiking",
+  "practiceTrabalhoRemunerado": "Paid work",
+  "practiceYoga": "Yoga"
+}

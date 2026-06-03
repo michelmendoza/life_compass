@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/activity_log.dart';
 import '../data/activities.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/domain_translations.dart';
 import '../widgets/dashboard/categories_card.dart';
 import '../widgets/dashboard/challenge_index_card.dart';
 import '../widgets/dashboard/consciousness_card.dart';
@@ -103,14 +105,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  String get _periodTitle {
-    if (_periodOffset == 0) return 'ATUAL';
-    if (_periodOffset == -1) return 'ANTERIOR';
-    return '${_periodOffset.abs()} ${_selectedPeriod == 'Hoje' ? 'DIAS' : _selectedPeriod == 'Semana' ? 'SEMANAS' : 'MESES'} ATRÁS';
+  String _getPeriodTitle(AppLocalizations l10n) {
+    if (_periodOffset == 0) return l10n.periodCurrent;
+    if (_periodOffset == -1) return l10n.periodPrevious;
+    final count = _periodOffset.abs();
+    if (_selectedPeriod == 'Hoje') return l10n.periodDaysAgo(count);
+    if (_selectedPeriod == 'Semana') return l10n.periodWeeksAgo(count);
+    return l10n.periodMonthsAgo(count);
   }
 
-  String get _periodSubtitle {
+  String _getPeriodSubtitle(BuildContext context) {
     final ref = _referenceDate;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final df = DateFormat('dd/MM');
     switch (_selectedPeriod) {
       case 'Hoje':
@@ -120,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             .subtract(Duration(days: ref.weekday - 1));
         return '${df.format(weekStart)} - ${df.format(weekStart.add(const Duration(days: 6)))}';
       case 'Mês':
-        return DateFormat('MMMM yyyy', 'pt_BR').format(ref);
+        return DateFormat('MMMM yyyy', locale).format(ref);
       default:
         return '';
     }
@@ -279,16 +285,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return hours > 0 ? '${hours}h${mins}m' : '${mins}m';
   }
 
-  String _getLifeBalance() {
+  String _getLifeBalance(AppLocalizations l10n) {
     final energy = _calculateEnergyBalance();
     final active = energy['Ativa'] ?? 0;
     final passive = energy['Passiva'] ?? 0;
-    if (_filteredLogs.isEmpty) return 'Sem dados';
-    if (active > 0.7) return '🔥 Muito Ativo';
-    if (passive > 0.7) return '🧘 Contemplativo';
-    if (active >= 0.4 && passive >= 0.4) return '⚖️ Equilibrado';
-    if (active > passive) return '⚡ Tend. Ativa';
-    return '🌿 Tend. Passiva';
+    if (_filteredLogs.isEmpty) return l10n.statusNoData;
+    if (active > 0.7) return l10n.statusVeryActive;
+    if (passive > 0.7) return l10n.statusContemplative;
+    if (active >= 0.4 && passive >= 0.4) return l10n.statusBalanced;
+    if (active > passive) return l10n.statusTendingActive;
+    return l10n.statusTendingPassive;
   }
 
   String _getStreakEmoji() {
@@ -299,30 +305,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return _currentStreak >= 1 ? '🌱' : '';
   }
 
-  String _getTrendText() {
-    if (_previousTotalMinutes == 0) return 'Primeiros registros! 🎉';
-    if (_isTrendingUp) return '$_trendPercent% mais que período anterior';
-    return '$_trendPercent% menos que período anterior';
+  String _getTrendText(AppLocalizations l10n) {
+    if (_previousTotalMinutes == 0) return l10n.trendFirstRecords;
+    if (_isTrendingUp) return l10n.trendUp(_trendPercent);
+    return l10n.trendDown(_trendPercent);
   }
 
-  String get _smartSuggestion {
-    if (_filteredLogs.isEmpty) {
-      return 'Inicie sua primeira atividade no RootFlow para ver insights personalizados! 🚀';
-    }
+  String _getSmartSuggestion(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (_filteredLogs.isEmpty) return l10n.suggestionStart;
     final naoPraticadas = _categoriasNaoPraticadas;
-    final sugestao = _sugestaoEquilibrio;
+    final sugestao = DomainTranslations.category(context, _sugestaoEquilibrio);
     if (naoPraticadas.length >= 3) {
-      return 'Você ainda não praticou ${naoPraticadas.length} categorias. Que tal começar com "$sugestao"? 🌱';
+      return l10n.suggestionMultipleCategories(naoPraticadas.length, sugestao);
     } else if (naoPraticadas.length == 1) {
-      return 'Falta apenas "$sugestao" para diversificar suas práticas! 🎯';
+      return l10n.suggestionOneCategory(sugestao);
     } else if (_indiceEquilibrio < 40) {
-      return 'Seu tempo está concentrado em poucas categorias. Experimente "$sugestao" para equilibrar! ⚖️';
+      return l10n.suggestionLowBalance(sugestao);
     } else if (_indiceEquilibrio >= 70) {
-      return 'Excelente equilíbrio! ${_indiceEquilibrio.round()}% de distribuição entre categorias! ⭐';
+      return l10n.suggestionHighBalance(_indiceEquilibrio.round());
     } else if (_currentStreak >= 7) {
-      return '$_currentStreak dias seguidos! ${_formatMinutes(_totalMinutes)} de prática! 🔥';
+      return l10n.suggestionStreak(_currentStreak, _formatMinutes(_totalMinutes));
     }
-    return 'Continue variando suas atividades para um desenvolvimento mais completo! 📊';
+    return l10n.suggestionVary;
   }
 
   // ========== BUILD ==========
@@ -361,8 +366,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           totalActivities: _totalActivities,
                           currentStreak: _currentStreak,
                           streakEmoji: _getStreakEmoji(),
-                          lifeBalance: _getLifeBalance(),
-                          trendText: _getTrendText(),
+                          lifeBalance: _getLifeBalance(AppLocalizations.of(context)),
+                          trendText: _getTrendText(AppLocalizations.of(context)),
                           isTrendingUp: _isTrendingUp,
                           trendPercent: _trendPercent,
                           showTrend: _totalMinutes > 0 && _previousTotalMinutes > 0,
@@ -378,7 +383,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           totalActivities: _totalActivities,
                         ),
                         const SizedBox(height: 16),
-                        SmartSuggestion(suggestion: _smartSuggestion),
+                        SmartSuggestion(suggestion: _getSmartSuggestion(context)),
                         const SizedBox(height: 16),
                         ConsciousnessCard(filteredLogs: _filteredLogs),
                         const SizedBox(height: 16),
@@ -452,9 +457,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Dashboard Vital', style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF4A5D23))),
+                Text(AppLocalizations.of(context).dashboardTitle, style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF4A5D23))),
                 const SizedBox(height: 4),
-                Text('Sua jornada de evolução consciente', style: GoogleFonts.lato(fontSize: 13, color: const Color(0xFF6B8E23).withOpacity(0.7))),
+                Text(AppLocalizations.of(context).dashboardSubtitle, style: GoogleFonts.lato(fontSize: 13, color: const Color(0xFF6B8E23).withOpacity(0.7))),
               ],
             ),
           ),
@@ -465,7 +470,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${widget.logs.length} registros',
+              AppLocalizations.of(context).recordsCount(widget.logs.length),
               style: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF6B8E23)),
             ),
           ),
@@ -476,7 +481,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // ========== SELETOR DE PERÍODO ==========
 
+  String _periodLabel(String key, AppLocalizations l10n) => switch (key) {
+    'Hoje' => l10n.periodToday,
+    'Semana' => l10n.periodWeek,
+    'Mês' => l10n.periodMonth,
+    'Geral' => l10n.periodAll,
+    _ => key,
+  };
+
   Widget _buildPeriodSelector() {
+    final l10n = AppLocalizations.of(context);
     final periods = ['Hoje', 'Semana', 'Mês', 'Geral'];
     return Column(
       children: [
@@ -501,7 +515,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       borderRadius: BorderRadius.circular(26),
                     ),
                     child: Text(
-                      period,
+                      _periodLabel(period, l10n),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lato(
                         fontSize: 13,
@@ -530,9 +544,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                      Text(_periodTitle, style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1.2)),
+                      Text(_getPeriodTitle(AppLocalizations.of(context)), style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1.2)),
                       const SizedBox(height: 2),
-                      Text(_periodSubtitle, style: GoogleFonts.lato(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF4A5D23))),
+                      Text(_getPeriodSubtitle(context), style: GoogleFonts.lato(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF4A5D23))),
                     ],
                   ),
                 ),
@@ -551,7 +565,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: const Color(0xFF6B8E23).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Text('Voltar ao atual', style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF6B8E23))),
+                child: Text(l10n.backToCurrent, style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF6B8E23))),
               ),
             ),
           ),

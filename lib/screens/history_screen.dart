@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../l10n/app_localizations.dart';
 import '../models/activity_log.dart';
 import '../widgets/activity_log_card.dart';
 
@@ -38,23 +39,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return sorted;
   }
 
-  String _monthName(String month) {
-    const names = [
-      '',
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro'
-    ];
-    return names[int.parse(month)];
+  String _monthName(String month, BuildContext context) {
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final date = DateTime(2000, int.parse(month));
+    final name = DateFormat('MMMM', locale).format(date);
+    return name[0].toUpperCase() + name.substring(1);
   }
 
   List<ActivityLog> get _filteredLogs {
@@ -112,29 +101,36 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return result;
   }
 
-  Map<String, List<ActivityLog>> get _groupedLogs {
+  Map<String, List<ActivityLog>> _getGroupedLogs(BuildContext context) {
     final Map<String, List<ActivityLog>> groups = {};
     final sortedLogs = List<ActivityLog>.from(_filteredLogs)
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final isEn = locale.startsWith('en');
+    final now = DateTime.now();
+
     for (final log in sortedLogs) {
       final logDate = log.timestamp;
-      final now = DateTime.now();
 
       String key;
       if (logDate.year == now.year &&
           logDate.month == now.month &&
           logDate.day == now.day) {
-        key = 'Hoje';
+        key = 'Hoje'; // internal key — translated at display time
       } else if (logDate.year == now.year &&
           logDate.month == now.month &&
           logDate.day == now.day - 1) {
-        key = 'Ontem';
+        key = 'Ontem'; // internal key — translated at display time
       } else if (logDate.year == now.year) {
-        key = DateFormat("EEEE, dd 'de' MMMM", 'pt_BR').format(logDate);
+        key = isEn
+            ? DateFormat('EEEE, MMMM dd', 'en_US').format(logDate)
+            : DateFormat("EEEE, dd 'de' MMMM", 'pt_BR').format(logDate);
         key = key[0].toUpperCase() + key.substring(1);
       } else {
-        key = DateFormat("dd 'de' MMMM, yyyy", 'pt_BR').format(logDate);
+        key = isEn
+            ? DateFormat('MMMM dd, yyyy', 'en_US').format(logDate)
+            : DateFormat("dd 'de' MMMM, yyyy", 'pt_BR').format(logDate);
       }
 
       groups.putIfAbsent(key, () => []).add(log);
@@ -147,7 +143,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (widget.logs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Nenhuma atividade para exportar.',
+          content: Text(AppLocalizations.of(context).exportNoActivity,
               style: GoogleFonts.lato()),
           backgroundColor: Colors.grey[700],
         ),
@@ -172,7 +168,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final groups = _groupedLogs;
+    final l10n = AppLocalizations.of(context);
+    final groups = _getGroupedLogs(context);
 
     return Scaffold(
       body: Container(
@@ -254,7 +251,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Histórico',
+                  AppLocalizations.of(context).historyTitle,
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -263,7 +260,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Sua jornada registrada',
+                  AppLocalizations.of(context).historySubtitle,
                   style: GoogleFonts.lato(
                     fontSize: 13,
                     color: const Color(0xFF6B8E23).withOpacity(0.7),
@@ -279,7 +276,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${widget.logs.length} registros',
+              AppLocalizations.of(context).recordsCount(widget.logs.length),
               style: GoogleFonts.lato(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -327,7 +324,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 style: GoogleFonts.lato(
                     fontSize: 14, color: const Color(0xFF2D3436)),
                 decoration: InputDecoration(
-                  hintText: 'Buscar atividade...',
+                  hintText: AppLocalizations.of(context).searchHint,
                   hintStyle:
                       GoogleFonts.lato(fontSize: 13, color: Colors.grey[400]),
                   prefixIcon: const Icon(Icons.search_rounded,
@@ -376,7 +373,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  String _periodDisplayLabel(String key, AppLocalizations l10n) => switch (key) {
+    'Todos' => l10n.filterAll,
+    'Hoje' => l10n.filterToday,
+    'Semana' => l10n.filterWeek,
+    'Mês' => l10n.filterMonth,
+    _ => key,
+  };
+
   Widget _buildFilters() {
+    final l10n = AppLocalizations.of(context);
     final periods = ['Todos', 'Hoje', 'Semana', 'Mês'];
 
     return AnimatedContainer(
@@ -392,7 +398,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PERÍODO',
+            l10n.filterPeriodLabel,
             style: GoogleFonts.lato(
               fontSize: 10,
               fontWeight: FontWeight.w900,
@@ -428,7 +434,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                   child: Text(
-                    period,
+                    _periodDisplayLabel(period, l10n),
                     style: GoogleFonts.lato(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -448,10 +454,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildMonthYearSelector() {
+    final l10n = AppLocalizations.of(context);
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
     final isSelected = _selectedFilter == 'Mês/Ano';
-    String displayText = 'Selecionar período';
+    String displayText = l10n.selectPeriodPlaceholder;
     if (isSelected && _selectedYear != null && _selectedMonth != null) {
-      displayText = '${_monthName(_selectedMonth!)} de $_selectedYear';
+      final monthStr = _monthName(_selectedMonth!, context);
+      displayText = isEn ? '$monthStr $_selectedYear' : '$monthStr de $_selectedYear';
     } else if (isSelected && _selectedYear != null) {
       displayText = _selectedYear!;
     }
@@ -519,7 +528,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   onRemove: () => setState(() => _selectedYear = null)),
             if (_selectedMonth != null)
               _activeFilterChip(
-                  label: _monthName(_selectedMonth!),
+                  label: _monthName(_selectedMonth!, context),
                   onRemove: () => setState(() => _selectedMonth = null)),
             if (_searchQuery.isNotEmpty)
               _activeFilterChip(
@@ -544,7 +553,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     const Icon(Icons.clear_rounded,
                         size: 14, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text('Limpar',
+                    Text(AppLocalizations.of(context).clear,
                         style:
                             GoogleFonts.lato(fontSize: 11, color: Colors.grey)),
                   ],
@@ -586,6 +595,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _showMonthYearPicker() {
     String? tempYear = _selectedYear;
     String? tempMonth = _selectedMonth;
+    final l10n = AppLocalizations.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -604,7 +614,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               Row(
                 children: [
-                  Text('Selecionar Período',
+                  Text(l10n.selectPeriodTitle,
                       style: GoogleFonts.playfairDisplay(
                           fontSize: 20, fontWeight: FontWeight.bold)),
                   const Spacer(),
@@ -622,7 +632,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              Text('ANO',
+              Text(l10n.yearLabel,
                   style: GoogleFonts.lato(
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
@@ -665,7 +675,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               if (tempYear != null) ...[
                 const SizedBox(height: 20),
-                Text('MÊS (OPCIONAL)',
+                Text(l10n.monthOptionalLabel,
                     style: GoogleFonts.lato(
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
@@ -692,7 +702,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   ? const Color(0xFF6B8E23)
                                   : Colors.grey[200]!),
                         ),
-                        child: Text(_monthName(month),
+                        child: Text(_monthName(month, context),
                             style: GoogleFonts.lato(
                                 fontSize: 13,
                                 fontWeight: isSelected
@@ -717,7 +727,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(20)),
-                        child: Text('Cancelar',
+                        child: Text(l10n.cancel,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.lato(
                                 fontSize: 14, color: Colors.grey[600])),
@@ -742,7 +752,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               colors: [Color(0xFF6B8E23), Color(0xFF8B6914)]),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text('Aplicar',
+                        child: Text(l10n.apply,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.lato(
                                 fontSize: 14,
@@ -773,10 +783,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildDateGroup(String title, List<ActivityLog> logs) {
+    final l10n = AppLocalizations.of(context);
     final totalDuration =
         logs.fold(Duration.zero, (sum, log) => sum + log.duration);
     final isToday = title == 'Hoje';
     final isYesterday = title == 'Ontem';
+    final displayTitle = isToday
+        ? l10n.today
+        : isYesterday
+            ? l10n.yesterday
+            : title;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -805,7 +821,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     if (isYesterday)
                       const Text('📅', style: TextStyle(fontSize: 12)),
                     const SizedBox(width: 6),
-                    Text(title,
+                    Text(displayTitle,
                         style: GoogleFonts.lato(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -817,7 +833,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                  '${logs.length} atividade${logs.length > 1 ? 's' : ''} · ${_formatDuration(totalDuration)}',
+                  '${l10n.activityCount(logs.length)} · ${_formatDuration(totalDuration)}',
                   style:
                       GoogleFonts.lato(fontSize: 11, color: Colors.grey[500])),
             ],
@@ -838,6 +854,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
@@ -862,8 +879,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 28),
             Text(
               _searchQuery.isNotEmpty
-                  ? 'Nenhum resultado encontrado'
-                  : 'Nenhuma atividade registrada',
+                  ? l10n.historyEmptyNoResults
+                  : l10n.historyEmptyNoActivity,
               style: GoogleFonts.playfairDisplay(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -872,8 +889,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 12),
             Text(
               _searchQuery.isNotEmpty
-                  ? 'Tente outro termo ou remova os filtros'
-                  : 'Inicie uma atividade no RootFlow\npara ver seu histórico aqui',
+                  ? l10n.historyEmptySearchHint
+                  : l10n.historyEmptyActivityHint,
               textAlign: TextAlign.center,
               style: GoogleFonts.lato(
                   fontSize: 14, color: Colors.grey[500], height: 1.4),

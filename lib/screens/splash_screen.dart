@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:root_flow/l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   final Widget nextScreen;
@@ -109,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                       // Nome do app
                       Text(
-                        'RootFlow',
+                        AppLocalizations.of(context).appTitle,
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -121,7 +122,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const SizedBox(height: 6),
 
                       Text(
-                        'Energia • Fluxo • Foco',
+                        AppLocalizations.of(context).appTagline,
                         style: GoogleFonts.lato(
                           fontSize: 14,
                           color: const Color(0xFF6B8E23).withOpacity(0.7),

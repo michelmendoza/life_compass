@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:root_flow/l10n/app_localizations.dart';
 import 'package:root_flow/screens/onboarding_premium_screen.dart';
 import 'package:root_flow/screens/splash_screen.dart';
 import 'screens/home_screen.dart';
@@ -22,6 +24,7 @@ void main() async {
   final settingsBox = await Hive.openBox('settings');
 
   await initializeDateFormatting('pt_BR', null);
+  await initializeDateFormatting('en_US', null);
 
   // Migra entradas salvas com chave int (box.add) para chave string (log.id)
   await _migrateLogsToIdKeys(logsBox);
@@ -84,6 +87,16 @@ class LifeCompassApp extends StatelessWidget {
       title: 'RootFlow',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt'),
+        Locale('en'),
+      ],
       home: hasSeenOnboarding
           ? MainNavigator(logsBox: logsBox, settingsBox: settingsBox)
           : OnboardingPremiumScreen(
@@ -195,26 +208,26 @@ class _MainNavigatorState extends State<MainNavigator> {
             selectedFontSize: 12,
             unselectedFontSize: 12,
             elevation: 8,
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded),
-                label: 'Início',
+                icon: const Icon(Icons.home_rounded),
+                label: AppLocalizations.of(context).navHome,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.local_florist),
-                label: 'Match',
+                icon: const Icon(Icons.local_florist),
+                label: AppLocalizations.of(context).navMatch,
               ),
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: SizedBox.shrink(),
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_rounded),
-                label: 'Dashboard',
+                icon: const Icon(Icons.dashboard_rounded),
+                label: AppLocalizations.of(context).navDashboard,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.history_rounded),
-                label: 'Histórico',
+                icon: const Icon(Icons.history_rounded),
+                label: AppLocalizations.of(context).navHistory,
               ),
             ],
           ),

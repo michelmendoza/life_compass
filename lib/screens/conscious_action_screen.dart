@@ -6,6 +6,8 @@ import 'package:root_flow/models/activity_log.dart';
 import 'package:root_flow/screens/customize_screen.dart';
 import '../data/activities.dart';
 import '../data/colors.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/domain_translations.dart';
 import 'timer_screen.dart';
 
 class ConsciousActionScreen extends StatefulWidget {
@@ -52,7 +54,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
     if (_selectedActivity == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Selecione uma categoria primeiro!'),
+          content: Text(AppLocalizations.of(context).selectCategoryFirst),
           backgroundColor: Colors.orange[700],
           behavior: SnackBarBehavior.floating,
           shape:
@@ -95,29 +97,8 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
     super.dispose();
   }
 
-  String _getCategoryDescription(Activity activity) {
-    // Descrições personalizadas para cada categoria
-    final descriptions = {
-      'Alimentação':
-          'Práticas para comer com consciência, atenção plena e gratidão pelos alimentos.',
-      'Movimento':
-          'Atividades que conectam corpo e mente através do movimento consciente.',
-      'Respiração':
-          'Técnicas respiratórias para equilibrar energia e acalmar a mente.',
-      'Concentração':
-          'Exercícios para desenvolver foco, atenção e clareza mental.',
-      'Emoções':
-          'Práticas para reconhecer, acolher e transformar suas emoções.',
-      'Repouso': 'Momentos de descanso ativo e recuperação da energia vital.',
-      'Criatividade':
-          'Expressão artística e criativa como forma de meditação ativa.',
-      'Conexão':
-          'Práticas para fortalecer vínculos e sentir-se parte de algo maior.',
-    };
-
-    return descriptions[activity.group] ??
-        'Práticas conscientes para desenvolver presença e atenção plena no dia a dia.';
-  }
+  String _getCategoryDescription(Activity activity) =>
+      DomainTranslations.categoryDesc(context, activity.group);
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +143,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                         Row(
                           children: [
                             Text(
-                              '📋 PRÁTICAS DISPONÍVEIS',
+                              AppLocalizations.of(context).availablePracticesLabel,
                               style: GoogleFonts.lato(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
@@ -179,7 +160,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                '${_selectedActivity!.practices.length} práticas',
+                                AppLocalizations.of(context).practicesCount(_selectedActivity!.practices.length),
                                 style: GoogleFonts.lato(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
@@ -216,7 +197,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Selecione uma categoria\npara ver as práticas disponíveis',
+                                AppLocalizations.of(context).selectCategoryHint,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.lato(
                                   fontSize: 14,
@@ -283,7 +264,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ação Consciente',
+                AppLocalizations.of(context).consciousActionTitle,
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -291,7 +272,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                 ),
               ),
               Text(
-                'Escolha com presença',
+                AppLocalizations.of(context).consciousActionSubtitle,
                 style: GoogleFonts.lato(
                   fontSize: 10,
                   color: const Color(0xFF6B8E23).withOpacity(0.6),
@@ -337,7 +318,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            '🍃 ÁREA DE ATUAÇÃO',
+            AppLocalizations.of(context).areaLabel,
             style: GoogleFonts.lato(
               fontSize: 11,
               fontWeight: FontWeight.w900,
@@ -407,7 +388,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        activity.group,
+                        DomainTranslations.category(context, activity.group),
                         style: GoogleFonts.lato(
                           fontSize: 11,
                           fontWeight:
@@ -473,7 +454,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _selectedActivity!.group,
+                  DomainTranslations.category(context, _selectedActivity!.group),
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -570,9 +551,9 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                 ElevatedButton.icon(
                   onPressed: () => _startActivity(practice),
                   icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                  label: const Text(
-                    'INICIAR',
-                    style: TextStyle(
+                  label: Text(
+                    AppLocalizations.of(context).start,
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
@@ -600,7 +581,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
               children: [
                 _infoChip(
                   practice.energy == 'Ativa' ? '⚡' : '🍃',
-                  practice.energy,
+                  DomainTranslations.energy(context, practice.energy),
                   energyColor,
                 ),
                 const SizedBox(width: 8),
@@ -608,7 +589,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                   practice.flow.contains('Difícil')
                       ? '🔥'
                       : (practice.flow.contains('Fácil') ? '🌊' : '⚡'),
-                  practice.flow,
+                  DomainTranslations.flow(context, practice.flow),
                   flowColor,
                 ),
                 const SizedBox(width: 8),
@@ -619,7 +600,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
                     'Espírito' => '🙏',
                     _ => '🧘',
                   },
-                  practice.organ,
+                  DomainTranslations.organ(context, practice.organ),
                   organColor,
                 ),
               ],

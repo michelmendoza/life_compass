@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:root_flow/l10n/app_localizations.dart';
 
 class DashboardEmptyState extends StatelessWidget {
   const DashboardEmptyState({super.key});
@@ -27,12 +28,12 @@ class DashboardEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Nenhuma atividade neste período',
+            AppLocalizations.of(context).dashboardEmptyTitle,
             style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
-            'Altere o período ou inicie uma atividade\nno RootFlow para ver suas métricas',
+            AppLocalizations.of(context).dashboardEmptySubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.lato(fontSize: 13, color: Colors.grey[500], height: 1.4),
           ),
