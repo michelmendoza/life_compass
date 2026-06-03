@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:life_compass/screens/onboarding_premium_screen.dart';
-import 'package:life_compass/screens/splash_screen.dart';
+import 'package:root_flow/screens/onboarding_premium_screen.dart';
+import 'package:root_flow/screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/dashboard_screen.dart';
@@ -81,7 +81,7 @@ class LifeCompassApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Life Compass',
+      title: 'RootFlow',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
       home: hasSeenOnboarding

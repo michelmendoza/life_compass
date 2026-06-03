@@ -159,13 +159,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
         .convert(widget.logs.map((l) => l.toJson()).toList());
 
     final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/life_compass_export.json');
+    final file = File('${dir.path}/rootflow_export.json');
     await file.writeAsString(jsonData);
 
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/json')],
-        subject: 'Life Compass — Histórico de atividades',
+        subject: 'RootFlow — Histórico de atividades',
       ),
     );
   }
@@ -873,7 +873,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Text(
               _searchQuery.isNotEmpty
                   ? 'Tente outro termo ou remova os filtros'
-                  : 'Inicie uma atividade na Bússola\npara ver seu histórico aqui',
+                  : 'Inicie uma atividade no RootFlow\npara ver seu histórico aqui',
               textAlign: TextAlign.center,
               style: GoogleFonts.lato(
                   fontSize: 14, color: Colors.grey[500], height: 1.4),

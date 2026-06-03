@@ -307,7 +307,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   String get _smartSuggestion {
     if (_filteredLogs.isEmpty) {
-      return 'Inicie sua primeira atividade na Bússola para ver insights personalizados! 🚀';
+      return 'Inicie sua primeira atividade no RootFlow para ver insights personalizados! 🚀';
     }
     final naoPraticadas = _categoriasNaoPraticadas;
     final sugestao = _sugestaoEquilibrio;

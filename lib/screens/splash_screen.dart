@@ -109,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                       // Nome do app
                       Text(
-                        'Life Compass',
+                        'RootFlow',
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -121,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const SizedBox(height: 6),
 
                       Text(
-                        'Bússola Vital',
+                        'Energia • Fluxo • Foco',
                         style: GoogleFonts.lato(
                           fontSize: 14,
                           color: const Color(0xFF6B8E23).withOpacity(0.7),

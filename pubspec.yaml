@@ -1,5 +1,5 @@
-name: life_compass
-description: App de bússola da vida com timer
+name: root_flow
+description: App de bem-estar com foco em energia, fluxo e foco
 publish_to: 'none'
 version: 1.0.0+1
 

@@ -32,7 +32,7 @@ class DashboardEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Altere o período ou inicie uma atividade\nna Bússola para ver suas métricas',
+            'Altere o período ou inicie uma atividade\nno RootFlow para ver suas métricas',
             textAlign: TextAlign.center,
             style: GoogleFonts.lato(fontSize: 13, color: Colors.grey[500], height: 1.4),
           ),

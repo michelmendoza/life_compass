@@ -1,4 +1,4 @@
-package com.example.life_compass
+package com.rootflow.app
 
 import io.flutter.embedding.android.FlutterActivity
 

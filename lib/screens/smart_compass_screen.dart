@@ -314,7 +314,8 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
     if (_isSwiping) return;
     final screenWidth = MediaQuery.of(context).size.width;
     if (_dragOffset > screenWidth * 0.2) {
-      _animateFlyOut(screenWidth * 1.5, () => _startPractice(_cards[_currentIndex]));
+      _animateFlyOut(
+          screenWidth * 1.5, () => _startPractice(_cards[_currentIndex]));
     } else if (_dragOffset < -(screenWidth * 0.2)) {
       _animateFlyOut(-screenWidth * 1.5, _nextCard);
     } else {
@@ -491,7 +492,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bússola Smart',
+                  'Match de práticas',
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -582,8 +583,7 @@ class _SmartCompassScreenState extends State<SmartCompassScreen>
         decoration: BoxDecoration(
           color: const Color(0xFF6B8E23).withOpacity(0.07),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-              color: const Color(0xFF6B8E23).withOpacity(0.2)),
+          border: Border.all(color: const Color(0xFF6B8E23).withOpacity(0.2)),
         ),
         child: Row(
           children: [

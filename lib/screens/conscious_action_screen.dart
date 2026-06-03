@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:life_compass/data/custom_activities.dart';
-import 'package:life_compass/data/practice.dart';
-import 'package:life_compass/models/activity_log.dart';
-import 'package:life_compass/screens/customize_screen.dart';
+import 'package:root_flow/data/custom_activities.dart';
+import 'package:root_flow/data/practice.dart';
+import 'package:root_flow/models/activity_log.dart';
+import 'package:root_flow/screens/customize_screen.dart';
 import '../data/activities.dart';
 import '../data/colors.dart';
 import 'timer_screen.dart';
