@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RootFlow — Treino é só um terço.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+:root{--accent:#cf7a3a;--accent-soft:#f7ede2}
+.hero-atl{background:var(--g0);color:#fff;position:relative;overflow:hidden;padding:clamp(3rem,7vw,5.5rem) 0 clamp(4rem,8vw,6rem)}
+.hero-atl .glow{position:absolute;bottom:-20%;right:-5%;width:60%;height:90%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 50%,transparent),transparent 62%);opacity:.45}
+.hero-atl .container{position:relative}
+.hero-atl .lead{color:rgba(255,255,255,.7)}
+.modes{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem}
+.mode{display:inline-flex;align-items:center;gap:.5rem;background:#fff;border:1px solid rgba(45,102,68,.12);border-radius:12px;padding:.7rem 1.1rem;font-weight:600;font-size:.92rem;box-shadow:var(--shadow-sm)}
+.mode .mi{width:30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:.9rem}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;counter-reset:s}
+.step{position:relative;padding-top:2.7rem}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:0;left:0;font-family:var(--serif);font-size:1.5rem;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:500}
+.step h4{font-size:1.12rem;margin-bottom:.4rem;letter-spacing:-.01em}
+.step p{font-size:.94rem;color:var(--muted);line-height:1.5}
+@media(max-width:880px){.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="nav on-dark">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark">🌿</span> RootFlow</a>
+  <div class="nav-right">
+    <a href="#como" class="nav-link">Como funciona</a>
+    <a href="#privacidade" class="nav-link">Privacidade</a>
+    <a href="#baixar" class="btn btn-accent" style="padding:.6rem 1.2rem;font-size:.84rem">Baixar · R$ 28</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero-atl">
+  <div class="glow"></div>
+  <div class="container">
+    <div class="grid2">
+      <div>
+        <p class="eyebrow reveal" style="color:var(--g5)">O terço que falta no seu treino</p>
+        <h1 class="display reveal" style="margin:1.2rem 0 1.4rem">Treino é só <em>um terço.</em></h1>
+        <p class="lead reveal" style="margin-bottom:2rem">Você lota o Corpo e zera Mente e Espírito — e é por isso que estagna. O RootFlow traz o <b style="color:#fff">timer HIIT e Tabata</b> que você já usa, e mostra os dois terços que faltam para destravar recuperação, foco e longevidade.</p>
+        <div class="btn-row reveal" id="baixar" style="margin-bottom:1.6rem">
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+        </div>
+        <div class="reveal" style="display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.92rem;margin:0 0 1.3rem;color:var(--accent)">R$ 28 · pagamento único, sem assinatura</div>
+        <div class="pills reveal">
+          <span class="pill"><span class="dot"></span> Timer HIIT · Tabata · Pomodoro</span>
+          <span class="pill"><span class="dot"></span> Veja seu desequilíbrio</span>
+          <span class="pill"><span class="dot"></span> Offline · sem conta</span>
+        </div>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center">
+        <div class="phone shot"><div class="phone-screen"><img src="../assets/screens/hiit.png" alt="Tela do RootFlow"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEMA -->
+<section class="section">
+  <div class="container">
+    <div class="grid2">
+      <div class="reveal">
+        <p class="eyebrow">O ponto cego</p>
+        <h2 class="h2" style="margin:1rem 0 1.3rem">Mais carga não é<br><em>mais resultado.</em></h2>
+        <p class="lead">O plateau, a lesão recorrente, o sono ruim — raramente vêm de treinar pouco. Vêm de treinar <b style="color:var(--ink)">só uma dimensão</b>. Recuperação, foco e regulação são o que transformam esforço em adaptação. O RootFlow torna esse ponto cego visível.</p>
+      </div>
+      <div class="reveal">
+        <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+          <div class="stat"><div class="n">95%</div><div class="l">do tempo do atleta típico cai só no eixo Corpo</div></div>
+          <div class="stat"><div class="n">⅓</div><div class="l">é quanto o treino representa do seu equilíbrio total</div></div>
+          <div class="stat"><div class="n">4</div><div class="l">modos de timer: Crono, Pomodoro, Tabata e HIIT custom</div></div>
+          <div class="stat"><div class="n">8s</div><div class="l">para registrar uma sessão e fechar o loop</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMER / FEATURE ANCHOR -->
+<section class="section paper">
+  <div class="container">
+    <div class="reveal" style="max-width:60ch;margin-bottom:2rem">
+      <p class="eyebrow">A casa que você já conhece</p>
+      <h2 class="h2" style="margin-top:1rem">O timer que você usaria de qualquer jeito — agora conectado ao seu equilíbrio.</h2>
+      <p class="lead" style="margin-top:1.2rem">Cada round que você crava entra automaticamente no seu balanço. Você não muda de hábito; você ganha um raio-X dele.</p>
+    </div>
+    <div class="modes reveal" style="margin-bottom:2.5rem">
+      <span class="mode"><span class="mi">⏱️</span> Crono livre</span>
+      <span class="mode"><span class="mi">🍅</span> Pomodoro</span>
+      <span class="mode"><span class="mi">🔥</span> HIIT Tabata</span>
+      <span class="mode"><span class="mi">⚙️</span> Intervalado custom</span>
+      <span class="mode"><span class="mi">✍️</span> Entrada manual</span>
+    </div>
+    <div class="triad">
+      <div class="organ reveal"><div class="o-ico">🫀</div><h4>Balanço por órgão</h4><p>Corpo, Mente e Espírito em percentuais. O choque visual de ver Corpo no talo e o resto vazio é o que muda o comportamento.</p></div>
+      <div class="organ reveal"><div class="o-ico">📈</div><h4>Índice de desafio</h4><p>Mede se você está progredindo ou só repetindo. Adaptação acontece na dose certa — nem fácil demais, nem no vermelho.</p></div>
+      <div class="organ reveal"><div class="o-ico">🧭</div><h4>Smart Match</h4><p>Cinco dias intensos? Ele prioriza recuperação passiva. O contrapeso que atletas sérios sabem que precisam — e sempre pulam.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="section" id="como">
+  <div class="container">
+    <div class="reveal" style="max-width:60ch;margin-bottom:3rem">
+      <p class="eyebrow">O loop</p>
+      <h2 class="h2" style="margin-top:1rem">Treine. Registre. Recupere com inteligência.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><h4>Crave o round</h4><p>Abra o timer, escolha Tabata ou HIIT, dê play. No fim, registre como foi — intensidade e presença, em dois toques.</p></div>
+      <div class="step reveal"><h4>Veja os três eixos</h4><p>O Dashboard revela o que o relógio do treino esconde: o quanto você investiu em Corpo e o quanto deixou de lado.</p></div>
+      <div class="step reveal"><h4>Recupere no ponto</h4><p>O Match lê sua semana e sugere o contrapeso certo — mobilidade, respiração, descanso ativo. Longevidade é estratégia.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVA -->
+<section class="section dark">
+  <div class="container">
+    <div class="grid2">
+      <div class="reveal">
+        <p class="quote" style="color:#fff">"Eu treinava 6x por semana e estagnei. Faltava o resto. O Match me forçou a descansar — e meus PRs voltaram a subir."</p>
+        <div class="quote-by" style="color:rgba(255,255,255,.6)"><span class="av">TL</span><div><b style="color:#fff">Thiago L.</b> · CrossFit · maratonista amador<br>Curitiba</div></div>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center"><div class="phone shot" style="width:250px"><div class="phone-screen"><img src="../assets/screens/dash-consciencia.png" alt="Tela do RootFlow"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACIDADE -->
+<section class="section" id="privacidade">
+  <div class="container">
+    <div class="reveal" style="text-align:center;max-width:62ch;margin:0 auto">
+      <p class="eyebrow center">Seus dados, seu corpo</p>
+      <h2 class="h2" style="margin:1.2rem 0 1.3rem">Performance é pessoal.<br>Seus dados também.</h2>
+      <p class="lead" style="margin:0 auto">Tudo local. Sem conta, sem servidor, sem rede. O RootFlow funciona offline e seus registros nunca saem do aparelho. Exporte para sua planilha quando quiser, apague quando quiser.</p>
+      <div class="pills reveal" style="justify-content:center;margin-top:1.8rem">
+        <span class="pill"><span class="dot"></span> 100% offline</span>
+        <span class="pill"><span class="dot"></span> Sem conta</span>
+        <span class="pill"><span class="dot"></span> Export JSON</span>
+        <span class="pill"><span class="dot"></span> PT + EN</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section paper">
+  <div class="container">
+    <div class="cta-band reveal">
+      <div class="glow"></div>
+      <p class="eyebrow center" style="color:var(--g5);justify-content:center">Comece hoje</p>
+      <h2 class="h2" style="color:#fff;margin:1.2rem 0 1rem">Destrave o terço que falta.</h2>
+      <p class="lead" style="color:rgba(255,255,255,.7);margin:0 auto 2rem">Pagamento único de R$ 28. Sem assinatura, sem conta. Use o timer que você já ama e descubra o que está segurando seu progresso.</p>
+      <div class="btn-row" style="justify-content:center">
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark" style="background:var(--g3)">🌿</span> RootFlow</a>
+  <span>Viva com intenção · diário de práticas conscientes</span>
+  <div class="footer-links"><a href="#como">Como funciona</a><a href="#privacidade">Privacidade</a><a href="../Estudo RootFlow.html">Estudo</a></div>
+</footer>
+
+<script>
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

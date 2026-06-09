@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RootFlow — Pare de medir tarefas.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+:root{--accent:#2f8f8a;--accent-soft:#e2f0ef}
+body{background:var(--cream)}
+.hero-soft{position:relative;overflow:hidden;padding:clamp(3rem,7vw,5.5rem) 0 clamp(4rem,8vw,6rem);
+  background:linear-gradient(170deg,#e6f1f0 0%,var(--cream) 55%)}
+.hero-soft .glow{position:absolute;top:-15%;right:-8%;width:55%;height:90%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 28%,transparent),transparent 60%);opacity:.6}
+.hero-soft .container{position:relative}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;counter-reset:s}
+.step{position:relative;padding-top:2.7rem}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:0;left:0;font-family:var(--serif);font-size:1.5rem;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:500}
+.step h4{font-size:1.12rem;margin-bottom:.4rem;letter-spacing:-.01em}
+.step p{font-size:.94rem;color:var(--muted);line-height:1.5}
+.versus{display:grid;grid-template-columns:1fr auto 1fr;gap:1.5rem;align-items:center}
+.vs-card{border-radius:var(--radius);padding:1.7rem;border:1px solid rgba(45,102,68,.14)}
+.vs-card.old{background:#f3efe9;border-color:#e2d8c8}
+.vs-card.new{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 24%,transparent)}
+.vs-card .vk{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
+.vs-card.old .vk{color:#9a8a6a}
+.vs-card.new .vk{color:var(--accent)}
+.vs-card ul{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.vs-card li{font-size:.95rem;line-height:1.45;padding-left:1.5rem;position:relative}
+.vs-card.old li::before{content:"✕";position:absolute;left:0;color:#b4593a;font-weight:700}
+.vs-card.new li::before{content:"✓";position:absolute;left:0;color:var(--accent);font-weight:700}
+.vs-mid{font-family:var(--serif);font-size:1.1rem;color:var(--muted);font-style:italic}
+.formula{display:inline-flex;align-items:center;gap:.9rem;background:#fff;border:1px solid rgba(45,102,68,.14);border-radius:14px;padding:1rem 1.4rem;box-shadow:var(--shadow-sm);flex-wrap:wrap}
+.formula .ftag{font-family:var(--serif);font-size:1.5rem;color:var(--accent)}
+.formula .fop{color:var(--muted);font-size:1.2rem}
+.formula .ft{font-size:.95rem;font-weight:600}
+@media(max-width:880px){.steps{grid-template-columns:1fr}.versus{grid-template-columns:1fr}.vs-mid{text-align:center}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark">🌿</span> RootFlow</a>
+  <div class="nav-right">
+    <a href="#como" class="nav-link">Como funciona</a>
+    <a href="#privacidade" class="nav-link">Privacidade</a>
+    <a href="#baixar" class="btn btn-accent" style="padding:.6rem 1.2rem;font-size:.84rem">Baixar · R$ 28</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero-soft">
+  <div class="glow"></div>
+  <div class="container">
+    <div class="grid2">
+      <div>
+        <p class="eyebrow reveal">Meça a vida certa, não as tarefas</p>
+        <h1 class="display reveal" style="margin:1.2rem 0 1.4rem">Pare de medir <em>tarefas.</em></h1>
+        <p class="lead reveal" style="margin-bottom:2rem">Você tem seis apps de hábito e mais ansiedade. O RootFlow troca o vício de streaks por uma métrica honesta — o <b style="color:var(--ink)">UP</b>, minutos praticados ÷ tempo ideal — e te mostra o equilíbrio real entre Mente, Corpo e Espírito.</p>
+        <div class="btn-row reveal" id="baixar" style="margin-bottom:1.6rem">
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+        </div>
+        <div class="reveal" style="display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.92rem;margin:0 0 1.3rem;color:var(--accent)">R$ 28 · pagamento único, sem assinatura</div>
+        <div class="pills reveal">
+          <span class="pill"><span class="dot"></span> UP: a métrica honesta</span>
+          <span class="pill"><span class="dot"></span> Seus dados exportáveis</span>
+          <span class="pill"><span class="dot"></span> Offline · sem conta</span>
+        </div>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center">
+        <div class="phone shot"><div class="phone-screen"><img src="../assets/screens/dash-balance.png" alt="Tela do RootFlow"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEMA -->
+<section class="section">
+  <div class="container">
+    <div class="reveal" style="max-width:62ch;margin:0 auto;text-align:center">
+      <p class="eyebrow center">A armadilha do streak</p>
+      <h2 class="h2" style="margin:1.2rem 0 1.3rem">Você otimizou tudo —<br>e ainda se sente <em>desequilibrado.</em></h2>
+      <p class="lead" style="margin:0 auto">Habit trackers premiam a sequência, não a vida. Você marca o check, mantém o streak por medo de quebrá-lo, e mede o que é fácil contar — não o que importa. O resultado é mais culpa, menos clareza.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VERSUS -->
+<section class="section paper">
+  <div class="container">
+    <div class="reveal" style="max-width:60ch;margin-bottom:2.5rem">
+      <p class="eyebrow">Uma régua diferente</p>
+      <h2 class="h2" style="margin-top:1rem">O fim da contabilidade de streaks.</h2>
+    </div>
+    <div class="versus reveal">
+      <div class="vs-card old">
+        <div class="vk">Apps de hábito comuns</div>
+        <ul>
+          <li>Premiam a sequência, não o conteúdo</li>
+          <li>Um dia perdido apaga semanas de progresso</li>
+          <li>Medem tarefas isoladas, sem visão de vida</li>
+          <li>Geram culpa e ansiedade de manutenção</li>
+        </ul>
+      </div>
+      <div class="vs-mid">vira</div>
+      <div class="vs-card new">
+        <div class="vk">RootFlow · métrica UP</div>
+        <ul>
+          <li>Mede tempo real ÷ tempo ideal por área</li>
+          <li>Um dia leve não destrói o panorama</li>
+          <li>Mostra o equilíbrio entre Mente, Corpo e Espírito</li>
+          <li>Dá direção tranquila, não pressão</li>
+        </ul>
+      </div>
+    </div>
+    <div class="reveal" style="margin-top:2.5rem;display:flex;justify-content:center">
+      <div class="formula">
+        <span class="ftag">UP</span><span class="fop">=</span>
+        <span class="ft">minutos praticados</span><span class="fop">÷</span><span class="ft">tempo ideal da área</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE ANCHOR -->
+<section class="section" id="dashboard">
+  <div class="container">
+    <div class="reveal" style="max-width:58ch;margin-bottom:2.5rem">
+      <p class="eyebrow">Para quem pensa em sistemas</p>
+      <h2 class="h2" style="margin-top:1rem">Um dashboard que responde a pergunta certa.</h2>
+      <p class="lead" style="margin-top:1.2rem">Não "quantos dias seguidos?", mas "minha energia está bem distribuída?". Tudo calculado em tempo real, nada que vire mais um número para você obsedar.</p>
+    </div>
+    <div class="triad">
+      <div class="organ reveal"><div class="o-ico">📊</div><h4>Dashboard analítico</h4><p>UP, balança de energia, distribuição por órgão, índice de desafio e tendência por período. Hoje, semana, mês — num olhar.</p></div>
+      <div class="organ reveal"><div class="o-ico">🍅</div><h4>Pomodoro embutido</h4><p>O foco que você já pratica, agora alimentando o seu equilíbrio automaticamente. Sem trocar de app.</p></div>
+      <div class="organ reveal"><div class="o-ico">📤</div><h4>Seus dados, exportáveis</h4><p>Export em JSON a qualquer momento. Leve para sua planilha, seu Notion, sua análise. Os dados são seus de verdade.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="section paper" id="como">
+  <div class="container">
+    <div class="reveal" style="max-width:60ch;margin-bottom:3rem">
+      <p class="eyebrow">O sistema</p>
+      <h2 class="h2" style="margin-top:1rem">Registrar leva 8 segundos. Entender, um olhar.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><h4>Registre sem atrito</h4><p>Um toque abre a ação, dois iniciam o timer. Crono, Pomodoro ou tempo manual. Cabe na rotina que você já tem.</p></div>
+      <div class="step reveal"><h4>Leia o painel</h4><p>O UP e o equilíbrio aparecem na hora. Você para de adivinhar e passa a enxergar onde a vida está pendendo.</p></div>
+      <div class="step reveal"><h4>Ajuste com o Match</h4><p>O Smart Match analisa 7 dias e sugere o contrapeso. Otimização de verdade: na área que precisa, não na que é fácil.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVA -->
+<section class="section">
+  <div class="container">
+    <div class="grid2">
+      <div class="reveal" style="display:flex;justify-content:center"><div class="phone shot" style="width:250px"><div class="phone-screen"><img src="../assets/screens/pomodoro.png" alt="Tela do RootFlow"></div></div></div>
+      <div class="reveal">
+        <p class="quote">"Larguei três habit trackers. O UP me mostrou que eu não tinha problema de disciplina — tinha problema de equilíbrio."</p>
+        <div class="quote-by"><span class="av">BF</span><div><b style="color:var(--ink)">Bruno F.</b> · product manager · entusiasta de produtividade<br>Belo Horizonte</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACIDADE -->
+<section class="section paper" id="privacidade">
+  <div class="container">
+    <div class="reveal" style="text-align:center;max-width:62ch;margin:0 auto">
+      <p class="eyebrow center">Local por princípio</p>
+      <h2 class="h2" style="margin:1.2rem 0 1.3rem">Sem nuvem. Sem conta.<br>Sem você virar o produto.</h2>
+      <p class="lead" style="margin:0 auto">Tudo roda offline, no seu aparelho. O RootFlow não tem servidor para vazar nem login para esquecer. Você é dono dos dados e os leva embora quando quiser, num arquivo só seu.</p>
+      <div class="pills reveal" style="justify-content:center;margin-top:1.8rem">
+        <span class="pill"><span class="dot"></span> 100% offline</span>
+        <span class="pill"><span class="dot"></span> Sem conta</span>
+        <span class="pill"><span class="dot"></span> Export JSON</span>
+        <span class="pill"><span class="dot"></span> PT + EN</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="container">
+    <div class="cta-band reveal">
+      <div class="glow"></div>
+      <p class="eyebrow center" style="color:var(--g5);justify-content:center">Comece hoje</p>
+      <h2 class="h2" style="color:#fff;margin:1.2rem 0 1rem">Meça o que realmente importa.</h2>
+      <p class="lead" style="color:rgba(255,255,255,.7);margin:0 auto 2rem">Pagamento único de R$ 28. Sem assinatura, sem conta. Troque a ansiedade do streak pela clareza de um equilíbrio que você finalmente consegue ver.</p>
+      <div class="btn-row" style="justify-content:center">
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark" style="background:var(--g3)">🌿</span> RootFlow</a>
+  <span>Viva com intenção · diário de práticas conscientes</span>
+  <div class="footer-links"><a href="#como">Como funciona</a><a href="#privacidade">Privacidade</a><a href="../Estudo RootFlow.html">Estudo</a></div>
+</footer>
+
+<script>
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

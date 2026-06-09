@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RootFlow — Sua prática não termina no tapete.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+:root{--accent:#7d6b9e;--accent-soft:#efebf4}
+body{background:var(--cream)}
+.hero-soft{position:relative;overflow:hidden;padding:clamp(3rem,7vw,5.5rem) 0 clamp(4rem,8vw,6rem);
+  background:linear-gradient(170deg,#f3eef7 0%,var(--cream) 55%)}
+.hero-soft .glow{position:absolute;top:-20%;left:-10%;width:55%;height:90%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 30%,transparent),transparent 60%);opacity:.6}
+.hero-soft .container{position:relative}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;counter-reset:s}
+.step{position:relative;padding-top:2.7rem}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:0;left:0;font-family:var(--serif);font-size:1.5rem;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:500}
+.step h4{font-size:1.12rem;margin-bottom:.4rem;letter-spacing:-.01em}
+.step p{font-size:.94rem;color:var(--muted);line-height:1.5}
+.scale{display:flex;flex-direction:column;gap:.7rem;margin-top:.5rem}
+.scale-row{display:flex;align-items:center;gap:1rem;background:#fff;border:1px solid rgba(45,102,68,.12);border-radius:14px;padding:.9rem 1.2rem;box-shadow:var(--shadow-sm)}
+.scale-row .se{font-size:1.5rem}
+.scale-row .sl b{font-size:.98rem}
+.scale-row .sl span{display:block;font-size:.82rem;color:var(--muted)}
+.scale-row .sn{margin-left:auto;width:90px;height:6px;border-radius:5px;background:var(--g7);overflow:hidden}
+.scale-row .sn i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.compass-feature{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+@media(max-width:880px){.steps{grid-template-columns:1fr}.compass-feature{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark">🌿</span> RootFlow</a>
+  <div class="nav-right">
+    <a href="#como" class="nav-link">Como funciona</a>
+    <a href="#privacidade" class="nav-link">Privacidade</a>
+    <a href="#baixar" class="btn btn-accent" style="padding:.6rem 1.2rem;font-size:.84rem">Baixar · R$ 28</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero-soft">
+  <div class="glow"></div>
+  <div class="container">
+    <div class="grid2">
+      <div>
+        <p class="eyebrow reveal">Leve a presença para fora do tapete</p>
+        <h1 class="display reveal" style="margin:1.2rem 0 1.4rem">Sua prática não termina <em>no tapete.</em></h1>
+        <p class="lead reveal" style="margin-bottom:2rem">Você é presente na meditação e disperso no resto do dia. O RootFlow registra cada prática com seu nível de consciência — de <b style="color:var(--ink)">😴 automático</b> a <b style="color:var(--ink)">✨ fluindo</b> — e mantém a intenção viva nas 23 horas que ficam de fora.</p>
+        <div class="btn-row reveal" id="baixar" style="margin-bottom:1.6rem">
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+        </div>
+        <div class="reveal" style="display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.92rem;margin:0 0 1.3rem;color:var(--accent)">R$ 28 · pagamento único, sem assinatura</div>
+        <div class="pills reveal">
+          <span class="pill"><span class="dot"></span> Nível de consciência por sessão</span>
+          <span class="pill"><span class="dot"></span> Constância sem culpa</span>
+          <span class="pill"><span class="dot"></span> Sem conta · só você</span>
+        </div>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center">
+        <div class="phone shot"><div class="phone-screen"><img src="../assets/screens/practices.png" alt="Tela do RootFlow"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEMA -->
+<section class="section">
+  <div class="container">
+    <div class="reveal" style="max-width:62ch;margin:0 auto;text-align:center">
+      <p class="eyebrow center">A lacuna entre as sessões</p>
+      <h2 class="h2" style="margin:1.2rem 0 1.3rem">A presença que você cultiva na almofada <em>evapora</em> às 9h da manhã.</h2>
+      <p class="lead" style="margin:0 auto">O problema nunca foi a sua prática. É a <b style="color:var(--ink)">continuidade</b>. Sem um fio que conecte uma sessão à próxima, cada meditação recomeça do zero — e a intenção se perde no automático do dia.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ESCALA DE CONSCIÊNCIA -->
+<section class="section paper">
+  <div class="container">
+    <div class="compass-feature">
+      <div class="reveal">
+        <p class="eyebrow">O coração do app</p>
+        <h2 class="h2" style="margin:1rem 0 1.2rem">Uma escala de consciência,<br>não de produtividade.</h2>
+        <p class="lead">Antes de cada prática, você marca o quão presente esteve. Baseado no modelo de consciência de David Hawkins, o RootFlow transforma um sentimento abstrato em algo que você acompanha e cultiva — sessão após sessão.</p>
+      </div>
+      <div class="reveal">
+        <div class="scale">
+          <div class="scale-row"><span class="se">😴</span><div class="sl"><b>Automático</b><span>Presente de corpo, ausente de mente</span></div><div class="sn"><i style="width:18%"></i></div></div>
+          <div class="scale-row"><span class="se">🌫️</span><div class="sl"><b>Disperso</b><span>Indo e voltando da atenção</span></div><div class="sn"><i style="width:45%"></i></div></div>
+          <div class="scale-row"><span class="se">🌱</span><div class="sl"><b>Atento</b><span>Consciente do que faz e por quê</span></div><div class="sn"><i style="width:70%"></i></div></div>
+          <div class="scale-row"><span class="se">✨</span><div class="sl"><b>Fluindo</b><span>Presença plena, sem esforço</span></div><div class="sn"><i style="width:96%"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="section" id="como">
+  <div class="container">
+    <div class="reveal" style="max-width:60ch;margin-bottom:3rem">
+      <p class="eyebrow">O ritual diário</p>
+      <h2 class="h2" style="margin-top:1rem">Um gesto simples, repetido com intenção.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><h4>Registre com presença</h4><p>Respiração, yoga, caminhada na natureza, silêncio. Escolha a prática e marque, com honestidade, como você esteve presente nela.</p></div>
+      <div class="step reveal"><h4>Veja seu equilíbrio</h4><p>Mente, Corpo e Espírito em harmonia visual. Energia Ativa e Passiva em balanço. Sua semana inteira, num olhar sereno.</p></div>
+      <div class="step reveal"><h4>Receba o contrapeso</h4><p>O Smart Match percebe o que faltou e sugere com delicadeza — um momento de corpo, um instante de espírito. Direção, nunca cobrança.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE ANCHOR -->
+<section class="section paper">
+  <div class="container">
+    <div class="reveal" style="max-width:58ch;margin-bottom:2.5rem">
+      <p class="eyebrow">Pensado para a sua jornada</p>
+      <h2 class="h2" style="margin-top:1rem">Constância que acolhe — em vez de cobrar.</h2>
+    </div>
+    <div class="triad">
+      <div class="organ reveal"><div class="o-ico">🌿</div><h4>Práticas passivas</h4><p>Meditação, respiração, contemplação. O app valoriza o silêncio tanto quanto o movimento — algo raro num mundo de streaks.</p></div>
+      <div class="organ reveal"><div class="o-ico">🕯️</div><h4>Histórico sem culpa</h4><p>Veja sua constância como um rio, não como uma corrente quebrada. Um dia de pausa não apaga semanas de presença.</p></div>
+      <div class="organ reveal"><div class="o-ico">🎧</div><h4>Ambiente que acalma</h4><p>Do onboarding com áudio de floresta à interface silenciosa, tudo foi desenhado para baixar o ruído, não aumentá-lo.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVA -->
+<section class="section">
+  <div class="container">
+    <div class="grid2">
+      <div class="reveal" style="display:flex;justify-content:center"><div class="phone shot" style="width:250px"><div class="phone-screen"><img src="../assets/screens/completion.png" alt="Tela do RootFlow"></div></div></div>
+      <div class="reveal">
+        <p class="quote">"Eu ensinava presença e perdia a minha no caos do dia. Hoje meu RootFlow é a primeira coisa que abro — e a última."</p>
+        <div class="quote-by"><span class="av">MA</span><div><b style="color:var(--ink)">Marina A.</b> · professora de yoga<br>Florianópolis</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACIDADE -->
+<section class="section paper" id="privacidade">
+  <div class="container">
+    <div class="reveal" style="text-align:center;max-width:62ch;margin:0 auto">
+      <p class="eyebrow center">Um espaço só seu</p>
+      <h2 class="h2" style="margin:1.2rem 0 1.3rem">Sua jornada interior<br>não precisa de plateia.</h2>
+      <p class="lead" style="margin:0 auto">Tudo fica no seu aparelho. Sem conta, sem servidor, sem rede. O RootFlow funciona offline porque a intimidade da sua prática é sagrada. Exporte quando quiser, apague quando quiser.</p>
+      <div class="pills reveal" style="justify-content:center;margin-top:1.8rem">
+        <span class="pill"><span class="dot"></span> 100% offline</span>
+        <span class="pill"><span class="dot"></span> Sem conta</span>
+        <span class="pill"><span class="dot"></span> Export em 1 toque</span>
+        <span class="pill"><span class="dot"></span> PT + EN</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="container">
+    <div class="cta-band reveal">
+      <div class="glow"></div>
+      <p class="eyebrow center" style="color:var(--g5);justify-content:center">Comece hoje</p>
+      <h2 class="h2" style="color:#fff;margin:1.2rem 0 1rem">A próxima respiração pode contar.</h2>
+      <p class="lead" style="color:rgba(255,255,255,.7);margin:0 auto 2rem">Pagamento único de R$ 28. Sem assinatura, sem conta. Registre sua primeira prática e comece a estender a presença para o dia inteiro.</p>
+      <div class="btn-row" style="justify-content:center">
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark" style="background:var(--g3)">🌿</span> RootFlow</a>
+  <span>Viva com intenção · diário de práticas conscientes</span>
+  <div class="footer-links"><a href="#como">Como funciona</a><a href="#privacidade">Privacidade</a><a href="../Estudo RootFlow.html">Estudo</a></div>
+</footer>
+
+<script>
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

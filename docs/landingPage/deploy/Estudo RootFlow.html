@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RootFlow — Estudo de Público & Estratégia de Conversão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+:root{--accent:#2d6644;--accent-soft:#e8f5ec}
+body{background:var(--paper)}
+
+/* progress */
+.prog{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:300;transition:width .1s}
+
+/* cover */
+.cover{padding:clamp(3.5rem,8vw,7rem) 0 clamp(2.5rem,5vw,4rem)}
+.meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;margin-top:2.5rem;padding-top:2rem;border-top:1px solid rgba(45,102,68,.16)}
+.meta b{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--g3);margin-bottom:.35rem}
+.meta span{font-size:1rem;color:var(--ink);font-weight:500}
+
+/* numbered section heads */
+.sec-head{display:flex;align-items:baseline;gap:1rem;margin-bottom:2.5rem}
+.sec-num{font-family:var(--serif);font-size:1.1rem;color:var(--accent);font-weight:500}
+.sec-head h2{margin:0}
+
+/* exec cards */
+.exec{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem}
+.exec .card{display:flex;gap:1rem;align-items:flex-start}
+.exec .e-n{font-family:var(--serif);font-size:1.7rem;color:var(--accent);line-height:1;flex:none}
+.exec h4{font-size:1.05rem;margin-bottom:.4rem;letter-spacing:-.01em}
+.exec p{font-size:.93rem;color:var(--muted);line-height:1.55}
+
+/* diag two-col */
+.diag{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+.panel{border-radius:var(--radius);padding:1.7rem;border:1px solid rgba(45,102,68,.14)}
+.panel.good{background:var(--accent-soft)}
+.panel.bad{background:#fbeee8;border-color:#e8c4b4}
+.panel .p-k{font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.panel.good .p-k{color:#2d6644}
+.panel.bad .p-k{color:#b4593a}
+.panel ul{list-style:none;display:flex;flex-direction:column;gap:.9rem}
+.panel li{font-size:.95rem;line-height:1.5;padding-left:1.5rem;position:relative}
+.panel li::before{position:absolute;left:0;top:0}
+.panel.good li::before{content:"✓";color:#2d6644;font-weight:700}
+.panel.bad li::before{content:"!";color:#b4593a;font-weight:700}
+.panel li b{font-weight:650}
+
+/* spectrum */
+.spectrum{position:relative;margin:1rem 0 1.5rem;padding:2.5rem 0 1rem}
+.spec-bar{height:8px;border-radius:8px;background:linear-gradient(90deg,#6f97c9,#72c98a,#d9a24a)}
+.spec-ends{display:flex;justify-content:space-between;margin-top:.7rem;font-size:.82rem;color:var(--muted)}
+.spec-marks{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.5rem}
+.spec-mark{text-align:center}
+.spec-mark .sm-dot{width:12px;height:12px;border-radius:50%;margin:0 auto .6rem;border:2px solid #fff;box-shadow:0 0 0 1px rgba(45,102,68,.2)}
+.spec-mark b{display:block;font-size:.92rem;letter-spacing:-.01em}
+.spec-mark span{font-size:.78rem;color:var(--muted)}
+
+/* personas */
+.persona{background:#fff;border:1px solid rgba(45,102,68,.13);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:1.3rem}
+.persona-top{display:flex;align-items:center;gap:1.1rem;padding:1.5rem 1.8rem;border-bottom:1px solid rgba(45,102,68,.1)}
+.persona-badge{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-size:1.4rem;flex:none;color:#fff}
+.persona-top .pt-id{flex:1}
+.persona-top h3{font-size:1.32rem;letter-spacing:-.02em;font-family:var(--serif);font-weight:500}
+.persona-top .pt-sub{font-size:.86rem;color:var(--muted);margin-top:.15rem}
+.persona-top .pt-tag{font-size:.72rem;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:.4rem .8rem;border-radius:100px;white-space:nowrap}
+.persona-body{display:grid;grid-template-columns:repeat(2,1fr);gap:0}
+.pb-cell{padding:1.3rem 1.8rem;border-right:1px solid rgba(45,102,68,.08);border-bottom:1px solid rgba(45,102,68,.08)}
+.pb-cell:nth-child(2n){border-right:none}
+.pb-cell .k{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g3);margin-bottom:.5rem}
+.pb-cell .v{font-size:.95rem;line-height:1.5;color:var(--ink)}
+.pb-cell.anchor{background:var(--g8)}
+.pb-quote{font-family:var(--serif);font-style:italic;font-size:1.02rem;color:var(--g2)}
+
+/* priority list */
+.prio{display:flex;flex-direction:column;gap:.7rem}
+.prio-item{display:grid;grid-template-columns:auto 1fr auto;gap:1.1rem;align-items:center;background:#fff;border:1px solid rgba(45,102,68,.12);border-radius:14px;padding:1.1rem 1.4rem}
+.prio-rank{font-family:var(--serif);font-size:1.3rem;color:var(--accent);width:1.5rem;text-align:center}
+.prio-item h4{font-size:1rem;letter-spacing:-.01em;margin-bottom:.2rem}
+.prio-item p{font-size:.88rem;color:var(--muted);line-height:1.45}
+.tags{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-radius:7px;white-space:nowrap}
+.tag.imp{background:#e6f3ea;color:#2d6644}
+.tag.eff{background:#f0eee8;color:#7a6a4a}
+
+/* before/after */
+.ba{display:flex;flex-direction:column;gap:1rem}
+.ba-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:stretch}
+.ba-cell{border-radius:14px;padding:1.3rem 1.5rem}
+.ba-cell.before{background:#f3efe9;border:1px solid #e2d8c8}
+.ba-cell.after{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 24%,transparent)}
+.ba-cell .k{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.7rem}
+.ba-cell.before .k{color:#9a8a6a}
+.ba-cell.after .k{color:var(--accent)}
+.ba-cell .txt{font-family:var(--serif);font-size:1.15rem;line-height:1.32;color:var(--ink)}
+.ba-cell.before .txt{color:#8a7a5e;text-decoration:line-through;text-decoration-color:rgba(180,89,58,.4)}
+.ba-note{font-size:.86rem;color:var(--muted);padding:0 .3rem}
+
+/* architecture */
+.arch{background:#fff;border:1px solid rgba(45,102,68,.13);border-radius:var(--radius-lg);padding:2.2rem;box-shadow:var(--shadow-sm)}
+.arch-hub{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.6rem}
+.arch-src{text-align:center;font-size:.78rem;color:var(--muted);background:var(--g8);border:1px dashed rgba(45,102,68,.3);border-radius:12px;padding:.8rem .5rem}
+.arch-lp{text-align:center;background:var(--accent);color:#fff;border-radius:12px;padding:1rem .6rem;font-weight:600;font-size:.9rem}
+.arch-flow{text-align:center;color:var(--g3);font-size:1.4rem;margin:.4rem 0}
+.arch-dest{text-align:center;background:var(--g0);color:#fff;border-radius:14px;padding:1.2rem;font-weight:600;margin-top:1.6rem;display:flex;align-items:center;justify-content:center;gap:.6rem}
+
+/* page gallery */
+.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem}
+.page-card{display:block;text-decoration:none;background:#fff;border:1px solid rgba(45,102,68,.13);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease}
+.page-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.page-prev{height:130px;display:flex;align-items:flex-end;padding:1.2rem;color:#fff;position:relative}
+.page-prev .pp-tag{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.2);padding:.3rem .7rem;border-radius:100px;backdrop-filter:blur(4px)}
+.page-info{padding:1.3rem 1.5rem}
+.page-info h4{font-size:1.12rem;letter-spacing:-.01em;margin-bottom:.35rem;color:var(--ink)}
+.page-info p{font-size:.88rem;color:var(--muted);line-height:1.45}
+.page-info .go{margin-top:.9rem;font-size:.84rem;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:.4rem}
+
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
+.metric{display:flex;gap:.9rem;align-items:flex-start;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:1.1rem 1.3rem}
+.metric .m-ico{color:var(--g5);font-size:1.1rem}
+.metric b{font-size:.96rem;display:block;margin-bottom:.2rem}
+.metric span{font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.45}
+
+@media(max-width:880px){
+  .exec,.diag,.persona-body,.ba-row,.gallery,.metrics,.arch-hub{grid-template-columns:1fr}
+  .pb-cell{border-right:none}
+  .spec-marks{grid-template-columns:1fr 1fr}
+  .prio-item{grid-template-columns:auto 1fr;gap:.8rem}
+  .tags{grid-column:2;justify-content:flex-start;margin-top:.3rem}
+}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<nav class="nav">
+  <a href="#" class="brand"><span class="brand-mark">🌿</span> RootFlow</a>
+  <div class="nav-right">
+    <a href="#diagnostico" class="nav-link">Diagnóstico</a>
+    <a href="#publicos" class="nav-link">Públicos</a>
+    <a href="#engajamento" class="nav-link">Engajamento</a>
+    <a href="#paginas" class="nav-link">As páginas</a>
+    <a href="#paginas" class="btn btn-accent" style="padding:.6rem 1.2rem;font-size:.84rem">Ver landing pages</a>
+  </div>
+</nav>
+
+<!-- COVER -->
+<header class="section cover">
+  <div class="container">
+    <p class="eyebrow reveal">Estudo estratégico · Junho 2026</p>
+    <h1 class="display reveal" style="margin:1.2rem 0 1.5rem;max-width:18ch">Para quem o RootFlow está <em>realmente</em> falando?</h1>
+    <p class="lead reveal" style="max-width:62ch">A página atual conversa com "todo mundo que pratica" — e por isso não convence ninguém com força. Este estudo mapeia o público real, corrige a mensagem e propõe <b style="color:var(--ink)">uma landing page por segmento</b>, com um único objetivo: <b style="color:var(--ink)">download do app</b>.</p>
+    <div class="meta-row reveal">
+      <div class="meta"><b>Objetivo</b><span>Compra do app · R$ 28 (iOS &amp; Android)</span></div>
+      <div class="meta"><b>Produto</b><span>Diário de práticas conscientes</span></div>
+      <div class="meta"><b>Entregável</b><span>Estudo + 4 landing pages</span></div>
+      <div class="meta"><b>Base</b><span>Página atual + descrição funcional</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- RESUMO -->
+<section class="section tight">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2 class="h2">Resumo executivo</h2></div>
+    <div class="exec">
+      <div class="card reveal"><div style="display:flex;gap:1rem"><span class="e-n">A</span><div><h4>A página vende um conceito, não um produto</h4><p>"Equilíbrio" é abstrato. As mecânicas que diferenciam de verdade — o <b>UP</b>, o <b>Smart Match</b>, os timers de Pomodoro a HIIT — estão invisíveis. O usuário não vê o que ganha ao abrir o app.</p></div></div></div>
+      <div class="card reveal"><div style="display:flex;gap:1rem"><span class="e-n">B</span><div><h4>O herói fala com um público sem rosto</h4><p>"Você pratica. Mas está equilibrado?" pressupõe que a pessoa já se vê como praticante. Exclui justamente quem mais precisa — e não cria identificação com nenhuma dor concreta.</p></div></div></div>
+      <div class="card reveal"><div style="display:flex;gap:1rem"><span class="e-n">C</span><div><h4>A privacidade vem cedo demais</h4><p>Quatro selos de privacidade aparecem antes de o usuário entender o valor. Reassurance é importante — mas como <b>reforço</b> depois do desejo, não como abertura.</p></div></div></div>
+      <div class="card reveal"><div style="display:flex;gap:1rem"><span class="e-n">D</span><div><h4>A recomendação: 1 página-mãe + 4 por público</h4><p>O mesmo conceito ressoa de formas <b>opostas</b> (recuperação × performance). Uma headline não cobre. Tráfego segmentado + mensagem casada = mais instalação, menos custo por instalação.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- DIAGNÓSTICO -->
+<section class="section" id="diagnostico">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2 class="h2">Diagnóstico: com quem a página fala hoje</h2></div>
+    <p class="lead reveal" style="margin-bottom:2.5rem">Hoje o alvo é o "<b style="color:var(--ink)">praticante consciente genérico</b>" — alguém que já medita, treina ou cuida de si e quer "equilíbrio". É um público real, mas amplo, indefinido e de baixa urgência. Há fundamentos fortes para construir em cima, e um problema central a resolver.</p>
+    <div class="diag">
+      <div class="panel good reveal">
+        <div class="p-k">O que já funciona — preserve</div>
+        <ul>
+          <li><b>Estética madura e coesa.</b> Verde/cream/Inter passam calma e credibilidade. Não mexer no tom visual.</li>
+          <li><b>A tríade Mente / Corpo / Espírito</b> é um gancho memorável e único. É o ativo central da marca.</li>
+          <li><b>Offline, sem conta</b> é um diferencial real num mar de apps que coletam tudo — só está no lugar errado.</li>
+          <li><b>PT + EN e iOS + Android</b> ampliam o alcance sem esforço extra de mensagem.</li>
+        </ul>
+      </div>
+      <div class="panel bad reveal">
+        <div class="p-k">O problema central — corrija</div>
+        <ul>
+          <li><b>Valor abstrato.</b> "Rastreia o tempo e mostra o desequilíbrio" — e então o quê? Falta o desfecho: o app <b>te diz o que fazer a seguir</b>.</li>
+          <li><b>Sem prova.</b> Nenhum print real do Dashboard, nenhum depoimento, nenhum número. Promessa sem evidência.</li>
+          <li><b>Herói excludente.</b> Fala com quem já pratica; ignora quem está desequilibrado e nem começou.</li>
+          <li><b>CTA sem contexto.</b> "Baixar grátis" não diz para quem, para quê, nem o quão fácil é.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PÚBLICOS -->
+<section class="section paper" id="publicos">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2 class="h2">O leque de público</h2></div>
+    <p class="lead reveal">A tríade Mente/Corpo/Espírito é tão ampla que atinge pessoas com motivações <b style="color:var(--ink)">contrárias</b>. De um lado, quem busca <b style="color:var(--ink)">regular e recuperar</b>; do outro, quem busca <b style="color:var(--ink)">otimizar e performar</b>. A mesma feature (ver onde sua energia vai) significa coisas diferentes para cada um.</p>
+    <div class="spectrum reveal">
+      <div class="spec-bar"></div>
+      <div class="spec-ends"><span>← Regulação &amp; recuperação</span><span>Otimização &amp; performance →</span></div>
+      <div class="spec-marks">
+        <div class="spec-mark"><span class="sm-dot" style="background:#6f97c9"></span><b>Praticante / Yoga</b><span>continuidade, intenção</span></div>
+        <div class="spec-mark"><span class="sm-dot" style="background:#72c98a"></span><b>Alto desempenho</b><span>evitar burnout</span></div>
+        <div class="spec-mark"><span class="sm-dot" style="background:#8fbf72"></span><b>Otimizador de hábitos</b><span>medir a vida certa</span></div>
+        <div class="spec-mark"><span class="sm-dot" style="background:#d9a24a"></span><b>Atleta / Fitness</b><span>recuperação, longevidade</span></div>
+      </div>
+    </div>
+    <p class="lead reveal" style="font-size:.95rem;margin-top:1rem">Outros públicos válidos para uma fase 2: <b style="color:var(--ink)">terapeutas e coaches</b> (recomendam o app a clientes — vetor B2B leve) e <b style="color:var(--ink)">jornada espiritual / religiosa</b> (o nível de consciência de Hawkins ressoa forte aqui).</p>
+  </div>
+</section>
+
+<!-- PERSONAS -->
+<section class="section">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2 class="h2">Quatro personas para atacar primeiro</h2></div>
+    <p class="lead reveal" style="margin-bottom:2.5rem">Cada persona abaixo vira uma landing page. Note a coluna <b style="color:var(--ink)">Feature-âncora</b>: ela amarra a dor a uma mecânica que <b style="color:var(--ink)">já existe</b> no app (segundo a descrição funcional). É isso que torna cada promessa crível.</p>
+
+    <!-- Persona 1 -->
+    <article class="persona reveal">
+      <div class="persona-top">
+        <span class="persona-badge" style="background:oklch(0.55 0.10 245)">🔥</span>
+        <div class="pt-id"><h3>O Alto Desempenho em Risco</h3><div class="pt-sub">Executivo, fundador, dev sênior · 28–45 anos</div></div>
+        <span class="pt-tag">Burnout / Performance</span>
+      </div>
+      <div class="persona-body">
+        <div class="pb-cell"><div class="k">Identidade</div><div class="v pb-quote">"Eu otimizo tudo na minha vida — menos a mim mesmo."</div></div>
+        <div class="pb-cell"><div class="k">Dor central</div><div class="v">Vive em Mente + Ativa o dia inteiro. Corpo e Espírito zerados. Está no caminho do burnout e sente, mas não tem como enxergar o estrago.</div></div>
+        <div class="pb-cell"><div class="k">Gatilho de download</div><div class="v">Noites mal dormidas, um susto de saúde, "trabalho demais". Busca "como evitar burnout", "equilíbrio vida-trabalho".</div></div>
+        <div class="pb-cell"><div class="k">Ângulo de mensagem</div><div class="v">Equilíbrio como <b>infraestrutura de performance sustentável</b> — não como hobby de bem-estar.</div></div>
+        <div class="pb-cell anchor"><div class="k">Prova que importa</div><div class="v">O gráfico que mostra, sem dó, o desequilíbrio Ativa × Passiva acumulado.</div></div>
+        <div class="pb-cell anchor"><div class="k">Feature-âncora no app</div><div class="v"><b>Smart Match</b> (detecta excesso de Mente/Ativa e força o contrapeso) + <b>Energy Balance</b> + nível de consciência (sair do piloto automático).</div></div>
+      </div>
+    </article>
+
+    <!-- Persona 2 -->
+    <article class="persona reveal">
+      <div class="persona-top">
+        <span class="persona-badge" style="background:oklch(0.62 0.08 145)">🧘</span>
+        <div class="pt-id"><h3>O Praticante que Quer Continuidade</h3><div class="pt-sub">Pratica yoga / meditação · 25–50 anos</div></div>
+        <span class="pt-tag">Yoga / Meditação</span>
+      </div>
+      <div class="persona-body">
+        <div class="pb-cell"><div class="k">Identidade</div><div class="v pb-quote">"Sou presente no tapete e disperso no resto do dia."</div></div>
+        <div class="pb-cell"><div class="k">Dor central</div><div class="v">A prática não vira vida. Quer levar a intenção e a presença da sessão para o dia inteiro — e manter constância sem culpa.</div></div>
+        <div class="pb-cell"><div class="k">Gatilho de download</div><div class="v">Volta de um retiro, recomendação do professor. Busca "diário de meditação", "app de intenção/consciência".</div></div>
+        <div class="pb-cell"><div class="k">Ângulo de mensagem</div><div class="v">Estender a prática para fora do tapete. <b>Ritual, intenção e presença</b> ao longo do dia.</div></div>
+        <div class="pb-cell anchor"><div class="k">Prova que importa</div><div class="v">A escala de consciência (Hawkins): de 😴 Automático a ✨ Fluindo, sessão a sessão.</div></div>
+        <div class="pb-cell anchor"><div class="k">Feature-âncora no app</div><div class="v"><b>Nível de consciência (0–3)</b> + práticas <b>Passivas</b> + histórico de constância + áudio de floresta no onboarding.</div></div>
+      </div>
+    </article>
+
+    <!-- Persona 3 -->
+    <article class="persona reveal">
+      <div class="persona-top">
+        <span class="persona-badge" style="background:oklch(0.60 0.13 55)">⚡</span>
+        <div class="pt-id"><h3>O Atleta Unidimensional</h3><div class="pt-sub">CrossFit, corrida, musculação · 20–40 anos</div></div>
+        <span class="pt-tag">Atletas / Fitness</span>
+      </div>
+      <div class="persona-body">
+        <div class="pb-cell"><div class="k">Identidade</div><div class="v pb-quote">"Treino o corpo com disciplina e ignoro todo o resto."</div></div>
+        <div class="pb-cell"><div class="k">Dor central</div><div class="v">Over-treino. Recuperação, sono e mente negligenciados. Estagnou e não entende por quê — o corpo está lotado, o resto está vazio.</div></div>
+        <div class="pb-cell"><div class="k">Gatilho de download</div><div class="v">Lesão, plateau, overtraining. Busca "recuperação", "mobilidade", "mindset de atleta".</div></div>
+        <div class="pb-cell"><div class="k">Ângulo de mensagem</div><div class="v">Treino é só <b>um terço</b>. O equilíbrio destrava recuperação, foco e longevidade.</div></div>
+        <div class="pb-cell anchor"><div class="k">Prova que importa</div><div class="v">O balanço que mostra Corpo no talo e Mente/Espírito no zero — o ponto cego do atleta.</div></div>
+        <div class="pb-cell anchor"><div class="k">Feature-âncora no app</div><div class="v"><b>Timer HIIT / Tabata</b> embutido (já é a casa dele) + <b>OrganBalance</b> + ChallengeIndex.</div></div>
+      </div>
+    </article>
+
+    <!-- Persona 4 -->
+    <article class="persona reveal">
+      <div class="persona-top">
+        <span class="persona-badge" style="background:oklch(0.58 0.09 200)">📊</span>
+        <div class="pt-id"><h3>O Otimizador de Hábitos</h3><div class="pt-sub">Fã de produtividade, quantified-self · 24–40 anos</div></div>
+        <span class="pt-tag">Produtividade / Hábitos</span>
+      </div>
+      <div class="persona-body">
+        <div class="pb-cell"><div class="k">Identidade</div><div class="v pb-quote">"Tenho seis apps de hábito e só mais ansiedade."</div></div>
+        <div class="pb-cell"><div class="k">Dor central</div><div class="v">Fadiga de streaks. Otimiza tarefas, não a vida. Mede o que é fácil medir — não o que importa. Quer um sistema, não mais culpa.</div></div>
+        <div class="pb-cell"><div class="k">Gatilho de download</div><div class="v">Cansaço de habit-trackers e planilhas. Busca "alternativa ao streak", "medir bem-estar de verdade".</div></div>
+        <div class="pb-cell"><div class="k">Ângulo de mensagem</div><div class="v">Pare de medir tarefas. Comece a medir o <b>equilíbrio da sua vida</b> — com uma métrica honesta.</div></div>
+        <div class="pb-cell anchor"><div class="k">Prova que importa</div><div class="v">O <b>UP</b> (minutos ÷ tempo ideal): uma métrica que não vira vício de streak.</div></div>
+        <div class="pb-cell anchor"><div class="k">Feature-âncora no app</div><div class="v"><b>UP + Dashboard</b> analítico + <b>Pomodoro</b> embutido + export de dados (JSON).</div></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ENGAJAMENTO -->
+<section class="section paper" id="engajamento">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2 class="h2">Engajamento: 7 melhorias priorizadas</h2></div>
+    <p class="lead reveal" style="margin-bottom:2.5rem">Ordenadas por retorno. As três primeiras valem por todas as outras juntas. Todas já estão aplicadas nas landing pages que acompanham este estudo.</p>
+    <div class="prio">
+      <div class="prio-item reveal"><span class="prio-rank">1</span><div><h4>Mostre o produto acima da dobra</h4><p>Um print/animação real do Dashboard — anel de UP + barras de equilíbrio. Ver o app vale mais que descrevê-lo.</p></div><div class="tags"><span class="tag imp">Impacto alto</span><span class="tag eff">Esforço médio</span></div></div>
+      <div class="prio-item reveal"><span class="prio-rank">2</span><div><h4>Revele o Smart Match — é o "aha"</h4><p>Uma seção dedicada: "ele lê seus últimos 7 dias e te diz qual prática traz você de volta ao centro". É o desfecho que falta.</p></div><div class="tags"><span class="tag imp">Impacto alto</span><span class="tag eff">Esforço médio</span></div></div>
+      <div class="prio-item reveal"><span class="prio-rank">3</span><div><h4>Troque o herói genérico por dor concreta</h4><p>"Praticante" → a dor específica de cada público. É a mudança de maior impacto com menor esforço.</p></div><div class="tags"><span class="tag imp">Impacto alto</span><span class="tag eff">Esforço baixo</span></div></div>
+      <div class="prio-item reveal"><span class="prio-rank">4</span><div><h4>Adicione prova</h4><p>2–3 depoimentos curtos + um número-âncora ("registre uma prática em 8 segundos"). Quebra o ceticismo.</p></div><div class="tags"><span class="tag imp">Impacto alto</span><span class="tag eff">Esforço baixo</span></div></div>
+      <div class="prio-item reveal"><span class="prio-rank">5</span><div><h4>Reposicione a privacidade</h4><p>De abertura para reforço: depois que o desejo está criado, "e tudo isso 100% offline, sem conta" fecha com chave de ouro.</p></div><div class="tags"><span class="tag imp">Impacto médio</span><span class="tag eff">Esforço baixo</span></div></div>
+      <div class="prio-item reveal"><span class="prio-rank">6</span><div><h4>Transforme o preço em argumento</h4><p>São R$ 28 — então venda o porquê: "Pague uma vez. Sem assinatura, sem mensalidade, seu para sempre." Compra única é o oposto do app que lucra com seus dados.</p></div><div class="tags"><span class="tag imp">Impacto alto</span><span class="tag eff">Esforço baixo</span></div></div>
+      <div class="prio-item reveal"><span class="prio-rank">7</span><div><h4>Demonstre o baixo atrito de registro</h4><p>Três frames do micro-loop FAB → timer → feedback. Mostra que cabe na rotina, não exige disciplina nova.</p></div><div class="tags"><span class="tag imp">Impacto médio</span><span class="tag eff">Esforço médio</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLAREZA -->
+<section class="section">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2 class="h2">Clareza de mensagem: antes &amp; depois</h2></div>
+    <p class="lead reveal" style="margin-bottom:2.5rem">Reescritas concretas. A regra: toda promessa termina no <b style="color:var(--ink)">"então o quê"</b> — o que o app faz por você a seguir.</p>
+    <div class="ba">
+      <div class="ba-row reveal">
+        <div class="ba-cell before"><div class="k">Antes — subtítulo do herói</div><div class="txt">"Rastreia o tempo que você dedica à sua Mente, Corpo e Espírito — e mostra onde está o desequilíbrio."</div></div>
+        <div class="ba-cell after"><div class="k">Depois</div><div class="txt">"Veja para onde sua energia está indo — e deixe o Smart Match te dizer exatamente qual prática traz você de volta ao centro."</div></div>
+      </div>
+      <p class="ba-note reveal">→ Adiciona o desfecho. Antes terminava no diagnóstico; agora termina na <b>ação</b> que o app entrega.</p>
+      <div class="ba-row reveal">
+        <div class="ba-cell before"><div class="k">Antes — headline única</div><div class="txt">"Você pratica. Mas está equilibrado?"</div></div>
+        <div class="ba-cell after"><div class="k">Depois — uma por público</div><div class="txt">"Você otimiza tudo. Menos você." · "Sua prática não precisa terminar no tapete." · "Treino é só um terço."</div></div>
+      </div>
+      <p class="ba-note reveal">→ Uma headline genérica vira quatro específicas. Cada uma fala a dor de um segmento — e por isso converte.</p>
+      <div class="ba-row reveal">
+        <div class="ba-cell before"><div class="k">Antes — eyebrow</div><div class="txt">"Diário de práticas conscientes"</div></div>
+        <div class="ba-cell after"><div class="k">Depois</div><div class="txt">"Equilíbrio para quem vive no limite" · "Leve a presença para fora do tapete" · "O terço que falta no seu treino"</div></div>
+      </div>
+      <p class="ba-note reveal">→ A categoria ("diário") interessa a você, não ao usuário. A dele é o <b>resultado</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RECOMENDAÇÃO -->
+<section class="section paper">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2 class="h2">Recomendação: uma landing page por público?</h2></div>
+    <div class="grid2" style="margin-bottom:3rem">
+      <div class="reveal">
+        <p class="kicker" style="margin-bottom:.8rem">Resposta curta</p>
+        <p class="h2" style="font-size:clamp(1.6rem,3vw,2.4rem);margin-bottom:1.2rem">Sim — mas <em>faseado</em>, e só com tráfego segmentado para alimentá-las.</p>
+        <p class="lead" style="font-size:1.02rem">Criar 4 páginas sem direcionar público a cada uma é desperdício. O ganho vem do <b style="color:var(--ink)">message match</b>: o anúncio que a pessoa clicou e a página que ela vê contam a mesma história. Isso aumenta a instalação e derruba o custo por instalação.</p>
+      </div>
+      <div class="reveal">
+        <div class="card" style="padding:1.8rem">
+          <p class="kicker" style="margin-bottom:1rem">Como executar sem virar pesadelo de manutenção</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:1rem">
+            <li style="display:flex;gap:.8rem"><span style="color:var(--accent);font-weight:700">01</span><div style="font-size:.95rem;line-height:1.5"><b>Núcleo compartilhado.</b> Produto, privacidade, download e rodapé são idênticos (um único CSS — já feito aqui).</div></li>
+            <li style="display:flex;gap:.8rem"><span style="color:var(--accent);font-weight:700">02</span><div style="font-size:.95rem;line-height:1.5"><b>Só 4 blocos mudam:</b> herói, dor, prova e a feature-âncora.</div></li>
+            <li style="display:flex;gap:.8rem"><span style="color:var(--accent);font-weight:700">03</span><div style="font-size:.95rem;line-height:1.5"><b>Comece com 2.</b> Burnout e Hábitos (maior intenção de busca). Valide, depois expanda para Yoga e Atletas.</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="kicker reveal" style="margin-bottom:1.2rem">Arquitetura recomendada — hub &amp; spokes</p>
+    <div class="arch reveal">
+      <div class="arch-hub">
+        <div><div class="arch-src">Ads "burnout"<br>+ LinkedIn</div><div class="arch-flow">↓</div><div class="arch-lp">LP Burnout</div></div>
+        <div><div class="arch-src">Comunidades<br>yoga · retiros</div><div class="arch-flow">↓</div><div class="arch-lp">LP Yoga</div></div>
+        <div><div class="arch-src">Ads fitness<br>+ influência</div><div class="arch-flow">↓</div><div class="arch-lp">LP Atletas</div></div>
+        <div><div class="arch-src">SEO · newsletters<br>de produtividade</div><div class="arch-flow">↓</div><div class="arch-lp">LP Hábitos</div></div>
+      </div>
+      <div class="arch-dest">📲 App Store &amp; Google Play — <b>Download</b></div>
+      <p style="text-align:center;font-size:.85rem;color:var(--muted);margin-top:1.2rem">A home da marca (<code>rootflow.app</code>) continua neutra para busca orgânica e tráfego direto, e linka para o segmento certo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PÁGINAS -->
+<section class="section" id="paginas">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2 class="h2">As quatro landing pages</h2></div>
+    <p class="lead reveal" style="margin-bottom:2.5rem">Construídas sobre o mesmo núcleo visual da marca. Mesmo produto, quatro conversas. Clique para abrir cada uma.</p>
+    <div class="gallery">
+      <a href="paginas/burnout.html" class="page-card reveal">
+        <div class="page-prev" style="background:linear-gradient(135deg,oklch(0.42 0.08 245),var(--g0))"><span class="pp-tag">Burnout / Performance</span></div>
+        <div class="page-info"><h4>Você otimiza tudo. Menos você.</h4><p>Para o alto desempenho em risco. Equilíbrio como infraestrutura de performance sustentável.</p><span class="go">Abrir página →</span></div>
+      </a>
+      <a href="paginas/yoga.html" class="page-card reveal">
+        <div class="page-prev" style="background:linear-gradient(135deg,#6f8f5e,var(--g1))"><span class="pp-tag">Yoga / Meditação</span></div>
+        <div class="page-info"><h4>Sua prática não termina no tapete.</h4><p>Para quem quer continuidade. Levar presença e intenção para o dia inteiro.</p><span class="go">Abrir página →</span></div>
+      </a>
+      <a href="paginas/atletas.html" class="page-card reveal">
+        <div class="page-prev" style="background:linear-gradient(135deg,oklch(0.50 0.12 55),var(--g0))"><span class="pp-tag">Atletas / Fitness</span></div>
+        <div class="page-info"><h4>Treino é só um terço.</h4><p>Para o atleta unidimensional. Equilíbrio que destrava recuperação e longevidade.</p><span class="go">Abrir página →</span></div>
+      </a>
+      <a href="paginas/habitos.html" class="page-card reveal">
+        <div class="page-prev" style="background:linear-gradient(135deg,oklch(0.44 0.08 200),var(--g0))"><span class="pp-tag">Produtividade / Hábitos</span></div>
+        <div class="page-info"><h4>Pare de medir tarefas.</h4><p>Para o otimizador de hábitos. Uma métrica honesta para o equilíbrio da vida.</p><span class="go">Abrir página →</span></div>
+      </a>
+    </div>
+    <p class="lead reveal" style="font-size:.9rem;margin-top:1.5rem;color:var(--muted)">As imagens reais (prints do app, fotos de pessoas) entram nos espaços marcados como placeholder. É só arrastar os arquivos quando tiver.</p>
+  </div>
+</section>
+
+<!-- MÉTRICAS -->
+<section class="section dark">
+  <div class="container">
+    <div class="sec-head reveal"><span class="sec-num" style="color:var(--g5)">09</span><h2 class="h2" style="color:#fff">O que medir depois do lançamento</h2></div>
+    <div class="metrics" style="margin-top:1rem">
+      <div class="metric reveal"><span class="m-ico">◎</span><div><b>Custo por instalação (CPI) por canal</b><span>O message match deve derrubá-lo. Compare cada LP contra a página genérica.</span></div></div>
+      <div class="metric reveal"><span class="m-ico">◎</span><div><b>Clique no CTA da store</b><span>Conversão da página em si. Meta inicial: 8–12% do tráfego pago.</span></div></div>
+      <div class="metric reveal"><span class="m-ico">◎</span><div><b>Profundidade de scroll até o Smart Match</b><span>Se poucos chegam ao "aha", suba a seção na página.</span></div></div>
+      <div class="metric reveal"><span class="m-ico">◎</span><div><b>Retenção D1 / D7 por origem de LP</b><span>Mede a <i>qualidade</i> do público — não só o volume. O melhor público às vezes é o menor.</span></div></div>
+    </div>
+    <div class="btn-row reveal" style="margin-top:3rem;justify-content:center">
+      <a href="#paginas" class="btn btn-accent">Ver as 4 landing pages</a>
+      <a href="referencia/rootflow-original.html" class="btn btn-ghost">Comparar com a página atual</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <a href="#" class="brand"><span class="brand-mark" style="background:var(--g3)">🌿</span> RootFlow</a>
+  <span>Estudo de público &amp; estratégia de conversão · documento de trabalho</span>
+  <div class="footer-links"><a href="#diagnostico">Diagnóstico</a><a href="#publicos">Públicos</a><a href="#paginas">Páginas</a></div>
+</footer>
+
+<script>
+// progress bar
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{const h=document.documentElement;const p=h.scrollTop/(h.scrollHeight-h.clientHeight);prog.style.width=(p*100)+'%';},{passive:true});
+// reveal
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

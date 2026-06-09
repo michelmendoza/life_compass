@@ -1,7 +1,7 @@
 name: root_flow
 description: App de bem-estar com foco em energia, fluxo e foco
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -44,9 +44,14 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "#6B8E23"
-  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  min_sdk_android: 21
+  # Android 8+ (Adaptive Icon)
+  adaptive_icon_background: "#0B2E1D"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
 
+  # iOS
+  remove_alpha_ios: false
+  
 fonts:
   - family: NotoSans
     fonts:

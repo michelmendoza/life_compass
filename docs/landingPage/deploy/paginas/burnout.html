@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RootFlow — Você otimiza tudo. Menos você.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/shared.css">
+<style>
+:root{--accent:#3f6cae;--accent-soft:#e9eef7}
+.hero-burn{background:var(--g0);color:#fff;position:relative;overflow:hidden;padding:clamp(3rem,7vw,5.5rem) 0 clamp(4rem,8vw,6rem)}
+.hero-burn .glow{position:absolute;top:-10%;right:-5%;width:60%;height:80%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 45%,transparent),transparent 65%);opacity:.5;filter:blur(10px)}
+.hero-burn .container{position:relative}
+.hero-burn .lead{color:rgba(255,255,255,.7)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;counter-reset:s}
+.step{position:relative;padding-top:2.7rem}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:0;left:0;font-family:var(--serif);font-size:1.5rem;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:500}
+.step h4{font-size:1.12rem;margin-bottom:.4rem;letter-spacing:-.01em}
+.step p{font-size:.94rem;color:var(--muted);line-height:1.5}
+.compass-feature{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.cf-card{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:var(--radius-lg);padding:1.8rem}
+.cf-deck{display:flex;flex-direction:column;gap:.8rem}
+.cf-suggestion{background:#fff;border:1px solid rgba(45,102,68,.12);border-radius:14px;padding:1rem 1.2rem;box-shadow:var(--shadow-sm)}
+.cf-suggestion .cs-k{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.cf-suggestion .cs-t{font-size:1rem;font-weight:600;margin-top:.25rem}
+.cf-suggestion .cs-d{font-size:.85rem;color:var(--muted);margin-top:.2rem}
+.cf-suggestion.dim{opacity:.5;transform:scale(.97)}
+@media(max-width:880px){.steps{grid-template-columns:1fr}.compass-feature{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="nav on-dark">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark">🌿</span> RootFlow</a>
+  <div class="nav-right">
+    <a href="#como" class="nav-link">Como funciona</a>
+    <a href="#privacidade" class="nav-link">Privacidade</a>
+    <a href="#baixar" class="btn btn-accent" style="padding:.6rem 1.2rem;font-size:.84rem">Baixar · R$ 28</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero-burn">
+  <div class="glow"></div>
+  <div class="container">
+    <div class="grid2">
+      <div>
+        <p class="eyebrow reveal" style="color:var(--g5)">Equilíbrio para quem vive no limite</p>
+        <h1 class="display reveal" style="margin:1.2rem 0 1.4rem">Você otimiza tudo.<br><em>Menos você.</em></h1>
+        <p class="lead reveal" style="margin-bottom:2rem">Suas semanas são 90% Mente e Ativa. Corpo e Espírito ficam no vermelho. O RootFlow mostra o desequilíbrio que leva ao burnout — e o <b style="color:#fff">Smart Match</b> te diz exatamente qual prática traz você de volta ao centro.</p>
+        <div class="btn-row reveal" id="baixar" style="margin-bottom:1.6rem">
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+          <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+        </div>
+        <div class="reveal" style="display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.92rem;margin:0 0 1.3rem;color:var(--accent)">R$ 28 · pagamento único, sem assinatura</div>
+        <div class="pills reveal">
+          <span class="pill"><span class="dot"></span> Veja seu equilíbrio em segundos</span>
+          <span class="pill"><span class="dot"></span> Smart Match sugere o contrapeso</span>
+          <span class="pill"><span class="dot"></span> Sem conta · 100% offline</span>
+        </div>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center">
+        <div class="phone shot"><div class="phone-screen"><img src="../assets/screens/dash-energy.png" alt="Tela do RootFlow"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PROBLEMA -->
+<section class="section">
+  <div class="container">
+    <div class="grid2">
+      <div class="reveal">
+        <p class="eyebrow">O custo invisível</p>
+        <h2 class="h2" style="margin:1rem 0 1.3rem">O burnout não avisa.<br><em>Seus dados, sim.</em></h2>
+        <p class="lead">Você só percebe o desequilíbrio quando ele já cobrou o preço — no sono, no foco, no corpo. O problema não é falta de disciplina. É falta de <b style="color:var(--ink)">visibilidade</b>. Ninguém consegue equilibrar o que não consegue ver.</p>
+      </div>
+      <div class="reveal">
+        <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+          <div class="stat"><div class="n">90%</div><div class="l">do seu tempo registrado costuma cair em Mente + Ativa</div></div>
+          <div class="stat"><div class="n">3</div><div class="l">eixos que o app equilibra: Mente, Corpo e Espírito</div></div>
+          <div class="stat"><div class="n">8s</div><div class="l">é o que leva para registrar uma prática</div></div>
+          <div class="stat"><div class="n">0</div><div class="l">contas, servidores ou dados saindo do seu aparelho</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="section paper" id="como">
+  <div class="container">
+    <div class="reveal" style="max-width:60ch;margin-bottom:3rem">
+      <p class="eyebrow">Como funciona</p>
+      <h2 class="h2" style="margin-top:1rem">Três toques entre o piloto automático e a consciência.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><h4>Registre em 1 toque</h4><p>Um botão sempre à mão abre a ação consciente. Escolha a prática, dê play. Crono, Pomodoro, HIIT ou tempo manual — você decide.</p></div>
+      <div class="step reveal"><h4>Veja o equilíbrio real</h4><p>O Dashboard calcula na hora seu UP, a balança Ativa × Passiva e a distribuição entre Mente, Corpo e Espírito. Sem configurar nada.</p></div>
+      <div class="step reveal"><h4>Deixe o Match guiar</h4><p>Ele lê seus últimos 7 dias e sugere exatamente o contrapeso que falta. Muito mental? Ele te empurra para o corpo. Sem culpa, com direção.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SMART MATCH (AHA) -->
+<section class="section">
+  <div class="container">
+    <div class="compass-feature">
+      <div class="reveal">
+        <p class="eyebrow">A diferença</p>
+        <h2 class="h2" style="margin:1rem 0 1.2rem">Não é mais um app que só <em>te mostra gráficos.</em></h2>
+        <p class="lead">A maioria para no diagnóstico. O RootFlow vai além: o <b style="color:var(--ink)">Smart Match</b> analisa seu padrão e devolve um deck de sugestões rankeadas. Você desliza para escolher — e cai direto no timer. Decisão tomada por você.</p>
+      </div>
+      <div class="cf-card reveal">
+        <div class="c-k" style="font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:1rem">Seu deck de hoje</div>
+        <div class="cf-deck">
+          <div class="cf-suggestion"><div class="cs-k">Contrapeso · Corpo passivo</div><div class="cs-t">Alongamento consciente · 20 min</div><div class="cs-d">Você acumulou 4 dias de alta carga mental.</div></div>
+          <div class="cf-suggestion dim"><div class="cs-k">Contrapeso · Espírito</div><div class="cs-t">Respiração 4-7-8 · 8 min</div><div class="cs-d">Seu eixo Espírito está há 6 dias zerado.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE ANCHOR -->
+<section class="section dark">
+  <div class="container">
+    <div class="reveal" style="max-width:58ch;margin-bottom:2.5rem">
+      <p class="eyebrow" style="color:var(--g5)">Feito para o seu padrão</p>
+      <h2 class="h2" style="color:#fff;margin-top:1rem">Saia do automático. Veja a energia que você gasta — e a que esquece de repor.</h2>
+    </div>
+    <div class="triad">
+      <div class="organ reveal" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)"><div class="o-ico">⚖️</div><h4 style="color:#fff">Balança de energia</h4><p style="color:rgba(255,255,255,.6)">Ativa × Passiva, lado a lado. O alerta visual de que você só acelera e nunca freia.</p></div>
+      <div class="organ reveal" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)"><div class="o-ico">🧠</div><h4 style="color:#fff">Nível de consciência</h4><p style="color:rgba(255,255,255,.6)">Antes de cada prática, você marca o quão presente esteve — de automático a fluindo. Autoconsciência que se constrói sozinha.</p></div>
+      <div class="organ reveal" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)"><div class="o-ico">📈</div><h4 style="color:#fff">Índice de desafio</h4><p style="color:rgba(255,255,255,.6)">Mede se você está se acomodando ou se forçando demais. Performance sustentável precisa dos dois.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVA -->
+<section class="section">
+  <div class="container">
+    <div class="grid2">
+      <div class="reveal">
+        <p class="quote">"Eu media tudo no trabalho e nada em mim. Em duas semanas o Match me obrigou a parar — e eu voltei a dormir."</p>
+        <div class="quote-by"><span class="av">RC</span><div><b style="color:var(--ink)">Rafael C.</b> · fundador de startup<br>São Paulo</div></div>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center"><div class="phone shot" style="width:250px"><div class="phone-screen"><img src="../assets/screens/dash-week.png" alt="Tela do RootFlow"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACIDADE (reforço) -->
+<section class="section paper" id="privacidade">
+  <div class="container">
+    <div class="reveal" style="text-align:center;max-width:62ch;margin:0 auto">
+      <p class="eyebrow center">E nada disso sai do seu aparelho</p>
+      <h2 class="h2" style="margin:1.2rem 0 1.3rem">Seus dados mais íntimos<br>não merecem virar produto.</h2>
+      <p class="lead" style="margin:0 auto">Tudo é local. Sem conta, sem servidor, sem rede. O RootFlow funciona offline porque o equilíbrio é seu — e só seu. Exporte quando quiser, apague quando quiser.</p>
+      <div class="pills reveal" style="justify-content:center;margin-top:1.8rem">
+        <span class="pill"><span class="dot"></span> 100% offline</span>
+        <span class="pill"><span class="dot"></span> Sem conta</span>
+        <span class="pill"><span class="dot"></span> Export em 1 toque</span>
+        <span class="pill"><span class="dot"></span> PT + EN</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="container">
+    <div class="cta-band reveal">
+      <div class="glow"></div>
+      <p class="eyebrow center" style="color:var(--g5);justify-content:center">Comece hoje</p>
+      <h2 class="h2" style="color:#fff;margin:1.2rem 0 1rem">O primeiro passo leva 8 segundos.</h2>
+      <p class="lead" style="color:rgba(255,255,255,.7);margin:0 auto 2rem">Pagamento único de R$ 28. Sem assinatura, sem conta, sem fricção. Registre sua primeira prática e veja onde sua energia está indo.</p>
+      <div class="btn-row" style="justify-content:center">
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Baixar na</span><b>App Store</b></span></a>
+        <a href="#" class="store"><span class="store-ico"></span><span><span>Disponível no</span><b>Google Play</b></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <a href="../Estudo RootFlow.html" class="brand"><span class="brand-mark" style="background:var(--g3)">🌿</span> RootFlow</a>
+  <span>Viva com intenção · diário de práticas conscientes</span>
+  <div class="footer-links"><a href="#como">Como funciona</a><a href="#privacidade">Privacidade</a><a href="../Estudo RootFlow.html">Estudo</a></div>
+</footer>
+
+<script>
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
