@@ -141,8 +141,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // ========== UPs ==========
 
   double _calcularUPs(ActivityLog log) {
-    final tempoIdeal = Activity.tempoIdeal[log.group] ?? 60;
-    return log.duration.inMinutes / tempoIdeal;
+    return log.duration.inMinutes / log.idealMinutes;
   }
 
   double get _totalUPs => _filteredLogs.fold(0.0, (sum, log) => sum + _calcularUPs(log));

@@ -946,5 +946,179 @@ class AppLocalizationsEn extends AppLocalizations {
       'Which dimension does this practice develop?';
 
   @override
+  String get idealTimeSectionLabel => '⏱️ Ideal time';
+
+  @override
+  String get idealTimeSectionQuestion =>
+      'How many minutes make a full, satisfying practice?';
+
+  @override
+  String get idealTimeHint => 'E.g., 20';
+
+  @override
+  String get idealTimeSuffix => 'min';
+
+  @override
+  String get reminderSectionLabel => '💛 Reminder';
+
+  @override
+  String get reminderSectionDescription =>
+      'Is there something you need to remember before starting the practice? Preparations, warm-up, meditation, purpose, people you love...';
+
+  @override
+  String get reminderHint =>
+      'E.g.: Take a deep breath first, call someone special...';
+
+  @override
+  String get reminderBeforeStartTitle => 'Before you begin...';
+
+  @override
+  String get reminderBeforeStartSubtitle =>
+      'You left a reminder for this practice 💛';
+
+  @override
+  String get reminderBeforeStartButton => 'I\'M READY — START';
+
+  @override
   String get addPracticeButton => 'ADD PRACTICE';
+
+  @override
+  String get settingsScreenTitle => 'Settings';
+
+  @override
+  String get settingsScreenSubtitle => 'Manage your data and preferences';
+
+  @override
+  String get settingsSectionData => 'DATA';
+
+  @override
+  String get settingsSectionSupport => 'SUPPORT';
+
+  @override
+  String get settingsExportData => 'Export data';
+
+  @override
+  String get settingsExportDataDesc =>
+      'Save a backup of everything you\'ve logged';
+
+  @override
+  String get settingsImportData => 'Import data';
+
+  @override
+  String get settingsImportDataDesc => 'Restore a previously exported backup';
+
+  @override
+  String get settingsClearData => 'Clear all data';
+
+  @override
+  String get settingsClearDataDesc =>
+      'Permanently removes your history and customizations';
+
+  @override
+  String get settingsFaq => 'Frequently asked questions';
+
+  @override
+  String get settingsAbout => 'About the app';
+
+  @override
+  String get settingsVisitSite => 'Visit our website';
+
+  @override
+  String get exportSuccessMessage => 'Data exported successfully!';
+
+  @override
+  String get exportEmptyMessage => 'No data to export yet.';
+
+  @override
+  String get exportShareSubject => 'Root Flow — Data backup';
+
+  @override
+  String get importConfirmTitle => 'Import data?';
+
+  @override
+  String importConfirmMessage(int logs, int categories) {
+    return '$logs activities and $categories categories will be added or updated. Your current data won\'t be deleted.';
+  }
+
+  @override
+  String get importConfirmBtn => 'Import';
+
+  @override
+  String get importSuccessMessage =>
+      'Data imported! Restart the app to see everything updated everywhere.';
+
+  @override
+  String get importErrorMessage =>
+      'Couldn\'t import this file. Check if it\'s a valid Root Flow backup.';
+
+  @override
+  String get importEmptyFile => 'The selected file has no data to import.';
+
+  @override
+  String get clearDataConfirmTitle => 'Clear all data?';
+
+  @override
+  String get clearDataConfirmMessage =>
+      'This will permanently remove your entire activity history and custom categories. This action cannot be undone.';
+
+  @override
+  String get clearDataConfirmBtn => 'Clear everything';
+
+  @override
+  String get clearDataSuccessMessage => 'All data has been removed.';
+
+  @override
+  String get faqQ1 => 'Where is my data stored?';
+
+  @override
+  String get faqA1 =>
+      'Everything is stored locally on your device. Root Flow doesn\'t send anything to servers or the cloud.';
+
+  @override
+  String get faqQ2 => 'How do I back up my data?';
+
+  @override
+  String get faqA2 =>
+      'Use \"Export data\" in the Settings menu to generate a backup file you can keep or share.';
+
+  @override
+  String get faqQ3 => 'Can I use the app on another phone?';
+
+  @override
+  String get faqA3 =>
+      'Yes. Export your data on the current device and import the same file on the new phone.';
+
+  @override
+  String get faqQ4 => 'What are UPs?';
+
+  @override
+  String get faqA4 =>
+      'UPs (Practice Units) measure how much you practiced an activity relative to its defined ideal time.';
+
+  @override
+  String get faqQ5 => 'Can I delete a default category or practice?';
+
+  @override
+  String get faqA5 =>
+      'Yes. In the Customize screen you can delete any category, even the default ones — deletion is permanent.';
+
+  @override
+  String get faqQ6 => 'I lost my data, can I recover it?';
+
+  @override
+  String get faqA6 =>
+      'Only if you exported a backup before. Without a backup file, removed data can\'t be recovered.';
+
+  @override
+  String get aboutAppDescription =>
+      'Root Flow is a wellness app that helps you balance energy, flow, and focus by mindfully tracking your daily activities.';
+
+  @override
+  String get aboutVersionLabel => 'Version';
+
+  @override
+  String get aboutPrivacyNote => 'All data is stored only on your device.';
+
+  @override
+  String get cantOpenLink => 'Couldn\'t open the link.';
 }

@@ -64,6 +64,151 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
       return;
     }
 
+    final reminder = practice.reminder;
+    if (reminder != null && reminder.isNotEmpty) {
+      _showReminderSheet(practice, reminder);
+    } else {
+      _navigateToTimer(practice);
+    }
+  }
+
+  void _showReminderSheet(Practice practice, String reminder) {
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFFBF0),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+            24, 20, 24, 32 + MediaQuery.of(context).viewInsets.bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                  color: Colors.amber[200],
+                  borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 24),
+            // Ícone
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFD580), Color(0xFFFFB347)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFD580).withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text('💛', style: TextStyle(fontSize: 30)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Título
+            Text(
+              l10n.reminderBeforeStartTitle,
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF4A3800),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.reminderBeforeStartSubtitle,
+              style: GoogleFonts.lato(
+                fontSize: 13,
+                color: const Color(0xFF8B6914),
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Card do lembrete
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color: const Color(0xFFFFD580).withValues(alpha: 0.7),
+                    width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFD580).withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                reminder,
+                style: GoogleFonts.lato(
+                  fontSize: 15,
+                  color: const Color(0xFF4A3800),
+                  height: 1.6,
+                ),
+              ),
+            ),
+            const SizedBox(height: 28),
+            // Botão iniciar
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+                _navigateToTimer(practice);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6B8E23), Color(0xFF8B6914)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6B8E23).withValues(alpha: 0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  l10n.reminderBeforeStartButton,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToTimer(Practice practice) {
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -75,6 +220,7 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
           energy: practice.energy,
           flow: practice.flow,
           organ: practice.organ,
+          idealMinutes: practice.idealMinutes,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -576,7 +722,8 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
 
           // Informações da prática
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: EdgeInsets.fromLTRB(
+                16, 8, 16, practice.reminder?.isNotEmpty == true ? 8 : 16),
             child: Row(
               children: [
                 _infoChip(
@@ -606,6 +753,37 @@ class _ConsciousActionScreenState extends State<ConsciousActionScreen> {
               ],
             ),
           ),
+
+          // Seção lembrete — visível diretamente no card
+          if (practice.reminder != null && practice.reminder!.isNotEmpty)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF9E6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: const Color(0xFFFFD580).withValues(alpha: 0.7)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('💛', style: TextStyle(fontSize: 14)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      practice.reminder!,
+                      style: GoogleFonts.lato(
+                        fontSize: 12,
+                        color: const Color(0xFF8B6914),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

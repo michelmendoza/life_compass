@@ -34,7 +34,8 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
               name: p['name'] ?? '',
               energy: p['energy'] ?? 'Ativa',
               flow: p['flow'] ?? 'Médio',
-              organ: p['organ'] ?? 'Mente'))
+              organ: p['organ'] ?? 'Mente',
+              idealMinutes: p['idealMinutes'] ?? 60))
           .toList();
     }
   }
@@ -197,7 +198,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                                                   fontWeight: FontWeight.w600,
                                                   color: const Color(0xFF2D3436))),
                                           const SizedBox(height: 2),
-                                          Text('${e.value.energy} · ${e.value.flow} · ${e.value.organ}',
+                                          Text('${e.value.energy} · ${e.value.flow} · ${e.value.organ} · ${e.value.idealMinutes}min',
                                               style: GoogleFonts.lato(fontSize: 11, color: Colors.grey[500])),
                                         ])),
                                     GestureDetector(

@@ -11,6 +11,7 @@ class ActivityLog extends HiveObject {
   final DateTime timestamp;
   final int? consciousnessLevel;
   final String? difficultyFeedback;
+  final int idealMinutes;
 
   ActivityLog({
     required this.id,
@@ -21,6 +22,7 @@ class ActivityLog extends HiveObject {
     required this.organ,
     required Duration duration,
     required this.timestamp,
+    required this.idealMinutes,
     this.consciousnessLevel = 0,
     this.difficultyFeedback = '',
   }) : durationInSeconds = duration.inSeconds;
@@ -53,6 +55,7 @@ class ActivityLog extends HiveObject {
       'timestamp': timestamp.toIso8601String(),
       'consciousnessLevel': consciousnessLevel, // ← ADICIONADO
       'difficultyFeedback': difficultyFeedback, // ← ADICIONADO
+      'idealMinutes': idealMinutes,
     };
   }
 
@@ -70,6 +73,7 @@ class ActivityLog extends HiveObject {
           json['consciousnessLevel'] as int? ?? 0, // ← ADICIONADO
       difficultyFeedback:
           json['difficultyFeedback'] as String? ?? '', // ← ADICIONADO
+      idealMinutes: json['idealMinutes'] as int? ?? 60,
     );
   }
 }

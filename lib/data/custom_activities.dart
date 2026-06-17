@@ -8,9 +8,13 @@ class CustomActivitiesManager {
   static Future<List<Activity>> loadActivities() async {
     final box = await Hive.openBox(_boxName);
     final customData = box.get('categories', defaultValue: []);
+    final deletedDefaults =
+        List<String>.from(box.get('deletedDefaults', defaultValue: []));
 
-    // Começa com TODAS as categorias padrão
-    final List<Activity> result = List.from(Activity.activities);
+    // Começa com as categorias padrão, exceto as excluídas pelo usuário
+    final List<Activity> result = Activity.activities
+        .where((a) => !deletedDefaults.contains(a.group))
+        .toList();
 
     // Guarda os nomes das categorias customizadas
     final Set<String> customNames = {};
@@ -69,6 +73,27 @@ class CustomActivitiesManager {
     }
   }
 
+  /// Exclui uma categoria pelo nome, seja ela padrão, padrão editada ou
+  /// totalmente customizada. Categorias padrão excluídas são marcadas
+  /// (tombstone) para nunca mais reaparecer, igual a um dado customizado.
+  static Future<void> deleteCategory(String groupName) async {
+    final box = await Hive.openBox(_boxName);
+
+    final customData = List.from(box.get('categories', defaultValue: []));
+    customData.removeWhere((c) => _convertMap(c)['group'] == groupName);
+    await box.put('categories', customData);
+
+    final isDefault = Activity.activities.any((a) => a.group == groupName);
+    if (isDefault) {
+      final deletedDefaults =
+          List<String>.from(box.get('deletedDefaults', defaultValue: []));
+      if (!deletedDefaults.contains(groupName)) {
+        deletedDefaults.add(groupName);
+        await box.put('deletedDefaults', deletedDefaults);
+      }
+    }
+  }
+
   static Future<List<Map<String, dynamic>>> getCustomActivities() async {
     final box = await Hive.openBox(_boxName);
     final raw = box.get('categories', defaultValue: []);
@@ -93,6 +118,7 @@ class CustomActivitiesManager {
   static Future<void> resetToDefault() async {
     final box = await Hive.openBox(_boxName);
     await box.put('categories', []);
+    await box.put('deletedDefaults', []);
   }
 
   static Map<String, dynamic> _convertMap(Map data) {
@@ -110,8 +136,11 @@ class CustomActivitiesManager {
         energy: p['energy']?.toString() ?? 'Ativa',
         flow: p['flow']?.toString() ?? 'Médio',
         organ: p['organ']?.toString() ?? 'Mente',
+        idealMinutes: int.tryParse(p['idealMinutes']?.toString() ?? '') ?? 60,
+        reminder: p['reminder']?.toString(),
       );
     }
-    return Practice(name: '', energy: 'Ativa', flow: 'Médio', organ: 'Mente');
+    return const Practice(
+        name: '', energy: 'Ativa', flow: 'Médio', organ: 'Mente', idealMinutes: 60);
   }
 }

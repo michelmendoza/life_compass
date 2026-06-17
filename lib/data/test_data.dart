@@ -282,6 +282,7 @@ class TestData {
       flow: flow,
       organ: organ,
       duration: Duration(minutes: minutes),
+      idealMinutes: minutes,
       timestamp: DateTime(
         dateTime.year,
         dateTime.month,
@@ -304,6 +305,7 @@ class TestData {
         flow: a.flow,
         organ: a.organ,
         duration: a.duration,
+        idealMinutes: a.idealMinutes,
         timestamp: DateTime(
           date.year,
           date.month,

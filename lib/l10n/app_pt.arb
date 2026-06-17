@@ -408,5 +408,70 @@
   "difficultySectionQuestion": "Qual o nível de esforço necessário?",
   "focusSectionLabel": "🎯 Foco",
   "focusSectionQuestion": "Qual dimensão essa prática desenvolve?",
-  "addPracticeButton": "ADICIONAR PRÁTICA"
+  "idealTimeSectionLabel": "⏱️ Tempo ideal",
+  "idealTimeSectionQuestion": "Quantos minutos representam uma prática completa e satisfatória?",
+  "idealTimeHint": "Ex: 20",
+  "idealTimeSuffix": "min",
+  "reminderSectionLabel": "💛 Lembrete",
+  "reminderSectionDescription": "Tem algo que precisa lembrar antes de começar a prática? Preparações, aquecimento, meditação, propósito, pessoas que ama...",
+  "reminderHint": "Ex: Respirar fundo antes, ligar para alguém especial...",
+  "reminderBeforeStartTitle": "Antes de começar...",
+  "reminderBeforeStartSubtitle": "Você deixou um lembrete para essa prática 💛",
+  "reminderBeforeStartButton": "ESTOU PRONTO — INICIAR",
+  "addPracticeButton": "ADICIONAR PRÁTICA",
+
+  "settingsScreenTitle": "Configurações",
+  "settingsScreenSubtitle": "Gerencie seus dados e preferências",
+  "settingsSectionData": "DADOS",
+  "settingsSectionSupport": "SUPORTE",
+  "settingsExportData": "Exportar dados",
+  "settingsExportDataDesc": "Salve um backup de tudo que você registrou",
+  "settingsImportData": "Importar dados",
+  "settingsImportDataDesc": "Restaure um backup exportado anteriormente",
+  "settingsClearData": "Limpar todos os dados",
+  "settingsClearDataDesc": "Remove permanentemente seu histórico e personalizações",
+  "settingsFaq": "Perguntas frequentes",
+  "settingsAbout": "Sobre o app",
+  "settingsVisitSite": "Visitar nosso site",
+
+  "exportSuccessMessage": "Dados exportados com sucesso!",
+  "exportEmptyMessage": "Nenhum dado para exportar ainda.",
+  "exportShareSubject": "Root Flow — Backup de dados",
+
+  "importConfirmTitle": "Importar dados?",
+  "importConfirmMessage": "{logs} atividades e {categories} categorias serão adicionadas ou atualizadas. Seus dados atuais não serão apagados.",
+  "@importConfirmMessage": {
+    "placeholders": {
+      "logs": { "type": "int" },
+      "categories": { "type": "int" }
+    }
+  },
+  "importConfirmBtn": "Importar",
+  "importSuccessMessage": "Dados importados! Reinicie o app para ver tudo atualizado em todas as telas.",
+  "importErrorMessage": "Não foi possível importar este arquivo. Verifique se é um backup válido do Root Flow.",
+  "importEmptyFile": "O arquivo selecionado não contém dados para importar.",
+
+  "clearDataConfirmTitle": "Limpar todos os dados?",
+  "clearDataConfirmMessage": "Isso vai remover permanentemente todo o seu histórico de atividades e categorias personalizadas. Essa ação não pode ser desfeita.",
+  "clearDataConfirmBtn": "Limpar tudo",
+  "clearDataSuccessMessage": "Todos os dados foram removidos.",
+
+  "faqQ1": "Onde meus dados são salvos?",
+  "faqA1": "Tudo fica salvo localmente no seu dispositivo. O Root Flow não envia nada para servidores ou para a nuvem.",
+  "faqQ2": "Como faço backup dos meus dados?",
+  "faqA2": "Use \"Exportar dados\" no menu de Configurações para gerar um arquivo de backup que você pode guardar ou compartilhar.",
+  "faqQ3": "Posso usar o app em outro celular?",
+  "faqA3": "Sim. Exporte os dados no aparelho atual e importe o mesmo arquivo no celular novo.",
+  "faqQ4": "O que são UPs?",
+  "faqA4": "UPs (Unidades de Prática) medem o quanto você praticou uma atividade em relação ao tempo ideal definido para ela.",
+  "faqQ5": "Posso excluir uma categoria ou prática padrão?",
+  "faqA5": "Sim. Na tela de Customizar você pode excluir qualquer categoria, mesmo as padrão — a exclusão é permanente.",
+  "faqQ6": "Perdi meus dados, é possível recuperar?",
+  "faqA6": "Só se você tiver exportado um backup antes. Sem um arquivo de backup, não é possível recuperar dados removidos.",
+
+  "aboutAppDescription": "Root Flow é um app de bem-estar que ajuda você a equilibrar energia, fluxo e foco através do registro consciente das suas atividades diárias.",
+  "aboutVersionLabel": "Versão",
+  "aboutPrivacyNote": "Todos os dados ficam armazenados apenas no seu dispositivo.",
+
+  "cantOpenLink": "Não foi possível abrir o link."
 }

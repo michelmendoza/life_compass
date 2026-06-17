@@ -408,5 +408,70 @@
   "difficultySectionQuestion": "What is the required effort level?",
   "focusSectionLabel": "🎯 Focus",
   "focusSectionQuestion": "Which dimension does this practice develop?",
-  "addPracticeButton": "ADD PRACTICE"
+  "idealTimeSectionLabel": "⏱️ Ideal time",
+  "idealTimeSectionQuestion": "How many minutes make a full, satisfying practice?",
+  "idealTimeHint": "E.g., 20",
+  "idealTimeSuffix": "min",
+  "reminderSectionLabel": "💛 Reminder",
+  "reminderSectionDescription": "Is there something you need to remember before starting the practice? Preparations, warm-up, meditation, purpose, people you love...",
+  "reminderHint": "E.g.: Take a deep breath first, call someone special...",
+  "reminderBeforeStartTitle": "Before you begin...",
+  "reminderBeforeStartSubtitle": "You left a reminder for this practice 💛",
+  "reminderBeforeStartButton": "I'M READY — START",
+  "addPracticeButton": "ADD PRACTICE",
+
+  "settingsScreenTitle": "Settings",
+  "settingsScreenSubtitle": "Manage your data and preferences",
+  "settingsSectionData": "DATA",
+  "settingsSectionSupport": "SUPPORT",
+  "settingsExportData": "Export data",
+  "settingsExportDataDesc": "Save a backup of everything you've logged",
+  "settingsImportData": "Import data",
+  "settingsImportDataDesc": "Restore a previously exported backup",
+  "settingsClearData": "Clear all data",
+  "settingsClearDataDesc": "Permanently removes your history and customizations",
+  "settingsFaq": "Frequently asked questions",
+  "settingsAbout": "About the app",
+  "settingsVisitSite": "Visit our website",
+
+  "exportSuccessMessage": "Data exported successfully!",
+  "exportEmptyMessage": "No data to export yet.",
+  "exportShareSubject": "Root Flow — Data backup",
+
+  "importConfirmTitle": "Import data?",
+  "importConfirmMessage": "{logs} activities and {categories} categories will be added or updated. Your current data won't be deleted.",
+  "@importConfirmMessage": {
+    "placeholders": {
+      "logs": { "type": "int" },
+      "categories": { "type": "int" }
+    }
+  },
+  "importConfirmBtn": "Import",
+  "importSuccessMessage": "Data imported! Restart the app to see everything updated everywhere.",
+  "importErrorMessage": "Couldn't import this file. Check if it's a valid Root Flow backup.",
+  "importEmptyFile": "The selected file has no data to import.",
+
+  "clearDataConfirmTitle": "Clear all data?",
+  "clearDataConfirmMessage": "This will permanently remove your entire activity history and custom categories. This action cannot be undone.",
+  "clearDataConfirmBtn": "Clear everything",
+  "clearDataSuccessMessage": "All data has been removed.",
+
+  "faqQ1": "Where is my data stored?",
+  "faqA1": "Everything is stored locally on your device. Root Flow doesn't send anything to servers or the cloud.",
+  "faqQ2": "How do I back up my data?",
+  "faqA2": "Use \"Export data\" in the Settings menu to generate a backup file you can keep or share.",
+  "faqQ3": "Can I use the app on another phone?",
+  "faqA3": "Yes. Export your data on the current device and import the same file on the new phone.",
+  "faqQ4": "What are UPs?",
+  "faqA4": "UPs (Practice Units) measure how much you practiced an activity relative to its defined ideal time.",
+  "faqQ5": "Can I delete a default category or practice?",
+  "faqA5": "Yes. In the Customize screen you can delete any category, even the default ones — deletion is permanent.",
+  "faqQ6": "I lost my data, can I recover it?",
+  "faqA6": "Only if you exported a backup before. Without a backup file, removed data can't be recovered.",
+
+  "aboutAppDescription": "Root Flow is a wellness app that helps you balance energy, flow, and focus by mindfully tracking your daily activities.",
+  "aboutVersionLabel": "Version",
+  "aboutPrivacyNote": "All data is stored only on your device.",
+
+  "cantOpenLink": "Couldn't open the link."
 }

@@ -1,13 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import '../l10n/app_localizations.dart';
 import '../models/activity_log.dart';
 import '../widgets/activity_log_card.dart';
+import 'settings_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   final List<ActivityLog> logs;
@@ -139,33 +136,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return groups;
   }
 
-  Future<void> _exportLogs() async {
-    if (widget.logs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).exportNoActivity,
-              style: GoogleFonts.lato()),
-          backgroundColor: Colors.grey[700],
-        ),
-      );
-      return;
-    }
-
-    final jsonData = const JsonEncoder.withIndent('  ')
-        .convert(widget.logs.map((l) => l.toJson()).toList());
-
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/rootflow_export.json');
-    await file.writeAsString(jsonData);
-
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path, mimeType: 'application/json')],
-        subject: 'RootFlow — Histórico de atividades',
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -286,7 +256,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: _exportLogs,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -294,7 +267,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(
-                Icons.upload_rounded,
+                Icons.settings_rounded,
                 size: 18,
                 color: Color(0xFF6B8E23),
               ),

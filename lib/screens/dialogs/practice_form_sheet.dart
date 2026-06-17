@@ -21,25 +21,39 @@ class PracticeFormSheet extends StatefulWidget {
 
 class _PracticeFormSheetState extends State<PracticeFormSheet> {
   final _ctrl = TextEditingController();
+  final _idealMinutesCtrl = TextEditingController();
+  final _reminderCtrl = TextEditingController();
   String _energy = 'Ativa', _flow = 'Médio', _organ = 'Mente';
 
-  bool get _canSave => _ctrl.text.trim().isNotEmpty;
+  bool get _canSave =>
+      _ctrl.text.trim().isNotEmpty &&
+      (int.tryParse(_idealMinutesCtrl.text.trim()) ?? 0) > 0;
 
   @override
   void initState() {
     super.initState();
     _ctrl.addListener(() => setState(() {}));
+    _idealMinutesCtrl.addListener(() => setState(() {}));
   }
 
   void _save() {
     if (!_canSave) return;
-    widget.onSave(Practice(name: _ctrl.text.trim(), energy: _energy, flow: _flow, organ: _organ));
+    widget.onSave(Practice(
+      name: _ctrl.text.trim(),
+      energy: _energy,
+      flow: _flow,
+      organ: _organ,
+      idealMinutes: int.parse(_idealMinutesCtrl.text.trim()),
+      reminder: _reminderCtrl.text.trim().isEmpty ? null : _reminderCtrl.text.trim(),
+    ));
     Navigator.pop(context);
   }
 
   @override
   void dispose() {
     _ctrl.dispose();
+    _idealMinutesCtrl.dispose();
+    _reminderCtrl.dispose();
     super.dispose();
   }
 
@@ -69,7 +83,7 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                    color: const Color(0xFF6B8E23).withOpacity(0.12),
+                    color: const Color(0xFF6B8E23).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12)),
                 child: Text(widget.categoryIcon, style: const TextStyle(fontSize: 22)),
               ),
@@ -121,6 +135,68 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
             _chips(['Mente', 'Corpo', 'Corpo/Mente', 'Espírito'], _organ,
                 (v) => setState(() => _organ = v),
                 translate: (v) => DomainTranslations.organ(context, v)),
+            const SizedBox(height: 20),
+            _label(AppLocalizations.of(context).idealTimeSectionLabel),
+            _subLabel(AppLocalizations.of(context).idealTimeSectionQuestion),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.grey[200]!)),
+              child: TextField(
+                controller: _idealMinutesCtrl,
+                keyboardType: TextInputType.number,
+                style: GoogleFonts.lato(fontSize: 15),
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context).idealTimeHint,
+                    hintStyle: GoogleFonts.lato(fontSize: 14, color: Colors.grey[400]),
+                    suffixText: AppLocalizations.of(context).idealTimeSuffix,
+                    suffixStyle: GoogleFonts.lato(fontSize: 13, color: Colors.grey[500]),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _label(AppLocalizations.of(context).reminderSectionLabel),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF9E6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFFD580).withValues(alpha: 0.6)),
+              ),
+              child: Text(
+                AppLocalizations.of(context).reminderSectionDescription,
+                style: GoogleFonts.lato(
+                  fontSize: 12,
+                  color: const Color(0xFF8B6914),
+                  fontStyle: FontStyle.italic,
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFFFD580).withValues(alpha: 0.6)),
+              ),
+              child: TextField(
+                controller: _reminderCtrl,
+                maxLines: 3,
+                minLines: 2,
+                style: GoogleFonts.lato(fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context).reminderHint,
+                  hintStyle: GoogleFonts.lato(fontSize: 13, color: Colors.grey[400]),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+              ),
+            ),
             const SizedBox(height: 28),
             GestureDetector(
               onTap: _canSave ? _save : null,
@@ -130,8 +206,8 @@ class _PracticeFormSheetState extends State<PracticeFormSheet> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                     gradient: LinearGradient(colors: [
-                      const Color(0xFF6B8E23).withOpacity(_canSave ? 1.0 : 0.35),
-                      const Color(0xFF8B6914).withOpacity(_canSave ? 1.0 : 0.35),
+                      const Color(0xFF6B8E23).withValues(alpha: _canSave ? 1.0 : 0.35),
+                      const Color(0xFF8B6914).withValues(alpha: _canSave ? 1.0 : 0.35),
                     ]),
                     borderRadius: BorderRadius.circular(16)),
                 child: Text(AppLocalizations.of(context).addPracticeButton,

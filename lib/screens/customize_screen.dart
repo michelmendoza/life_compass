@@ -50,11 +50,14 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
     return _allActivities.where((a) => customNames.contains(a.group)).toList();
   }
 
-  /// Apenas as padrão originais (não modificadas)
+  /// Apenas as padrão originais (não modificadas e não excluídas)
   List<Activity> get _defaultOnly {
     final customNames = _customData.map((c) => c['group'] as String).toSet();
-    return _defaultActivities
-        .where((a) => !customNames.contains(a.group))
+    final defaultGroupNames = _defaultActivities.map((a) => a.group).toSet();
+    return _allActivities
+        .where((a) =>
+            defaultGroupNames.contains(a.group) &&
+            !customNames.contains(a.group))
         .toList();
   }
 
@@ -93,8 +96,6 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
   }
 
   void _deleteCategory(Activity activity) {
-    final index = _getCustomIndex(activity);
-    if (index < 0) return;
     showDialog(
       context: context,
       builder: (ctx) {
@@ -117,7 +118,7 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                   borderRadius: BorderRadius.circular(10)),
               child: TextButton(
                   onPressed: () async {
-                    await CustomActivitiesManager.removeCustomActivity(index);
+                    await CustomActivitiesManager.deleteCategory(activity.group);
                     await _loadData();
                     widget.onActivitiesChanged();
                     if (ctx.mounted) Navigator.pop(ctx);
@@ -325,21 +326,19 @@ class _CustomizeScreenState extends State<CustomizeScreen> {
                     size: 16, color: Color(0xFF6B8E23)),
               ),
             ),
-            // 🔥 DELETAR só nas customizadas
-            if (isCustom) ...[
-              const SizedBox(width: 6),
-              GestureDetector(
-                onTap: () => _deleteCategory(activity),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8)),
-                  child: const Icon(Icons.delete_outline_rounded,
-                      size: 16, color: Colors.red),
-                ),
+            // 🔥 DELETAR (padrão ou customizada — exclusão é permanente)
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: () => _deleteCategory(activity),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.delete_outline_rounded,
+                    size: 16, color: Colors.red),
               ),
-            ],
+            ),
           ]),
         ),
         // Empty state quando não há práticas

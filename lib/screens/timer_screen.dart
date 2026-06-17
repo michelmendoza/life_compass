@@ -22,6 +22,7 @@ class TimerScreen extends StatefulWidget {
   final String energy;
   final String flow;
   final String organ;
+  final int idealMinutes;
 
   const TimerScreen({
     super.key,
@@ -30,6 +31,7 @@ class TimerScreen extends StatefulWidget {
     required this.energy,
     required this.flow,
     required this.organ,
+    required this.idealMinutes,
   });
 
   @override
@@ -477,6 +479,7 @@ class _TimerScreenState extends State<TimerScreen>
       organ: _isBreak ? 'Corpo/Mente' : widget.organ,
       duration: _completionDuration!,
       timestamp: DateTime.now(),
+      idealMinutes: widget.idealMinutes,
       consciousnessLevel: consciousnessLevel,
       difficultyFeedback: difficultyStr,
     );

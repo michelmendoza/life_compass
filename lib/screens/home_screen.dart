@@ -167,28 +167,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         GestureDetector(
                           onTap: _showOnboarding,
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(1),
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF6B8E23), Color(0xFF8FBC8F)],
-                              ),
                               borderRadius: BorderRadius.circular(15),
                               boxShadow: [
                                 BoxShadow(
                                   color:
                                       const Color(0xFF6B8E23).withOpacity(0.3),
                                   blurRadius: 8,
-                                  offset: const Offset(0, 3),
+                                  offset: const Offset(0, 13),
                                 ),
                               ],
                             ),
-                            child: const Text(
-                              '🧭',
-                              style: TextStyle(fontSize: 28),
+                            child: Image.asset(
+                              'assets/images/logo.png',
+                              width: 70,
+                              height: 70,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

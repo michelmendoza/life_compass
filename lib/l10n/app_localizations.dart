@@ -1784,11 +1784,323 @@ abstract class AppLocalizations {
   /// **'Qual dimensão essa prática desenvolve?'**
   String get focusSectionQuestion;
 
+  /// No description provided for @idealTimeSectionLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'⏱️ Tempo ideal'**
+  String get idealTimeSectionLabel;
+
+  /// No description provided for @idealTimeSectionQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantos minutos representam uma prática completa e satisfatória?'**
+  String get idealTimeSectionQuestion;
+
+  /// No description provided for @idealTimeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: 20'**
+  String get idealTimeHint;
+
+  /// No description provided for @idealTimeSuffix.
+  ///
+  /// In pt, this message translates to:
+  /// **'min'**
+  String get idealTimeSuffix;
+
+  /// No description provided for @reminderSectionLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'💛 Lembrete'**
+  String get reminderSectionLabel;
+
+  /// No description provided for @reminderSectionDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem algo que precisa lembrar antes de começar a prática? Preparações, aquecimento, meditação, propósito, pessoas que ama...'**
+  String get reminderSectionDescription;
+
+  /// No description provided for @reminderHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Respirar fundo antes, ligar para alguém especial...'**
+  String get reminderHint;
+
+  /// No description provided for @reminderBeforeStartTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes de começar...'**
+  String get reminderBeforeStartTitle;
+
+  /// No description provided for @reminderBeforeStartSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você deixou um lembrete para essa prática 💛'**
+  String get reminderBeforeStartSubtitle;
+
+  /// No description provided for @reminderBeforeStartButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'ESTOU PRONTO — INICIAR'**
+  String get reminderBeforeStartButton;
+
   /// No description provided for @addPracticeButton.
   ///
   /// In pt, this message translates to:
   /// **'ADICIONAR PRÁTICA'**
   String get addPracticeButton;
+
+  /// No description provided for @settingsScreenTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações'**
+  String get settingsScreenTitle;
+
+  /// No description provided for @settingsScreenSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerencie seus dados e preferências'**
+  String get settingsScreenSubtitle;
+
+  /// No description provided for @settingsSectionData.
+  ///
+  /// In pt, this message translates to:
+  /// **'DADOS'**
+  String get settingsSectionData;
+
+  /// No description provided for @settingsSectionSupport.
+  ///
+  /// In pt, this message translates to:
+  /// **'SUPORTE'**
+  String get settingsSectionSupport;
+
+  /// No description provided for @settingsExportData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar dados'**
+  String get settingsExportData;
+
+  /// No description provided for @settingsExportDataDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salve um backup de tudo que você registrou'**
+  String get settingsExportDataDesc;
+
+  /// No description provided for @settingsImportData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar dados'**
+  String get settingsImportData;
+
+  /// No description provided for @settingsImportDataDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restaure um backup exportado anteriormente'**
+  String get settingsImportDataDesc;
+
+  /// No description provided for @settingsClearData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar todos os dados'**
+  String get settingsClearData;
+
+  /// No description provided for @settingsClearDataDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remove permanentemente seu histórico e personalizações'**
+  String get settingsClearDataDesc;
+
+  /// No description provided for @settingsFaq.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perguntas frequentes'**
+  String get settingsFaq;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sobre o app'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsVisitSite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visitar nosso site'**
+  String get settingsVisitSite;
+
+  /// No description provided for @exportSuccessMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados exportados com sucesso!'**
+  String get exportSuccessMessage;
+
+  /// No description provided for @exportEmptyMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum dado para exportar ainda.'**
+  String get exportEmptyMessage;
+
+  /// No description provided for @exportShareSubject.
+  ///
+  /// In pt, this message translates to:
+  /// **'Root Flow — Backup de dados'**
+  String get exportShareSubject;
+
+  /// No description provided for @importConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar dados?'**
+  String get importConfirmTitle;
+
+  /// No description provided for @importConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{logs} atividades e {categories} categorias serão adicionadas ou atualizadas. Seus dados atuais não serão apagados.'**
+  String importConfirmMessage(int logs, int categories);
+
+  /// No description provided for @importConfirmBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar'**
+  String get importConfirmBtn;
+
+  /// No description provided for @importSuccessMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados importados! Reinicie o app para ver tudo atualizado em todas as telas.'**
+  String get importSuccessMessage;
+
+  /// No description provided for @importErrorMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível importar este arquivo. Verifique se é um backup válido do Root Flow.'**
+  String get importErrorMessage;
+
+  /// No description provided for @importEmptyFile.
+  ///
+  /// In pt, this message translates to:
+  /// **'O arquivo selecionado não contém dados para importar.'**
+  String get importEmptyFile;
+
+  /// No description provided for @clearDataConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar todos os dados?'**
+  String get clearDataConfirmTitle;
+
+  /// No description provided for @clearDataConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Isso vai remover permanentemente todo o seu histórico de atividades e categorias personalizadas. Essa ação não pode ser desfeita.'**
+  String get clearDataConfirmMessage;
+
+  /// No description provided for @clearDataConfirmBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar tudo'**
+  String get clearDataConfirmBtn;
+
+  /// No description provided for @clearDataSuccessMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os dados foram removidos.'**
+  String get clearDataSuccessMessage;
+
+  /// No description provided for @faqQ1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Onde meus dados são salvos?'**
+  String get faqQ1;
+
+  /// No description provided for @faqA1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo fica salvo localmente no seu dispositivo. O Root Flow não envia nada para servidores ou para a nuvem.'**
+  String get faqA1;
+
+  /// No description provided for @faqQ2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como faço backup dos meus dados?'**
+  String get faqQ2;
+
+  /// No description provided for @faqA2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use \"Exportar dados\" no menu de Configurações para gerar um arquivo de backup que você pode guardar ou compartilhar.'**
+  String get faqA2;
+
+  /// No description provided for @faqQ3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Posso usar o app em outro celular?'**
+  String get faqQ3;
+
+  /// No description provided for @faqA3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim. Exporte os dados no aparelho atual e importe o mesmo arquivo no celular novo.'**
+  String get faqA3;
+
+  /// No description provided for @faqQ4.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que são UPs?'**
+  String get faqQ4;
+
+  /// No description provided for @faqA4.
+  ///
+  /// In pt, this message translates to:
+  /// **'UPs (Unidades de Prática) medem o quanto você praticou uma atividade em relação ao tempo ideal definido para ela.'**
+  String get faqA4;
+
+  /// No description provided for @faqQ5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Posso excluir uma categoria ou prática padrão?'**
+  String get faqQ5;
+
+  /// No description provided for @faqA5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim. Na tela de Customizar você pode excluir qualquer categoria, mesmo as padrão — a exclusão é permanente.'**
+  String get faqA5;
+
+  /// No description provided for @faqQ6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perdi meus dados, é possível recuperar?'**
+  String get faqQ6;
+
+  /// No description provided for @faqA6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só se você tiver exportado um backup antes. Sem um arquivo de backup, não é possível recuperar dados removidos.'**
+  String get faqA6;
+
+  /// No description provided for @aboutAppDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Root Flow é um app de bem-estar que ajuda você a equilibrar energia, fluxo e foco através do registro consciente das suas atividades diárias.'**
+  String get aboutAppDescription;
+
+  /// No description provided for @aboutVersionLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Versão'**
+  String get aboutVersionLabel;
+
+  /// No description provided for @aboutPrivacyNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os dados ficam armazenados apenas no seu dispositivo.'**
+  String get aboutPrivacyNote;
+
+  /// No description provided for @cantOpenLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o link.'**
+  String get cantOpenLink;
 }
 
 class _AppLocalizationsDelegate
