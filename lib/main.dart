@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:root_flow/l10n/app_localizations.dart';
 import 'package:root_flow/screens/onboarding_premium_screen.dart';
 import 'package:root_flow/screens/splash_screen.dart';
+import 'locale_controller.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/dashboard_screen.dart';
@@ -28,6 +29,8 @@ void main() async {
 
   // Migra entradas salvas com chave int (box.add) para chave string (log.id)
   await _migrateLogsToIdKeys(logsBox);
+
+  await loadSavedLocale(settingsBox);
 
   final hasSeenOnboarding =
       settingsBox.get('onboarding_complete', defaultValue: false);
@@ -83,34 +86,40 @@ class LifeCompassApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'RootFlow',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('pt'),
-        Locale('en'),
-      ],
-      home: hasSeenOnboarding
-          ? MainNavigator(logsBox: logsBox, settingsBox: settingsBox)
-          : OnboardingPremiumScreen(
-              onComplete: () async {
-                await settingsBox.put('onboarding_complete', true);
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: appLocale,
+      builder: (context, locale, _) {
+        return MaterialApp(
+          title: 'RootFlow',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
+          locale: locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('pt'),
+            Locale('en'),
+          ],
+          home: hasSeenOnboarding
+              ? MainNavigator(logsBox: logsBox, settingsBox: settingsBox)
+              : OnboardingPremiumScreen(
+                  onComplete: () async {
+                    await settingsBox.put('onboarding_complete', true);
 
-                // ⭐ Recria o app com o novo estado (funcionava antes!)
-                runApp(LifeCompassApp(
-                  logsBox: logsBox,
-                  hasSeenOnboarding: true,
-                  settingsBox: settingsBox,
-                ));
-              },
-            ),
+                    // ⭐ Recria o app com o novo estado (funcionava antes!)
+                    runApp(LifeCompassApp(
+                      logsBox: logsBox,
+                      hasSeenOnboarding: true,
+                      settingsBox: settingsBox,
+                    ));
+                  },
+                ),
+        );
+      },
     );
   }
 }
@@ -186,6 +195,7 @@ class _MainNavigatorState extends State<MainNavigator> {
               HistoryScreen(
                 logs: logs,
                 onDeleteLog: _removeLog,
+                settingsBox: widget.settingsBox,
               ),
               ConsciousActionScreen(
                 logs: logs,

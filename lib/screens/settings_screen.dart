@@ -2,14 +2,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../data/backup_manager.dart';
 import '../l10n/app_localizations.dart';
+import '../locale_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final Box settingsBox;
+
+  const SettingsScreen({super.key, required this.settingsBox});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -173,6 +177,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       (l10n.faqQ4, l10n.faqA4),
       (l10n.faqQ5, l10n.faqA5),
       (l10n.faqQ6, l10n.faqA6),
+      (l10n.faqQ7, l10n.faqA7),
+      (l10n.faqQ8, l10n.faqA8),
+      (l10n.faqQ9, l10n.faqA9),
+      (l10n.faqQ10, l10n.faqA10),
+      (l10n.faqQ11, l10n.faqA11),
     ];
     showModalBottomSheet(
       context: context,
@@ -298,6 +307,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // ========== LANGUAGE ==========
+  void _showLanguagePicker() {
+    final l10n = AppLocalizations.of(context);
+    final current = appLocale.value;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        decoration: const BoxDecoration(
+          color: Color(0xFFF8F9FA),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(l10n.languagePickerTitle,
+                style: GoogleFonts.playfairDisplay(
+                    fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            _languageOption(null, l10n.languageSystemDefault, current),
+            _languageOption(const Locale('pt'), l10n.languagePortuguese, current),
+            _languageOption(const Locale('en'), l10n.languageEnglish, current),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _languageOption(Locale? locale, String label, Locale? current) {
+    final selected = locale?.languageCode == current?.languageCode;
+    return GestureDetector(
+      onTap: () async {
+        await setAppLocale(widget.settingsBox, locale);
+        if (mounted) Navigator.pop(context);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: selected
+              ? const Color(0xFF6B8E23).withOpacity(0.1)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+              color: selected ? const Color(0xFF6B8E23) : Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.lato(
+                    fontSize: 14,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: selected
+                        ? const Color(0xFF6B8E23)
+                        : const Color(0xFF2D3436)),
+              ),
+            ),
+            if (selected)
+              const Icon(Icons.check_circle_rounded,
+                  color: Color(0xFF6B8E23), size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ========== SITE LINK ==========
   Future<void> _openSite() async {
     final l10n = AppLocalizations.of(context);
@@ -333,6 +422,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.all(16),
                   children: [
+                    _sectionLabel(l10n.settingsSectionPreferences),
+                    const SizedBox(height: 8),
+                    _tile(
+                      icon: Icons.language_rounded,
+                      title: l10n.settingsLanguage,
+                      subtitle: l10n.settingsLanguageDesc,
+                      onTap: _showLanguagePicker,
+                    ),
+                    const SizedBox(height: 24),
                     _sectionLabel(l10n.settingsSectionData),
                     const SizedBox(height: 8),
                     _tile(

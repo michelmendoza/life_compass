@@ -988,6 +988,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsScreenSubtitle => 'Gerencie seus dados e preferências';
 
   @override
+  String get settingsSectionPreferences => 'PREFERÊNCIAS';
+
+  @override
+  String get settingsLanguage => 'Idioma';
+
+  @override
+  String get settingsLanguageDesc => 'Escolha o idioma do aplicativo';
+
+  @override
+  String get languagePickerTitle => 'Escolher idioma';
+
+  @override
+  String get languageSystemDefault => 'Automático (idioma do sistema)';
+
+  @override
+  String get languagePortuguese => 'Português';
+
+  @override
+  String get languageEnglish => 'Inglês';
+
+  @override
   String get settingsSectionData => 'DADOS';
 
   @override
@@ -1069,45 +1090,81 @@ class AppLocalizationsPt extends AppLocalizations {
   String get clearDataSuccessMessage => 'Todos os dados foram removidos.';
 
   @override
-  String get faqQ1 => 'Onde meus dados são salvos?';
+  String get faqQ1 => 'Como funciona o Root Flow?';
 
   @override
   String get faqA1 =>
-      'Tudo fica salvo localmente no seu dispositivo. O Root Flow não envia nada para servidores ou para a nuvem.';
+      'Você escolhe uma categoria (como Saúde, Trabalho ou Lazer) e uma prática dentro dela, inicia o timer e registra o quanto praticou. Tudo aparece depois no Dashboard e no Histórico para você acompanhar sua evolução.';
 
   @override
-  String get faqQ2 => 'Como faço backup dos meus dados?';
+  String get faqQ2 => 'O que é o Match?';
 
   @override
   String get faqA2 =>
-      'Use \"Exportar dados\" no menu de Configurações para gerar um arquivo de backup que você pode guardar ou compartilhar.';
+      'É a tela de cartões (🌼) que sugere práticas combinando com seu momento atual. Deslize para o lado para ver outras sugestões, ou toque em uma para começar.';
 
   @override
-  String get faqQ3 => 'Posso usar o app em outro celular?';
+  String get faqQ3 => 'O que são UPs?';
 
   @override
   String get faqA3 =>
-      'Sim. Exporte os dados no aparelho atual e importe o mesmo arquivo no celular novo.';
-
-  @override
-  String get faqQ4 => 'O que são UPs?';
-
-  @override
-  String get faqA4 =>
       'UPs (Unidades de Prática) medem o quanto você praticou uma atividade em relação ao tempo ideal definido para ela.';
 
   @override
-  String get faqQ5 => 'Posso excluir uma categoria ou prática padrão?';
+  String get faqQ4 => 'Como funcionam os modos de Timer?';
+
+  @override
+  String get faqA4 =>
+      'Ao iniciar uma prática você escolhe entre 4 modos: Cronômetro (conta livremente), Pomodoro (ciclos de foco com pausas), Manual (você digita o tempo já praticado) e HIIT (intervalos de treino intenso).';
+
+  @override
+  String get faqQ5 => 'O que é o Índice de Equilíbrio?';
 
   @override
   String get faqA5 =>
-      'Sim. Na tela de Customizar você pode excluir qualquer categoria, mesmo as padrão — a exclusão é permanente.';
+      'É a métrica do Dashboard que mostra o quão distribuído está seu tempo entre as categorias praticadas. Quanto mais perto de 100%, mais equilibrada está sua rotina.';
 
   @override
-  String get faqQ6 => 'Perdi meus dados, é possível recuperar?';
+  String get faqQ6 =>
+      'O que é o feedback de consciência depois de uma atividade?';
 
   @override
   String get faqA6 =>
+      'Ao concluir uma prática, você avalia como se sentiu (do automático ao fluindo) e o nível de dificuldade. Isso alimenta o gráfico \"Flow vs Desafio\" do Dashboard, ajudando a identificar em qual nível de desafio você mais entra em flow.';
+
+  @override
+  String get faqQ7 => 'Onde meus dados são salvos?';
+
+  @override
+  String get faqA7 =>
+      'Tudo fica salvo localmente no seu dispositivo. O Root Flow não envia nada para servidores ou para a nuvem.';
+
+  @override
+  String get faqQ8 => 'Como faço backup dos meus dados?';
+
+  @override
+  String get faqA8 =>
+      'Use \"Exportar dados\" no menu de Configurações para gerar um arquivo de backup que você pode guardar ou compartilhar.';
+
+  @override
+  String get faqQ9 => 'Posso usar o app em outro celular?';
+
+  @override
+  String get faqA9 =>
+      'Sim. Exporte os dados no aparelho atual e importe o mesmo arquivo no celular novo.';
+
+  @override
+  String get faqQ10 => 'Posso excluir uma categoria ou prática padrão?';
+
+  @override
+  String get faqA10 =>
+      'Sim. Na tela de Customizar você pode excluir qualquer categoria, mesmo as padrão — a exclusão é permanente.';
+
+  @override
+  String get faqQ11 => 'Perdi meus dados, é possível recuperar?';
+
+  @override
+  String get faqA11 =>
       'Só se você tiver exportado um backup antes. Sem um arquivo de backup, não é possível recuperar dados removidos.';
 
   @override

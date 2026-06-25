@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../models/activity_log.dart';
@@ -9,10 +10,12 @@ import 'settings_screen.dart';
 class HistoryScreen extends StatefulWidget {
   final List<ActivityLog> logs;
   final Function(ActivityLog)? onDeleteLog;
+  final Box settingsBox;
 
   const HistoryScreen({
     super.key,
     required this.logs,
+    required this.settingsBox,
     this.onDeleteLog,
   });
 
@@ -258,17 +261,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
           GestureDetector(
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              MaterialPageRoute(
+                builder: (_) => SettingsScreen(settingsBox: widget.settingsBox),
+              ),
             ),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: const Color(0xFF6B8E23).withOpacity(0.12),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(
                 Icons.settings_rounded,
-                size: 18,
+                size: 24,
                 color: Color(0xFF6B8E23),
               ),
             ),

@@ -1862,6 +1862,48 @@ abstract class AppLocalizations {
   /// **'Gerencie seus dados e preferências'**
   String get settingsScreenSubtitle;
 
+  /// No description provided for @settingsSectionPreferences.
+  ///
+  /// In pt, this message translates to:
+  /// **'PREFERÊNCIAS'**
+  String get settingsSectionPreferences;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Idioma'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsLanguageDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o idioma do aplicativo'**
+  String get settingsLanguageDesc;
+
+  /// No description provided for @languagePickerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher idioma'**
+  String get languagePickerTitle;
+
+  /// No description provided for @languageSystemDefault.
+  ///
+  /// In pt, this message translates to:
+  /// **'Automático (idioma do sistema)'**
+  String get languageSystemDefault;
+
+  /// No description provided for @languagePortuguese.
+  ///
+  /// In pt, this message translates to:
+  /// **'Português'**
+  String get languagePortuguese;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inglês'**
+  String get languageEnglish;
+
   /// No description provided for @settingsSectionData.
   ///
   /// In pt, this message translates to:
@@ -2009,74 +2051,134 @@ abstract class AppLocalizations {
   /// No description provided for @faqQ1.
   ///
   /// In pt, this message translates to:
-  /// **'Onde meus dados são salvos?'**
+  /// **'Como funciona o Root Flow?'**
   String get faqQ1;
 
   /// No description provided for @faqA1.
   ///
   /// In pt, this message translates to:
-  /// **'Tudo fica salvo localmente no seu dispositivo. O Root Flow não envia nada para servidores ou para a nuvem.'**
+  /// **'Você escolhe uma categoria (como Saúde, Trabalho ou Lazer) e uma prática dentro dela, inicia o timer e registra o quanto praticou. Tudo aparece depois no Dashboard e no Histórico para você acompanhar sua evolução.'**
   String get faqA1;
 
   /// No description provided for @faqQ2.
   ///
   /// In pt, this message translates to:
-  /// **'Como faço backup dos meus dados?'**
+  /// **'O que é o Match?'**
   String get faqQ2;
 
   /// No description provided for @faqA2.
   ///
   /// In pt, this message translates to:
-  /// **'Use \"Exportar dados\" no menu de Configurações para gerar um arquivo de backup que você pode guardar ou compartilhar.'**
+  /// **'É a tela de cartões (🌼) que sugere práticas combinando com seu momento atual. Deslize para o lado para ver outras sugestões, ou toque em uma para começar.'**
   String get faqA2;
 
   /// No description provided for @faqQ3.
   ///
   /// In pt, this message translates to:
-  /// **'Posso usar o app em outro celular?'**
+  /// **'O que são UPs?'**
   String get faqQ3;
 
   /// No description provided for @faqA3.
   ///
   /// In pt, this message translates to:
-  /// **'Sim. Exporte os dados no aparelho atual e importe o mesmo arquivo no celular novo.'**
+  /// **'UPs (Unidades de Prática) medem o quanto você praticou uma atividade em relação ao tempo ideal definido para ela.'**
   String get faqA3;
 
   /// No description provided for @faqQ4.
   ///
   /// In pt, this message translates to:
-  /// **'O que são UPs?'**
+  /// **'Como funcionam os modos de Timer?'**
   String get faqQ4;
 
   /// No description provided for @faqA4.
   ///
   /// In pt, this message translates to:
-  /// **'UPs (Unidades de Prática) medem o quanto você praticou uma atividade em relação ao tempo ideal definido para ela.'**
+  /// **'Ao iniciar uma prática você escolhe entre 4 modos: Cronômetro (conta livremente), Pomodoro (ciclos de foco com pausas), Manual (você digita o tempo já praticado) e HIIT (intervalos de treino intenso).'**
   String get faqA4;
 
   /// No description provided for @faqQ5.
   ///
   /// In pt, this message translates to:
-  /// **'Posso excluir uma categoria ou prática padrão?'**
+  /// **'O que é o Índice de Equilíbrio?'**
   String get faqQ5;
 
   /// No description provided for @faqA5.
   ///
   /// In pt, this message translates to:
-  /// **'Sim. Na tela de Customizar você pode excluir qualquer categoria, mesmo as padrão — a exclusão é permanente.'**
+  /// **'É a métrica do Dashboard que mostra o quão distribuído está seu tempo entre as categorias praticadas. Quanto mais perto de 100%, mais equilibrada está sua rotina.'**
   String get faqA5;
 
   /// No description provided for @faqQ6.
   ///
   /// In pt, this message translates to:
-  /// **'Perdi meus dados, é possível recuperar?'**
+  /// **'O que é o feedback de consciência depois de uma atividade?'**
   String get faqQ6;
 
   /// No description provided for @faqA6.
   ///
   /// In pt, this message translates to:
-  /// **'Só se você tiver exportado um backup antes. Sem um arquivo de backup, não é possível recuperar dados removidos.'**
+  /// **'Ao concluir uma prática, você avalia como se sentiu (do automático ao fluindo) e o nível de dificuldade. Isso alimenta o gráfico \"Flow vs Desafio\" do Dashboard, ajudando a identificar em qual nível de desafio você mais entra em flow.'**
   String get faqA6;
+
+  /// No description provided for @faqQ7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Onde meus dados são salvos?'**
+  String get faqQ7;
+
+  /// No description provided for @faqA7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo fica salvo localmente no seu dispositivo. O Root Flow não envia nada para servidores ou para a nuvem.'**
+  String get faqA7;
+
+  /// No description provided for @faqQ8.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como faço backup dos meus dados?'**
+  String get faqQ8;
+
+  /// No description provided for @faqA8.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use \"Exportar dados\" no menu de Configurações para gerar um arquivo de backup que você pode guardar ou compartilhar.'**
+  String get faqA8;
+
+  /// No description provided for @faqQ9.
+  ///
+  /// In pt, this message translates to:
+  /// **'Posso usar o app em outro celular?'**
+  String get faqQ9;
+
+  /// No description provided for @faqA9.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim. Exporte os dados no aparelho atual e importe o mesmo arquivo no celular novo.'**
+  String get faqA9;
+
+  /// No description provided for @faqQ10.
+  ///
+  /// In pt, this message translates to:
+  /// **'Posso excluir uma categoria ou prática padrão?'**
+  String get faqQ10;
+
+  /// No description provided for @faqA10.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim. Na tela de Customizar você pode excluir qualquer categoria, mesmo as padrão — a exclusão é permanente.'**
+  String get faqA10;
+
+  /// No description provided for @faqQ11.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perdi meus dados, é possível recuperar?'**
+  String get faqQ11;
+
+  /// No description provided for @faqA11.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só se você tiver exportado um backup antes. Sem um arquivo de backup, não é possível recuperar dados removidos.'**
+  String get faqA11;
 
   /// No description provided for @aboutAppDescription.
   ///

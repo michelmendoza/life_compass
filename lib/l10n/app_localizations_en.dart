@@ -989,6 +989,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsScreenSubtitle => 'Manage your data and preferences';
 
   @override
+  String get settingsSectionPreferences => 'PREFERENCES';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageDesc => 'Choose the app\'s language';
+
+  @override
+  String get languagePickerTitle => 'Choose language';
+
+  @override
+  String get languageSystemDefault => 'Automatic (system language)';
+
+  @override
+  String get languagePortuguese => 'Portuguese';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
   String get settingsSectionData => 'DATA';
 
   @override
@@ -1068,45 +1089,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearDataSuccessMessage => 'All data has been removed.';
 
   @override
-  String get faqQ1 => 'Where is my data stored?';
+  String get faqQ1 => 'How does Root Flow work?';
 
   @override
   String get faqA1 =>
-      'Everything is stored locally on your device. Root Flow doesn\'t send anything to servers or the cloud.';
+      'You choose a category (like Health, Work, or Leisure) and a practice within it, start the timer, and log how much you practiced. Everything then shows up in the Dashboard and History so you can track your progress.';
 
   @override
-  String get faqQ2 => 'How do I back up my data?';
+  String get faqQ2 => 'What is Match?';
 
   @override
   String get faqA2 =>
-      'Use \"Export data\" in the Settings menu to generate a backup file you can keep or share.';
+      'It\'s the card-based screen (🌼) that suggests practices matching your current moment. Swipe sideways to see other suggestions, or tap one to get started.';
 
   @override
-  String get faqQ3 => 'Can I use the app on another phone?';
+  String get faqQ3 => 'What are UPs?';
 
   @override
   String get faqA3 =>
-      'Yes. Export your data on the current device and import the same file on the new phone.';
-
-  @override
-  String get faqQ4 => 'What are UPs?';
-
-  @override
-  String get faqA4 =>
       'UPs (Practice Units) measure how much you practiced an activity relative to its defined ideal time.';
 
   @override
-  String get faqQ5 => 'Can I delete a default category or practice?';
+  String get faqQ4 => 'How do the Timer modes work?';
+
+  @override
+  String get faqA4 =>
+      'When starting a practice you can choose from 4 modes: Stopwatch (counts freely), Pomodoro (focus cycles with breaks), Manual (you type in time already practiced), and HIIT (high-intensity interval training).';
+
+  @override
+  String get faqQ5 => 'What is the Balance Index?';
 
   @override
   String get faqA5 =>
-      'Yes. In the Customize screen you can delete any category, even the default ones — deletion is permanent.';
+      'It\'s the Dashboard metric showing how evenly your time is spread across the categories you\'ve practiced. The closer to 100%, the more balanced your routine.';
 
   @override
-  String get faqQ6 => 'I lost my data, can I recover it?';
+  String get faqQ6 => 'What\'s the consciousness feedback after an activity?';
 
   @override
   String get faqA6 =>
+      'After finishing a practice, you rate how you felt (from automatic to flowing) and the difficulty level. This feeds the Dashboard\'s \"Flow vs Challenge\" chart, helping you spot which difficulty level gets you into flow most often.';
+
+  @override
+  String get faqQ7 => 'Where is my data stored?';
+
+  @override
+  String get faqA7 =>
+      'Everything is stored locally on your device. Root Flow doesn\'t send anything to servers or the cloud.';
+
+  @override
+  String get faqQ8 => 'How do I back up my data?';
+
+  @override
+  String get faqA8 =>
+      'Use \"Export data\" in the Settings menu to generate a backup file you can keep or share.';
+
+  @override
+  String get faqQ9 => 'Can I use the app on another phone?';
+
+  @override
+  String get faqA9 =>
+      'Yes. Export your data on the current device and import the same file on the new phone.';
+
+  @override
+  String get faqQ10 => 'Can I delete a default category or practice?';
+
+  @override
+  String get faqA10 =>
+      'Yes. In the Customize screen you can delete any category, even the default ones — deletion is permanent.';
+
+  @override
+  String get faqQ11 => 'I lost my data, can I recover it?';
+
+  @override
+  String get faqA11 =>
       'Only if you exported a backup before. Without a backup file, removed data can\'t be recovered.';
 
   @override
